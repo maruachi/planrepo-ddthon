@@ -1,0 +1,1 @@
+export function Pagination({ hasMore, loading, more, count }: { hasMore: boolean; loading?: boolean; more: () => void; count: number }) { return <div className="pagination"><span>{count}개 표시{hasMore ? ' · 일부 목록입니다' : ''}</span>{hasMore && <button data-testid="pagination-more-button" disabled={loading} onClick={more}>더 불러오기</button>}</div>; }

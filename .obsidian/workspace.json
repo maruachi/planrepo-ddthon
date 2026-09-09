@@ -1,0 +1,230 @@
+{
+  "main": {
+    "id": "41c8752f2ee96c56",
+    "type": "split",
+    "children": [
+      {
+        "id": "fb64f7e711a2b07a",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "a0a12e40f5c383ac",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "aidlc-docs/construction/sr-document-foundation/functional-design/frontend-components.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "frontend-components"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "af458c3335e9bcbc",
+    "type": "split",
+    "children": [
+      {
+        "id": "70fb4324e98b6cb4",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "51ec74cd46f51633",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "81c2c78559271b43",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "5cd9ff7322795e7e",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "0f1f758eb14fcc93",
+    "type": "split",
+    "children": [
+      {
+        "id": "79ff3decb957d72a",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "418bb94c141f05e2",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "aidlc-docs/construction/sr-document-foundation/functional-design/frontend-components.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks"
+            }
+          },
+          {
+            "id": "34afb5de87033880",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "aidlc-docs/construction/sr-document-foundation/functional-design/frontend-components.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links"
+            }
+          },
+          {
+            "id": "4986816d91619a1f",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "a4f1d1b13fb5c88a",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "All properties"
+            }
+          },
+          {
+            "id": "a1886ca459981ee4",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "aidlc-docs/construction/sr-document-foundation/functional-design/frontend-components.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false
+    }
+  },
+  "active": "51ec74cd46f51633",
+  "lastOpenFiles": [
+    "aidlc-docs/construction/build-and-test/build-and-test-summary.md",
+    "aidlc-docs/construction/build-and-test/performance-test-instructions.md",
+    "aidlc-docs/construction/build-and-test/integration-test-instructions.md",
+    "aidlc-docs/construction/build-and-test/unit-test-instructions.md",
+    "aidlc-docs/construction/build-and-test/build-instructions.md",
+    "aidlc-docs/construction/build-and-test",
+    "aidlc-docs/construction/plans/build-and-test-plan.md",
+    "aidlc-docs/construction/review-implementation/code/verification.md",
+    "aidlc-docs/construction/review-implementation/code/implementation-summary.md",
+    "aidlc-docs/construction/review-implementation/code/api-reference.md",
+    "aidlc-docs/construction/review-implementation/code/README.md",
+    "aidlc-docs/construction/review-implementation/code",
+    "tests/review-implementation/http.test.ts",
+    "dist/server/sr-document-foundation/storage/migrations/003-reviews.js",
+    "dist/server/review-implementation/services/review-service.js",
+    "dist/server/review-implementation/http/review-routes.js",
+    "dist/server/review-implementation/services",
+    "dist/server/review-implementation/http",
+    "dist/server/review-implementation",
+    "dist/server/shared/review-contracts.js",
+    "aidlc-docs/construction/review-implementation/nfr-design/logical-components.md",
+    "aidlc-docs/construction/review-implementation/nfr-design/nfr-design-patterns.md",
+    "aidlc-docs/construction/plans/review-implementation-nfr-design-plan.md",
+    "aidlc-docs/construction/review-implementation/nfr-requirements/tech-stack-decisions.md",
+    "aidlc-docs/construction/review-implementation/nfr-requirements/nfr-requirements.md",
+    "aidlc-docs/construction/plans/review-implementation-nfr-requirements-plan.md",
+    "aidlc-docs/construction/review-implementation/functional-design/frontend-components.md",
+    "aidlc-docs/construction/review-implementation/functional-design/business-logic-model.md",
+    "aidlc-docs/construction/review-implementation/functional-design/business-rules.md",
+    "aidlc-docs/construction/review-implementation/functional-design/domain-entities.md",
+    "aidlc-docs/construction/plans/review-implementation-functional-design-plan.md",
+    "aidlc-docs/construction/plans/review-implementation-code-generation-plan.md",
+    "aidlc-docs/construction/aidlc-planning/code/verification.md",
+    "aidlc-docs/construction/aidlc-planning/code/implementation-summary.md",
+    "aidlc-docs/construction/aidlc-planning/code/api-reference.md",
+    "aidlc-docs/construction/aidlc-planning/code/README.md"
+  ]
+}

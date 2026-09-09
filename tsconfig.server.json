@@ -1,0 +1,23 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "lib": [
+      "ES2023"
+    ],
+    "types": [
+      "node"
+    ],
+    "rootDir": "src",
+    "outDir": "dist/server"
+  },
+  "include": [
+    "src/app/**/*.ts",
+    "src/shared/*.ts",
+    "src/sr-document-foundation/storage/**/*.ts",
+    "src/sr-document-foundation/services/**/*.ts",
+    "src/sr-document-foundation/http/**/*.ts",
+    "src/sr-document-foundation/compare/**/*.ts"
+  ]
+}

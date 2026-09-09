@@ -1,0 +1,15 @@
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { Link, Outlet, useBlocker } from 'react-router-dom';
+import { ConfirmDialog } from '../sr-document-foundation/ui/ConfirmDialog.js';
+import type { DemoRole } from '../shared/review-contracts.js';
+import './roles.css';
+const RoleContext = createContext<DemoRole>('author');
+export const useRole = () => useContext(RoleContext);
+const DirtyContext = createContext<(owner: symbol, value: boolean) => void>(() => {});
+export function useDirty(value: boolean) { const setDirty = useContext(DirtyContext); const owner = useRef(Symbol('draft')); useEffect(() => { setDirty(owner.current, value); return () => setDirty(owner.current, false); }, [value, setDirty]); }
+export function WorkspaceShell() {
+  const [role, setRole] = useState<DemoRole>('author'); const [pendingRole, setPendingRole] = useState<DemoRole>();
+  const [dirty, updateDirty] = useState(false); const dirtyRef = useRef(false); const owners = useRef(new Set<symbol>()); const setDirty = useCallback((owner: symbol, value: boolean) => { if (value) owners.current.add(owner); else owners.current.delete(owner); dirtyRef.current = owners.current.size > 0; updateDirty(dirtyRef.current); }, []); const blocker = useBlocker(() => dirtyRef.current);
+  useEffect(() => { const leave = (e: BeforeUnloadEvent) => { if (dirty) { e.preventDefault(); e.returnValue = ''; } }; window.addEventListener('beforeunload', leave); return () => window.removeEventListener('beforeunload', leave); }, [dirty]);
+  return <DirtyContext.Provider value={setDirty}><RoleContext.Provider value={role}><a className="skip" href="#main">본문으로 이동</a><header className="app-header"><Link className="brand" data-testid="workspace-home-link" to="/"><span className="brand-mark">P</span>PlanRepo</Link><span className="header-divider"/><span className="header-caption">계획 작업공간</span><div className="header-right"><span className="local-indicator">로컬 작업공간</span><label className="role-label">시연 역할 <select aria-label="시연 역할" data-testid="workspace-role-select" value={role} onChange={e => { const next = e.target.value as DemoRole; if (dirtyRef.current) setPendingRole(next); else setRole(next); }}><option value="author">작성자</option><option value="reviewer">리뷰어</option></select></label></div></header><main id="main"><Outlet /></main><footer className="app-footer">계획의 변화와 판단을 한곳에.</footer>{blocker.state === 'blocked' && <ConfirmDialog title="작성 중인 내용이 있습니다" label="변경을 버리고 이동" cancel={() => blocker.reset()} confirm={() => { owners.current.clear(); dirtyRef.current = false; updateDirty(false); blocker.proceed(); }}><p>저장되지 않은 입력을 버리고 이동합니다.</p></ConfirmDialog>}{pendingRole && <ConfirmDialog title="역할을 전환할까요?" label="초안을 버리고 역할 전환" cancel={() => setPendingRole(undefined)} confirm={() => { owners.current.clear(); dirtyRef.current = false; updateDirty(false); setRole(pendingRole); setPendingRole(undefined); }}><p>작성 중인 입력을 버리고 역할을 전환합니다.</p></ConfirmDialog>}</RoleContext.Provider></DirtyContext.Provider>;
+}

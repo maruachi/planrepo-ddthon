@@ -1,0 +1,39 @@
+{
+  "name": "planrepo",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "scripts": {
+    "dev": "tsc -p tsconfig.worker.json && tsx src/app/server.ts",
+    "typecheck": "tsc -p tsconfig.client.json && tsc -p tsconfig.server.json --noEmit && tsc -p tsconfig.test.json",
+    "build:worker": "tsc -p tsconfig.worker.json",
+    "build": "vite build && tsc -p tsconfig.server.json",
+    "start": "node dist/server/app/server.js",
+    "test": "npm run build:worker && vitest run"
+  },
+  "dependencies": {
+    "better-sqlite3": "13.0.3",
+    "diff": "9.0.0",
+    "express": "5.2.1",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "react-markdown": "10.1.0",
+    "react-router-dom": "7.18.3",
+    "remark-gfm": "4.0.1"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "9.6.0",
+    "@types/express": "5.0.6",
+    "@types/node": "24.13.3",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.7",
+    "@vitejs/plugin-react": "6.1.1",
+    "tsx": "4.23.13",
+    "typescript": "7.0.2",
+    "vite": "8.2.2",
+    "vitest": "5.0.0"
+  }
+}

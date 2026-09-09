@@ -1,0 +1,6 @@
+import { useMemo, useState } from 'react';
+import { textPage } from './compare-state.js';
+export function PagedText({ body }: { body: string }) {
+  const [page, setPage] = useState(0); const [copied, setCopied] = useState(''); const result = useMemo(() => textPage(body, page), [body, page]);
+  return <div className="raw-view"><div className="text-tools"><span>원본 · {result.total.toLocaleString()}줄 · {page + 1}/{Math.max(1, Math.ceil(result.total / 200))} 구간</span><button data-testid="raw-copy-button" onClick={() => { void navigator.clipboard.writeText(body).then(() => setCopied('복사했습니다.')).catch(() => setCopied('복사하지 못했습니다. 원문을 직접 선택해 주세요.')); }}>전체 원문 복사</button><span role="status">{copied}</span></div><div className="code-scroll" tabIndex={0} aria-label="문서 원본"><pre>{result.lines.map(line => <div className="raw-line" key={line.number}><span className="line-number">{line.number}</span><span>{line.text}</span><small>{line.ending === '끝 개행 없음' ? ' ∅ 끝 개행 없음' : ` ↵ ${line.ending}`}</small></div>)}</pre>{!body && <p className="empty">빈 문서입니다.</p>}</div><div className="actions"><button data-testid="raw-previous-button" disabled={page === 0} onClick={() => setPage(p => p - 1)}>이전 구간</button><button data-testid="raw-next-button" disabled={(page + 1) * 200 >= result.total} onClick={() => setPage(p => p + 1)}>다음 구간</button></div></div>;
+}

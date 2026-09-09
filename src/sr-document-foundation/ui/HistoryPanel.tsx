@@ -1,0 +1,14 @@
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import type { HistoryEvent } from '../../shared/contracts.js';
+import { api, isEvent, versionRoute } from '../../shared/client/api-client.js';
+import { errorOf } from '../../shared/errors.js';
+import { usePaged } from './use-query.js';
+import { ErrorNotice } from './ErrorNotice.js';
+import { AsyncStatus } from './AsyncStatus.js';
+import { Pagination } from './Pagination.js';
+export function HistoryPanel({ srId, documentId, revision }: { srId: string; documentId?: string; revision: number }) {
+  const [filtered, setFiltered] = useState(false); const [selected, setSelected] = useState<HistoryEvent>(); const [detailError, setDetailError] = useState<ReturnType<typeof errorOf>>();
+  const query = usePaged(`/api/srs/${srId}/history${filtered && documentId ? `?documentId=${documentId}` : ''}`, isEvent, revision);
+  return <aside className="history-panel"><div className="section-heading"><h2>활동 이력</h2><span className="history-dot"/></div>{documentId && <label className="checkbox-label"><input type="checkbox" data-testid="history-filter-checkbox" checked={filtered} onChange={e => { setFiltered(e.target.checked); setSelected(undefined); }} />선택 문서만</label>}<ErrorNotice error={query.error} retry={query.reload} /><AsyncStatus loading={query.loading} /><ol className="timeline">{query.data?.items.map(e => <li key={e.id}><span className="timeline-dot"/><div className="event-meta"><span>{e.actor.source === 'ai' ? 'AI' : e.actor.source === 'user' ? '사람' : '시스템'}</span><time>{new Date(e.occurredAt).toLocaleString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</time></div><p>{e.summary}</p><small className="event-kind">{e.kind} · #{e.sequence}</small><div className="event-links">{e.versionRefs.map(r => <Link key={r.versionId} data-testid="history-version-link" to={versionRoute(r)}>버전 {r.versionId.slice(0, 6)}</Link>)}</div><button className="quiet" data-testid="history-detail-button" onClick={() => { setDetailError(undefined); void api.request(`/api/srs/${srId}/history/${e.id}`, isEvent).then(setSelected).catch(e => setDetailError(errorOf(e))); }}>상세 보기</button></li>)}</ol>{query.data && !query.data.items.length && <p className="empty">해당 이력이 없습니다.</p>}<ErrorNotice error={detailError} />{selected && <div className="event-details"><strong>{selected.summary}</strong><p>{selected.subject === undefined && selected.details === undefined ? '추가 상세 내용 없음' : JSON.stringify({ subject: selected.subject, details: selected.details }, null, 2)}</p><button data-testid="history-close-button" onClick={() => setSelected(undefined)}>상세 닫기</button></div>}{query.data && <Pagination count={query.data.items.length} hasMore={!!query.data.nextCursor} loading={query.loading} more={() => void query.more()} />}</aside>;
+}

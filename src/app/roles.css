@@ -1,0 +1,4 @@
+.planning-role-scope { min-width: 0; margin: 0; padding: 0; border: 0; }
+.role-label { display: flex; align-items: center; gap: 8px; white-space: nowrap; font-size: 12px; }
+.role-label select { width: auto; padding: 6px 10px; }
+@media (max-width: 600px) { .role-label { gap: 4px; font-size: 11px; } .role-label select { padding: 6px; } }
