@@ -3,21 +3,21 @@
 ## Project Information
 - **Project**: PlanRepo
 - **Workflow Version**: AI-DLC v1.0.1
-- **Project Type**: Greenfield
+- **Project Type**: Brownfield — follow-up worktree integration enhancement; original MVP began greenfield
 - **Start Date**: 2026-09-08T11:10:23Z
-- **Current Phase**: CONSTRUCTION
-- **Current Stage**: Build and Test — Complete; Operations placeholder not executed
-- **Requirements Depth**: Standard; expand if production or external integration scope requires it.
-- **Source**: [Original requirements](../requirements/planrepo-requirements.md)
+- **Current Phase**: CONSTRUCTION — Worktree Integration 1-hour Vertical Spike
+- **Current Stage**: Build and Test — WT-Spike results awaiting Operations approval Q1
+- **Requirements Depth**: Comprehensive — system-wide Git/filesystem/process/DB trust and recovery boundaries
+- **Source**: [Worktree integration requirements](../requirements/planrepo-aidlc-worktree-requirements.md); builds on [original requirements](../requirements/planrepo-requirements.md)
 
 ## Workspace State
 - **Existing Code**: Yes — U1/U2/U3 complete; actual CLI generation/storage and integrated browser flows verified
 - **Programming Languages**: TypeScript — React UI, Express services, SQLite storage and worker generated
 - **Build System**: npm/Vite/TypeScript/Vitest — locked install, typecheck, build and focused tests passed
 - **Project Structure**: Local modular app in src/, tests/ and root configuration; workflow docs in aidlc-docs/
-- **Reverse Engineering Needed**: No
-- **Workspace Root**: /Users/dgyim/works/planrepo-ddthon
-- **Existing AI-DLC State / Reverse Engineering Artifacts**: None at workflow start
+- **Reverse Engineering Needed**: Yes — the completed MVP is now a brownfield baseline and no reverse-engineering artifacts exist
+- **Workspace Root**: /Users/dgyim/works/ddthon-2026/fix-ydg-01
+- **Existing AI-DLC State / Reverse Engineering Artifacts**: Existing completed workflow state found; no reverse-engineering artifacts found for the current codebase
 - **Pre-existing Git Changes**: README.md deleted; requirements/, AGENTS.md and .aidlc-rule-details/ untracked. Preserved.
 
 ## Code Location Rules
@@ -26,6 +26,21 @@
 - **User Source Requirements**: requirements/; preserve original source
 
 ## Stage Progress
+### WORKTREE INTEGRATION ENHANCEMENT
+- [x] Workspace Detection — brownfield TypeScript application; existing reverse-engineering artifacts absent
+- [x] Reverse Engineering — approved via continuation instruction on 2026-09-09T03:16:26Z
+- [x] Requirements Analysis — Q1 B approved via “권장안 대로 진행”
+- [x] User Stories — Q1 B approved via “승인 후 진행”
+- [x] Workflow Planning — 1-hour spike plan approved via “승인 후 진행” on 2026-09-09T03:43:31Z
+- [x] Application Design — SKIPPED for the approved 1-hour spike; long-term component/method rework accepted
+- [x] Units Generation — SKIPPED for the approved 1-hour spike; single informal WT-Spike unit used
+- [x] Functional Design — SKIPPED for the approved 1-hour spike; only plan-level invariants apply
+- [x] NFR Requirements — SKIPPED for the approved 1-hour spike; production NFR analysis deferred
+- [x] NFR Design — SKIPPED for the approved 1-hour spike; durable recovery/atomicity design deferred
+- [x] Infrastructure Design — SKIPPED; no cloud, deployment or IaC change
+- [x] Code Generation — implementation verified and generated-artifact Q1 B approved via “Continue to Next Stage”
+- [ ] Build and Test — verification/instructions complete; [Operations approval Q1](construction/build-and-test/worktree-integration-spike-approval-questions.md) pending
+
 ### INCEPTION
 - [x] Workspace Detection
 - [x] Reverse Engineering — SKIPPED: no existing source code
@@ -49,11 +64,58 @@
 ## Extension Configuration
 | Extension | Enabled | Decided At |
 |---|---|---|
-| Security Baseline | No | Requirements Analysis — Q11 B |
-| Resiliency Baseline | No | Requirements Analysis — Q12 B |
-| Property-Based Testing | No | Requirements Analysis — Q13 C |
+| Security Baseline | No | Worktree Integration Requirements — Q20 B |
+| Resiliency Baseline | No | Worktree Integration Requirements — Q21 B |
+| Property-Based Testing | Partial | Worktree Integration Requirements — Q22 B |
 
-Only the three opt-in files have been loaded. All three extensions are explicitly disabled by the user. Full rules were not loaded; enforcement is skipped and logged in audit.md. All discovered extension rule files have matching opt-in files.
+For the Worktree Integration Enhancement, Security and Resiliency are disabled. Security's full rule file was loaded during recommendation evaluation, revealed material incompatibility with the local loopback MVP, and led to final Q20 B; it is not enforced. Resiliency's full rule file was not loaded. Property-Based Testing is enabled in Partial mode; its full rules are loaded and only PBT-02, PBT-03, PBT-07, PBT-08 and PBT-09 are blocking where applicable.
+
+## Worktree Integration Requirements Analysis Status
+- **Plan**: [Requirements analysis plan](inception/plans/worktree-integration-requirements-analysis-plan.md)
+- **Questions**: [Verification questions](inception/requirements/worktree-integration-requirement-verification-questions.md)
+- **Depth**: Comprehensive
+- **Intent**: System-wide enhancement replacing fixed temporary-directory planning with SR worktrees and file-based AI-DLC truth
+- **Loaded baseline**: architecture, code structure, API, component inventory, technology stack, business overview, dependencies and code quality assessment
+- **Answers**: [Validated recommended answers](inception/requirements/worktree-integration-requirement-answer-validation.md), 22/22 complete
+- **Requirements**: [Worktree integration requirements](inception/requirements/worktree-integration-requirements.md)
+- **Approval**: [Requirements approval Q1](inception/requirements/worktree-integration-requirements-approval-questions.md), Q1 B approved
+- **Gate**: Passed on 2026-09-09T03:26:47Z; User Stories started
+- **Extensions**: Security No, Resiliency No, PBT Partial; no blocking Requirements Analysis findings
+
+## Worktree Integration User Stories Status
+- **Assessment**: [Execute User Stories](inception/plans/worktree-integration-user-stories-assessment.md) — direct user-facing, complex cross-component workflow
+- **Plan**: [Story generation plan](inception/plans/worktree-integration-story-generation-plan.md)
+- **Method**: User Journey + Domain hybrid, vertical-slice stories, Given/When/Then acceptance criteria; seven recommended answers approved
+- **Stories**: [18 Worktree stories](inception/user-stories/worktree-integration-stories.md) across repository/workspace, execution, documents and compatibility/handoff
+- **Personas**: [Local Planner and Peer Reviewer](inception/user-stories/worktree-integration-personas.md)
+- **Approval**: [Generated artifact Q1](inception/user-stories/worktree-integration-user-stories-approval-questions.md), Q1 B approved
+- **Validation**: 18 story statements, 18 INVEST records, 18 acceptance sections, 69 Given/When/Then criteria; all FR-WT/NFR-WT covered; dependency graph acyclic; P2 excluded
+- **Gate**: Passed on 2026-09-09T03:35:25Z; Workflow Planning started
+- **Extensions**: Security and Resiliency disabled/N/A; PBT Partial has no directly applicable User Stories rules, N/A with forward trace only
+
+## Worktree Integration Execution Plan Summary
+- **Checklist**: [Workflow Planning checklist](inception/plans/worktree-integration-workflow-planning-plan.md)
+- **Superseded plan**: [40–60 hour full plan](inception/plans/worktree-integration-execution-plan.md), not approved
+- **Current plan**: [1-hour vertical spike](inception/plans/worktree-integration-one-hour-execution-plan.md)
+- **Approval**: [Workflow plan Q2](inception/plans/worktree-integration-workflow-planning-approval-questions.md), Q2 A approved via “승인 후 진행” on 2026-09-09T03:43:31Z
+- **Delivery type**: Technical vertical spike, not P0+P1 requirements completion
+- **Execute**: Single WT-Spike Code Generation and focused Build and Test
+- **Skip for spike**: Application Design, Units Generation, Functional Design, NFR Requirements, NFR Design, Infrastructure Design
+- **Parallel lanes**: Lead integration + A Git/worktree + B legacy state/manifest/PBT + C runner/status UI
+- **Timebox**: 60 minutes after approval; hard stop with passing scope and explicit backlog
+- **Included proof**: One worktree, legacy state parser, exact resume prompt/cwd, scoped manifest delta, minimal API/UI
+- **Deferred**: Durable schema/checkpoints, official profile, drift/edit/restore/approval, migration/review/handoff and full acceptance
+- **Gate**: Passed; Q2 A explicitly acknowledges reduced scope and rework risk. Code Generation Part 1 approval remains a separate mandatory gate.
+- **Extensions**: Security No, Resiliency No, PBT Partial; no blocking Workflow Planning findings
+
+## Worktree Integration Reverse Engineering Status
+- [x] Reverse Engineering completed on 2026-09-09T03:12:07Z
+- **Artifacts Location**: `aidlc-docs/inception/reverse-engineering/`
+- **Baseline**: 72 source files, 29 test/support files, React/Express/SQLite local modular application
+- **Key finding**: current Claude execution is temporary-directory, planning-only and JSON/DB based; worktree, repository, profile/state parser, file checkpoint/blob, drift and checkpoint restore domains are absent
+- **Validation**: 10 Markdown artifacts and 9 Mermaid blocks passed structural checks; every diagram has a text alternative
+- **Fresh verification**: test/typecheck could not start because dependencies are not installed (`tsc` unavailable); prior completed workflow evidence remains 23 files/86 tests passed
+- **Extensions**: Security Baseline disabled/N/A; Resiliency Baseline disabled/N/A; Property-Based Testing disabled/N/A
 
 ## Confirmed Product Scope
 - One-day local single-user MVP without login; peer review via role switching.
@@ -178,10 +240,20 @@ Only the three opt-in files have been loaded. All three extensions are explicitl
 5. All three extensions remain disabled/N/A. Preserve original user files and README deletion.
 
 ## Last Completed
-U3 implementation and final Build and Test: 86 tests, typecheck/build, actual CLI document verification, integrated browser flows, restart preservation and execution/verification documents.
+WT-Spike focused Build and Test execution/instructions: 118 tests, typecheck and production build passed; PBT Partial compliant.
 
 ## Next Step
-User review of completed implementation. Operations remains an unexecuted placeholder; no pending code implementation steps.
+Explicit approval in [WT-Spike Build and Test Q1](construction/build-and-test/worktree-integration-spike-approval-questions.md). After Q1 B, mark Build and Test complete and transition to the Operations placeholder.
+
+## Worktree Integration Spike Code Generation Summary
+- **Plan**: [WT-Spike Code Generation plan](construction/plans/worktree-integration-spike-code-generation-plan.md), Part 1 approved and all executable Part 2 items complete; generated-artifact approval remains open
+- **Implementation**: [Summary](construction/worktree-integration-spike/code/implementation-summary.md) — deterministic Git worktree, legacy state parser, scoped manifest, exact-prompt runner, three API routes and SR detail status panel
+- **Verification**: [Evidence](construction/worktree-integration-spike/code/verification.md) — eight focused files/32 tests, impact sample 12 files/40 tests, full 31 files/118 tests, typecheck and production build passed
+- **Vertical proof**: Isolated OS-temp Git fixture with real worktree and filesystem plus fake launcher; actual Claude CLI and browser smoke not run or claimed
+- **Stories**: Partial evidence only for US-WT-03/04/06/07/08/10; no complete P0/P1 story claim
+- **Persistence boundary**: No new DB entity/migration; status and operation deduplication are process-memory spike behavior
+- **Extensions**: Security/Resiliency disabled/N/A; PBT Partial PBT-02/03/07/08/09 compliant with fast-check 4.9.0, seed 424242, 150 runs/property and shrinking enabled
+- **Gate**: [Generated-artifact Q1](construction/worktree-integration-spike/code/code-generation-approval-questions.md) B approved; focused Build and Test started
 
 ## Parallel Implementation Assessment
 - **Assessment complete**: [Parallel implementation recommendation](construction/plans/parallel-implementation-assessment.md).

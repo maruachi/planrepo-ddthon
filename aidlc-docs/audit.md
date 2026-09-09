@@ -1050,3 +1050,242 @@ React·TypeScript·Vite·Express 5·SQLite를 제안하며, 저장 위치·입�
 **Context**: Resumed the completed AI-DLC workspace for a low-risk repository maintenance task. The existing .gitignore already excludes dependencies, build output, development output, local PlanRepo data, local environment overrides, caches, logs and operating-system files. The complete current user input is recorded before staging and committing. Security, Resiliency and Property-Based Testing remain disabled and N/A. Plain Markdown and ignore patterns were validated; no diagrams or structured content were added.
 
 ---
+
+## Workspace Detection — Worktree Integration Improvement
+**Timestamp**: 2026-09-09T02:54:47Z
+**User Input**: "requirements/planrepo-aidlc-worktree-requirements.md 를 읽고 개선사항에 대해서 aidlc workflow 진행해줘."
+**AI Response**: "AIDLC 공통 규칙과 기존 완료 상태를 불러오고, 후속 개선 요구사항을 위한 새 워크플로의 Workspace Detection을 시작했다. 요구사항 원문, 현재 코드, Git 상태와 기존 역공학 산출물의 최신성을 대조한다."
+**Context**: Existing PlanRepo workflow was complete through Build and Test. This request starts an enhancement workflow against the current brownfield codebase. Loaded common process, session continuity, content validation and question-format rules; displayed the welcome message; loaded only the three extension opt-in files. Existing extension configuration remains Security No, Resiliency No and Property-Based Testing No pending Requirements Analysis. Plain Markdown was validated before this append; no diagram or structured block was added.
+
+---
+
+## Workspace Detection — Complete; Reverse Engineering Start
+**Timestamp**: 2026-09-09T02:56:00Z
+**User Input**: No additional user input.
+**AI Response**: "Workspace Detection completed. PlanRepo is a brownfield local modular TypeScript application with npm/Vite/Vitest, React/Express and SQLite. The requested worktree integration is a major enhancement to the completed MVP. No current reverse-engineering artifact set exists, so Reverse Engineering starts automatically and will require approval before Requirements Analysis."
+**Context**: Workspace root corrected to /Users/dgyim/works/ddthon-2026/fix-ydg-01. Found 101 source/test files, 96 TypeScript/TSX files, package.json and existing completed AI-DLC state. No CDK, Terraform, Docker or CI workflow was discovered by the targeted scan. The new requirements file is untracked and preserved. Existing Security, Resiliency and Property-Based Testing settings are disabled; enforcement was skipped. State was updated to the worktree-integration enhancement cycle. Plain Markdown was validated before edits; no diagram was added.
+
+---
+
+## Reverse Engineering — Worktree Integration Baseline
+**Timestamp**: 2026-09-09T02:56:00Z
+**User Input**: No additional user input.
+**AI Response**: "Started comprehensive reverse engineering of the current PlanRepo codebase as the baseline for the worktree integration enhancement."
+**Context**: Reverse Engineering is mandatory because the workspace is now brownfield and has no existing reverse-engineering artifacts. Analysis covers all application, shared, storage, CLI, UI and test modules plus build and runtime configuration. Extensions remain disabled and N/A. No application code changed.
+
+---
+
+## Reverse Engineering — Complete and Approval Request
+**Timestamp**: 2026-09-09T03:14:26Z
+**User Input**: No additional user input.
+**AI Response**: "Reverse Engineering completed. Generated business overview, architecture, code structure, API, component inventory, interaction diagrams, technology stack, dependencies, code quality, and metadata artifacts. The user is asked to review them and either request changes or explicitly approve continuation to Requirements Analysis."
+**Context**: Analyzed 122 relevant non-generated workspace files, including 72 source files and 29 test/support files. Confirmed the central gap: current planning uses a fixed nine-stage database model and runs Claude in a disposable temporary directory with project capabilities disabled; repository/worktree/profile/state-parser/checkpoint/blob/drift/restore domains do not exist. Validated 10 Markdown files, balanced fences, nine Mermaid blocks, text alternatives, and `git diff --check`. Fresh `npm test` and `npm run typecheck` could not start because dependencies are not installed (`tsc` not found); no application failure or fresh pass was claimed. Updated stage state and checkboxes in the same interaction. Security Baseline, Resiliency Baseline, and Property-Based Testing remain disabled and N/A. This approval prompt is logged before presentation. No application code, dependencies, runtime data, Git history, or external system changed.
+
+---
+
+## Session Continuity — Reverse Engineering Approval and Requirements Analysis Resume
+**Timestamp**: 2026-09-09T03:16:26Z
+**User Input**: "aidlc-docs/aidlc-state.md를 확인하고, 첫 번째 미완료 항목부터 이어서 진행해주세요."
+**AI Response**: "기존 상태를 확인했다. 첫 번째 미완료 항목은 Worktree Integration Enhancement의 Requirements Analysis이며, 직전 Reverse Engineering 산출물은 완료 후 승인 대기 상태였다. 사용자의 명시적인 계속 진행 지시를 Reverse Engineering 승인으로 기록하고 Requirements Analysis를 시작한다."
+**Context**: Loaded the existing state first, then common process, session continuity, content validation and question-format rules, Reverse Engineering and Requirements Analysis rules, and all three extension opt-in files. The welcome message was not repeated because audit history confirms it was already shown when this enhancement workflow started. Security Baseline, Resiliency Baseline and Property-Based Testing remain explicitly disabled in state; their full rule files were not loaded and enforcement is N/A. Validated the plain Markdown append and answer edit before writing; no diagrams or code blocks were added. No application code, dependencies, runtime state or Git history changed.
+
+---
+
+## Requirements Analysis — Worktree Integration Clarification Gate
+**Timestamp**: 2026-09-09T03:16:26Z
+**User Input**: No additional user input.
+**AI Response**: "Reverse Engineering의 architecture, code structure, API, component inventory, technology stack, business overview, dependencies와 code quality assessment를 불러오고 원본 및 후속 요구사항을 대조했다. 변경을 System-wide/Complex로 평가해 Comprehensive 깊이를 선택했으며, 명시적으로 남은 제품·기술·품질 결정과 세 확장 opt-in을 포함한 22개 질문을 작성했다. 모든 답변을 받기 전에는 요구사항 문서를 생성하지 않는다."
+**Context**: Created `inception/plans/worktree-integration-requirements-analysis-plan.md` and checked every completed plan step in the same interaction. Created `inception/requirements/worktree-integration-requirement-verification-questions.md`. The questions cover delivery priority, repository source, worktree lifecycle, profile/init policy, actor/trust boundaries, managed files, capacity/blob/retention, drift/restore, session/concurrency/Git policy, legacy migration, UI updates, performance and all three opt-in extensions. Existing Security/Resiliency/PBT settings remain disabled and N/A until Questions 20–22 are answered; full rules were not loaded. Before file creation, validated that the new content uses plain Markdown only, has balanced backticks, valid relative links, consistent table columns, blank-separated choices, a final Other option and an empty `[Answer]:` for each question. No Mermaid, ASCII diagram, application code, dependency, runtime data, Git history or external system changed.
+
+---
+
+## Requirements Analysis — Recommended Answers Requested
+**Timestamp**: 2026-09-09T03:21:52Z
+**User Input**: "권장안으로 진행해줘."
+**AI Response**: "22개 확인 질문에 현재 brownfield 구조와 로컬 MVP 위험을 기준으로 권장 답변을 기록했다. P0+P1, 로컬 저장소, 지연 worktree 생성, 기존·공식 AI-DLC 프로필, 명시적 초기화·drift 결정, source checkpoint, 단일 문서 복원, 보수적 용량·동시성·성능 기준을 선택했다. Security Baseline은 활성화하고 Resiliency Baseline은 비활성화하며 PBT는 순수 함수·직렬화에 부분 적용한다."
+**Context**: Requirements Analysis clarification gate. All 22 `[Answer]:` fields are populated with valid choices and rationale under the user's direction to use recommendations. Initial contradiction review found the P0+P1 scope consistent with single-document restoration and P2 deferral, local-only repository scope consistent with the existing single-user loopback app, and profile-driven session behavior consistent with dual profile support. Security/PBT full rules must now be loaded before requirements generation; Resiliency full rules remains unloaded and its extension is N/A. Plain Markdown answer edits and audit append were validated before writing; no diagrams, application code, runtime data, dependencies or Git history changed.
+
+---
+
+## Requirements Analysis — Recommendation Reconciliation and Approval Request
+**Timestamp**: 2026-09-09T03:21:52Z
+**User Input**: No additional user input.
+**AI Response**: "권장 답변을 전체 확장 규칙과 대조했다. Security Baseline은 현재 로컬 MVP에 managed-key 암호화, TLS/HSTS, 전면 인증, 중앙 로그·알림을 강제해 범위를 materially 확장하므로 최종 권장안을 Q20 B로 바로잡았다. 원문 보안 NFR은 유지했다. Resiliency는 No, PBT는 Partial로 확정했다. 22개 답변의 모순·누락이 없음을 검증하고 P0+P1 Worktree 통합 요구사항과 승인 질문을 생성했다."
+**Context**: Loaded the complete Security Baseline and Property-Based Testing rules after the initial recommendation evaluation; Resiliency remained disabled and its full rules were not loaded. Generated answer validation, comprehensive normalized requirements and the dedicated approval file. Requirements include 17 functional requirement groups, eight NFR groups, 16 acceptance criteria, data requirements, source traceability and extension compliance. Security and Resiliency are disabled/N/A. PBT Partial is compliant at Requirements Analysis: enforced rules PBT-02, PBT-03, PBT-07, PBT-08 and PBT-09 are expressed as forward requirements; implementation evidence is deferred to their applicable NFR Design, Code Generation and Build and Test stages. No blocking extension findings remain. Validated before creation: no Mermaid or ASCII diagrams, balanced code spans, valid local links, consistent Markdown table columns, question choices with blank separators and final Other option. Requirements remain awaiting explicit approval; User Stories did not start. No application code, dependency, runtime data, Git history or external system changed.
+
+---
+
+## Requirements Analysis — Content and Extension Validation Complete
+**Timestamp**: 2026-09-09T03:25:59Z
+**User Input**: No additional user input.
+**AI Response**: "22개 권장 답변, 요구사항·승인 문서, 계획 체크박스와 상태 링크를 검증했다. 요구사항은 17개 기능 그룹, 8개 NFR 그룹과 16개 인수 기준을 포함하며, 승인 질문의 `[Answer]:`만 미입력 상태다. PBT Partial의 모든 PBT-01..10을 Requirements Analysis 단계 기준으로 개별 판정했고 blocking finding이 없음을 확인했다."
+**Context**: Post-creation structural validation passed: 22 question headings matched 22 populated valid answers; the approval file has exactly one pending answer; only the explicit user-approval plan checkbox remains open; all referenced local files exist; `git diff --check` passed. The artifacts contain no Mermaid or ASCII diagram. Security and Resiliency are disabled and skipped/N/A. PBT-01, PBT-04, PBT-05, PBT-06 and PBT-10 are advisory under Partial mode; enforced PBT-02, PBT-03, PBT-07, PBT-08 and PBT-09 are not implementation-verifiable in Requirements Analysis, are marked N/A with stage rationale, and have forward requirements for their applicable stages. No product code, tests, dependencies, runtime data, Git history or external systems changed.
+
+---
+
+## Requirements Analysis — Approval Response
+**Timestamp**: 2026-09-09T03:26:47Z
+**User Input**: "권장안 대로 진행"
+**AI Response**: "Worktree 통합 요구사항 승인 Q1 B로 기록하고 Requirements Analysis를 완료했다. 직접적인 신규 사용자 흐름과 복합 상태·복구 규칙이 있으므로 권장된 User Stories 단계를 시작한다."
+**Context**: Explicit approval of the recommended requirements path and transition to User Stories. Updated the requirements approval answer, final requirements plan checkbox and stage state in the same interaction. Security and Resiliency remain disabled/N/A. PBT remains Partial; Requirements Analysis had no blocking findings. No product code, dependencies, runtime data, Git history or external systems changed.
+
+---
+
+## User Stories Part 1 — Assessment and Planning Questions
+**Timestamp**: 2026-09-09T03:26:47Z
+**User Input**: No additional user input.
+**AI Response**: "User Stories 필요성 평가를 완료해 실행으로 결정했다. 승인된 요구사항과 brownfield 문맥을 기반으로 User Journey + Domain hybrid 권장안을 포함한 생성 계획과 7개 방법론 질문을 작성했다. 모든 답변과 계획 승인을 받기 전에는 story·persona를 생성하지 않는다."
+**Context**: High-priority indicators are new user-facing repository/worktree/execution/edit/recovery flows and complex business rules. Created enhancement-specific assessment and plan files without overwriting the original MVP story artifacts. Completed Part 1 steps were checked immediately; answer, ambiguity and approval steps remain open. Validated before creation: plain Markdown only, no Mermaid/ASCII, balanced code spans, valid relative links, table columns, seven blank-separated question sets, final Other options and empty answer tags. Security/Resiliency disabled and skipped/N/A. PBT Partial has no direct User Stories enforcement stage; PBT-02, PBT-03, PBT-07, PBT-08 and PBT-09 are N/A here and remain forward constraints. No generated stories, application code, tests, dependencies, runtime state, Git history or external systems changed.
+
+---
+
+## User Stories Part 1 — Recommended Plan Approval
+**Timestamp**: 2026-09-09T03:30:17Z
+**User Input**: "권장안 대로 진행해줘."
+**AI Response**: "7개 Story 작성 질문에 모두 첫 번째 권장안을 기록하고, 사용자의 진행 지시를 User Stories 생성 계획 승인으로 처리했다. Local Planner와 Peer Reviewer, User Journey + Domain hybrid, vertical slices, Given/When/Then과 추적 ID, 핵심 복구 story 분리, P0/P1·의존성 표시와 compatibility story를 기준으로 Part 2 생성을 시작한다."
+**Context**: All seven answers are valid A choices with concrete decision rules; no omissions, mixed choices, contradictions or undefined criteria remain. Part 1 answer, analysis, decision and approval checkboxes were completed in the same interaction. Security and Resiliency remain disabled/N/A. PBT Partial has no direct User Stories enforcement and remains N/A at this stage with forward trace. Plain Markdown edits were validated before writing. No application code, tests, dependencies, runtime data, Git history or external systems changed.
+
+---
+
+## User Stories Part 2 — Generation Complete and Approval Request
+**Timestamp**: 2026-09-09T03:34:04Z
+**User Input**: No additional user input.
+**AI Response**: "승인된 hybrid 방법론으로 Local Planner와 Peer Reviewer persona, 4개 epic의 18개 vertical-slice stories를 생성했다. 각 story에 P0/P1, 선행 의존성, 병렬 가능성, INVEST 판단, Given/When/Then acceptance criteria와 FR-WT/NFR-WT/AC-WT trace를 포함했다. 생성 산출물 승인 질문 Q1에서 수정 요청 또는 Workflow Planning 진행 승인을 받기 전까지 대기한다."
+**Context**: Completed every executable Part 2 plan step and updated its checkbox in the same interaction. Generated 18 story statements, 18 INVEST records, 18 acceptance sections and 69 Given/When/Then criteria; all 17 FR-WT and eight NFR-WT groups appear in the coverage map. Compatibility is explicit in US-WT-02 and US-WT-17. P2 items remain deferred. Dependency review found no cycles. Content validation passed: no Mermaid or ASCII diagrams, balanced Markdown code spans, valid local files/links, consistent tables and `git diff --check`. Created the dedicated generated-artifact approval file and left only its approval checkbox open. Security and Resiliency disabled/skipped/N/A. PBT Partial has no direct User Stories enforcement; each PBT-01..10 is individually N/A or advisory with forward-stage rationale, and no blocking findings exist. No application code, tests, dependencies, runtime data, Git history or external systems changed.
+**Approval Prompt**: "Worktree 통합 stories와 personas를 검토하고 `worktree-integration-user-stories-approval-questions.md`의 Q1에 A(수정 요청), B(승인 후 Workflow Planning), 또는 X(기타)를 기록해 주세요."
+
+---
+
+## User Stories Part 2 — Approval Response and Workflow Planning Start
+**Timestamp**: 2026-09-09T03:35:25Z
+**User Input**: "승인 후 진행"
+**AI Response**: "Worktree 통합 stories와 personas 승인 Q1 B를 기록하고 User Stories 단계를 완료했다. 승인된 요구사항·18개 stories·brownfield 구조를 기반으로 Workflow Planning을 시작한다."
+**Context**: Explicit generated-artifact approval and transition. Updated the approval answer and final story-plan checkbox in the same interaction. All 18 stories, two personas, 69 criteria and dependency/traceability validation remain approved. Security and Resiliency disabled/N/A; PBT Partial has no User Stories blocking finding. No product code, tests, dependencies, runtime data, Git history or external systems changed.
+
+---
+
+## Workflow Planning — Plan Complete and Approval Request
+**Timestamp**: 2026-09-09T03:35:25Z
+**User Input**: No additional user input.
+**AI Response**: "승인된 brownfield context, Worktree 요구사항, 18 stories와 2 personas를 기반으로 comprehensive execution plan을 생성했다. High-risk architectural transformation으로 평가하고 Application Design, Units Generation, 4개 unit의 Functional/NFR/Code stages와 final Build and Test를 실행하며, cloud·deployment 변화가 없는 Infrastructure Design은 skip하도록 권장한다. 사용자에게 skip 포함 여부를 override할 수 있는 Workflow Plan 승인 질문을 제공한다."
+**Context**: Created a workflow planning checklist, execution plan, validated Mermaid plus text alternative, four proposed units, module sequence, rollback/testing strategy, 40–60 hour provisional estimate, success criteria and approval question. Completed checklist steps were marked immediately; only explicit plan approval remains open. Mermaid validation: all alphanumeric node IDs declared, brackets/quotes balanced, edges and style targets resolved, status placeholders replaced, text alternative included. Markdown tables and local links were reviewed before creation; `git diff --check` is scheduled as post-write validation. Security/Resiliency disabled/skipped/N/A. PBT Partial has no directly applicable Workflow Planning enforcement; all PBT-01..10 have per-rule N/A/advisory rationale and later-stage ownership. No blocking findings. No application code, tests, dependencies, runtime data, Git history or external systems changed.
+**Approval Prompt**: "Worktree 통합 execution plan을 검토하고 Q1에 A(수정 요청), B(승인 후 Application Design), C(Infrastructure Design 포함 후 승인), 또는 X(기타)를 기록해 주세요. 권장 skip과 단계 구성은 사용자가 변경할 수 있습니다."
+
+---
+
+## Workflow Planning — Post-Write Validation Complete
+**Timestamp**: 2026-09-09T03:37:45Z
+**User Input**: No additional user input.
+**AI Response**: "Execution plan, checklist, approval question, state와 audit를 post-write 검증했다. Plan checklist와 approval file에는 의도한 승인 항목 하나만 열려 있고, Mermaid의 19개 node/style target과 15개 edge가 모두 선언되어 있으며 local links와 Markdown diff 검사가 통과했다."
+**Context**: Structural checks confirmed one Mermaid block with balanced fences, no unresolved edge/style node IDs, balanced brackets/quotes and a text alternative. Ten PBT rule rows are present. Required prior artifact targets exist. `git diff --check` passed. An initial read-only validation command incorrectly treated Markdown fence backticks as shell syntax and produced no valid diagram inspection; it changed no files or state. The corrected validator avoided shell backticks and passed. Security/Resiliency disabled/N/A, PBT Partial has no Workflow Planning blocking finding. No application code, tests, dependencies, runtime data, Git history or external systems changed.
+
+---
+
+## Change Request — Workflow Planning One-Hour Timebox
+**Timestamp**: 2026-09-09T03:39:34Z
+**User Input**: "예상 작업 시간이 너무 길어 1시간 안에 진행할 수 잇게 계획을 축소하고 병렬 진행 가능한 형태로 나눠줘."
+**AI Response**: "전체 P0+P1은 1시간 안에 완료할 수 없음을 명시하고, 목표를 one-worktree/legacy-state/exact-resume/manifest/minimal-status vertical spike로 축소했다. Lead와 세 구현 lane의 file ownership, 60분 hard stop, focused verification과 후속 backlog를 포함한 revised plan을 작성했다."
+**Context**: Current Workflow Planning plan was unapproved, so it was preserved as superseded rather than destructively replaced. The change skips Application Design, Units Generation, Functional Design, NFR Requirements, NFR Design and Infrastructure Design for the spike; this accepts missing durable schema, complete profile/checkpoint/drift/edit/approval/migration/review design and likely rework before production. Code Generation and Build and Test remain mandatory in minimal focused depth. PBT Partial remains enabled: fast-check, round-trip/invariant generators, shrinking and seed evidence are assigned to Lane B and remain blocking during implementation. Security/Resiliency disabled/N/A. No product code, tests, dependencies, runtime data, Git history or external systems changed.
+**Artifacts Affected**: Added `worktree-integration-one-hour-execution-plan.md`; marked the full plan superseded; updated Workflow Planning checklist, approval questions and state. The revised plan still requires explicit Q2 approval acknowledging reduced scope.
+
+---
+
+## Workflow Planning — Revised One-Hour Plan Approval Request
+**Timestamp**: 2026-09-09T03:39:34Z
+**User Input**: No additional user input.
+**AI Response**: "축소된 1시간 plan의 scope, parallel lanes, skip 영향, hard stop과 verification criteria를 검토하도록 Q2 승인 질문을 제시한다. 사용자는 권장 spike 승인, 수정 또는 원래 전체 plan 복귀를 선택할 수 있다."
+**Context**: Approval prompt logged before presentation. No implementation began and no skipped-stage impact was treated as accepted yet.
+**Approval Prompt**: "1시간 Vertical Spike plan을 검토하고 Q2에 A(축소·재작업 위험 인정 후 Code Generation), B(수정), C(전체 plan 복귀), 또는 X(기타)를 기록해 주세요."
+
+---
+
+## Workflow Planning — One-Hour Revision Validation Complete
+**Timestamp**: 2026-09-09T03:41:33Z
+**User Input**: No additional user input.
+**AI Response**: "1시간 revised plan의 Markdown, links, approval state, extension rows와 Mermaid를 검증했다. 원래 plan 수정 요청은 완료 체크했고 revised approval 하나만 열어 두었다."
+**Context**: Validation found one Mermaid block and one text alternative; all 10 nodes, 12 edges and 10 style targets resolve with balanced brackets. Ten PBT rule rows are present. Q1 records the user's modification request and only Q2 is blank. The Workflow Planning checklist has exactly one open item: revised plan approval. Referenced plan files exist and `git diff --check` passed. No blocking extension finding, product code, tests, dependencies, runtime data, Git history or external systems changed.
+
+---
+
+## Workflow Planning — Revised One-Hour Plan Approval Response
+**Timestamp**: 2026-09-09T03:43:31Z
+**User Input**: "승인 후 진행"
+**AI Response**: "축소된 Workflow Plan의 Q2 A 승인으로 기록하고, 단일 WT-Spike Code Generation Part 1로 전환했다. 승인된 skip 범위와 장기 재작업 위험을 상태에 확정했다."
+**Context**: The user explicitly approved the recommended 60-minute vertical spike after being told that it does not complete the approved P0+P1 requirements. Application Design, Units Generation, Functional Design, NFR Requirements, NFR Design and Infrastructure Design are recorded as skipped for this spike. This accepts missing durable schema/checkpoints, official profile, drift/edit/approval/restore, migration/review/handoff and production NFR design. Code Generation and focused Build and Test remain required. The approval authorizes preparation of the mandatory detailed code generation plan; it does not bypass the separate Code Generation Part 1 approval gate. Security and Resiliency remain disabled/N/A. PBT Partial remains enabled and blocking for PBT-02, PBT-03, PBT-07, PBT-08 and PBT-09 where applicable. No product code, tests, dependencies, runtime data, Git history or external systems changed.
+
+---
+
+## Code Generation Part 1 — WT-Spike Plan Complete and Approval Request
+**Timestamp**: 2026-09-09T03:45:00Z
+**User Input**: No additional user input.
+**AI Response**: "승인된 1시간 vertical spike를 13개 실행 단계로 구체화했다. Lead와 세 lane의 exact file ownership, frozen contracts, partial story traceability, Git/state/manifest/runner/API/UI 작업, focused tests, PBT, isolated proof와 hard stop handoff를 단일 Code Generation 계획에 기록했다. 명시적 계획 승인 전에는 구현을 시작하지 않는다."
+**Context**: Created the mandatory Code Generation Part 1 single source of truth for informal unit WT-Spike. Planning steps P1–P8 are complete and P9 approval remains open. The execution plan has 13 numbered steps, brownfield in-place targets, no database entities or migration, process-memory-only status, three non-overlapping delegated lanes and Lead-owned shared integration files. Story mapping is explicitly partial for US-WT-03/04/06/07/08/10 and does not claim story completion. Content validation before creation: plain Markdown only, no Mermaid or ASCII diagrams, balanced code spans, consistent table columns, existing parent links and blank-separated approval choices with final Other option. Security and Resiliency are disabled/N/A. PBT Partial is compliant at planning time: PBT-02, PBT-03, PBT-07, PBT-08 and PBT-09 have explicit blocking implementation and evidence steps using fast-check, reusable generators, round-trip/invariants, shrinking and seed replay. No product code, tests, dependencies, runtime data, Git history or external systems changed.
+**Approval Prompt**: "WT-Spike Code Generation Plan을 검토하고 Q1에 A(Request Changes), B(Continue to Code Generation), 또는 X(Other)를 기록해 주세요. B 승인 시점부터 Lead + 3개 lane의 60분 병렬 구현 timebox를 시작합니다."
+
+---
+
+## Code Generation Part 1 — Post-Write Validation Complete
+**Timestamp**: 2026-09-09T03:46:25Z
+**User Input**: No additional user input.
+**AI Response**: "WT-Spike Code Generation 계획, 승인 질문, workflow 승인 기록과 state를 post-write 검증했다. 13개 numbered execution steps와 Part 1 승인 항목 하나만 열려 있고, 기존 code는 변경되지 않았다."
+**Context**: `git diff --check` passed. Both referenced plan files and the approved one-hour parent plan exist. The Code Generation plan has Steps 1–13, Part 1 P1–P8 checked and only P9 approval open; the approval document has one empty `[Answer]:`. Plain Markdown has no Mermaid or ASCII diagram and therefore requires no diagram validator. Table delimiters, code spans and parent links were manually checked during creation. The stale Last Completed and Next Step state text was corrected to the current approval gate. PBT-02/03/07/08/09 remain planned and blocking in Generation; no implementation evidence is claimed yet. No product code, tests, dependencies, runtime data, Git history or external systems changed.
+
+---
+
+## Code Generation Part 1 — Approval Response and Part 2 Start
+**Timestamp**: 2026-09-09T03:46:59Z
+**User Input**: "승인 후 진행"
+**AI Response**: "WT-Spike Code Generation Q1 B 승인으로 기록하고 60분 timebox를 시작했다. Lead는 contracts/API/service/app integration을 담당하고, 세 비충돌 lane은 Git/worktree, state/manifest/PBT, runner/UI를 병렬 구현한다."
+**Context**: Explicit approval covers the complete 13-step Code Generation plan and its parallel sequence. Part 1 P9 was checked immediately. Preflight preserved all existing user/workflow changes, confirmed installed dependencies, Git 2.39.5 and Node 24.7.0. No product file had been changed at the time of this entry. Security and Resiliency remain disabled/N/A. PBT Partial remains blocking for PBT-02, PBT-03, PBT-07, PBT-08 and PBT-09.
+
+---
+
+## Code Generation Part 2 — Parallel Implementation and Verification
+**Timestamp**: 2026-09-09T03:52:52Z
+**User Input**: No additional user input.
+**AI Response**: "Lead와 세 lane의 spike 구현을 통합했다. Git/worktree, legacy state, scoped manifest/PBT, exact-prompt runner, API/client/status panel을 연결하고 isolated vertical proof와 focused/regression/full tests, typecheck와 production build를 완료했다."
+**Context**: Lane A passed 12 Git/worktree tests. Lane B passed 10 state/manifest tests including three fast-check properties with fixed seed 424242, 150 runs/property and shrinking enabled. Lane C passed seven runner/client tests. Lead added contracts, process-memory service/operation deduplication, three HTTP routes, configuration/composition/lifecycle, SR detail panel integration and three integration tests. The isolated vertical proof uses an OS temporary Git repository and fake launcher; it proves deterministic worktree, parsed current stage/first incomplete item, exact resume prompt/cwd and created manifest path, then cleans the fixture. Final focused result: eight files/32 tests. Impact regression: 12 files/40 tests. Full suite: 31 files/118 tests. Typecheck and production build passed; build retains a non-blocking existing large-chunk warning. The first sandboxed HTTP test attempt failed to bind loopback with EPERM; approved rerun exposed and then resolved a Lead test fixture default-argument error. Actual Claude CLI and browser UI smoke were not run and are not claimed. Security/Resiliency disabled/N/A. PBT-02/03/07/08/09 are compliant. No user repository, default DB, Git history or external system was mutated.
+
+---
+
+## Code Generation Part 2 — Generated Artifacts Complete and Approval Request
+**Timestamp**: 2026-09-09T03:54:08Z
+**User Input**: No additional user input.
+**AI Response**: "WT-Spike implementation summary와 verification evidence를 생성하고 code plan의 모든 executable 항목을 완료했다. 표준 generated-artifact review gate에서 Request Changes 또는 Continue to Build and Test 승인을 요청한다."
+**Context**: Documentation records all created/modified files, three API endpoints, config, partial story evidence, process-memory limitation, PBT compliance and explicit backlog. Post-implementation evidence is 32 focused tests, 40 impact tests, 118 full tests, typecheck and production build. No duplicate `_new`/`_modified` files exist and `git diff --check` passed before approval document creation. Actual Claude CLI and browser smoke remain explicitly unverified. Security and Resiliency disabled/N/A. PBT-02/03/07/08/09 compliant. Code Generation stays incomplete until the user explicitly approves generated artifacts; Build and Test has not started.
+**Approval Prompt**: "생성된 WT-Spike code/tests/docs를 검토하고 Q1에 A(Request Changes), B(Continue to Build and Test), 또는 X(Other)를 기록해 주세요."
+
+---
+
+## Code Generation Part 2 — Final Content Validation
+**Timestamp**: 2026-09-09T03:54:40Z
+**User Input**: No additional user input.
+**AI Response**: "Generated artifact approval gate의 최종 구조를 검증했다. Code plan에는 사용자 승인 항목 하나만 열려 있고 approval answer는 비어 있으며, state와 audit가 동일한 gate를 가리킨다."
+**Context**: `git diff --check` passed after all code and documentation edits. Required implementation/verification/approval files exist. The implementation documents use plain Markdown only with no Mermaid or ASCII diagrams; tables, inline code and local relative links were checked. The plan has one unchecked item: explicit generated-artifact approval before focused Build and Test. The approval file has one blank `[Answer]:` and blank-separated A/B/X choices with Other last. No further product or runtime changes occurred during validation.
+
+---
+
+## Code Generation Part 2 — Generated Artifact Approval and Build and Test Start
+**Timestamp**: 2026-09-09T03:55:49Z
+**User Input**: "Continue to Next Stage"
+**AI Response**: "WT-Spike generated artifacts Q1 B 승인으로 기록하고 Code Generation을 완료했다. Focused Build and Test 규칙과 기존 instruction files를 로드하고, brownfield addendum 방식의 Build and Test 계획을 시작했다."
+**Context**: Explicit generated-artifact approval. The final Code Generation plan checkbox was completed in the same interaction and stage-level Code Generation was marked complete. Build and Test Step 1–2 are complete. Existing PlanRepo build/test documents are preserved and will be updated in place with current spike commands, results, limitations and PBT evidence. Security/Resiliency remain disabled/N/A; PBT remains Partial and blocking for PBT-02/03/07/08/09 where applicable.
+
+---
+
+## Build and Test Stage — WT-Spike Instructions Complete
+**Timestamp**: 2026-09-09T03:57:28Z
+**User Input**: No additional user input.
+**AI Response**: "WT-Spike Build and Test 검증을 재실행하고 기존 five instruction files를 brownfield addendum로 갱신했다. Typecheck, 31 files/118 tests와 production build가 통과했으며 Operations 승인 질문을 제시한다."
+**Context**: Build status Success; test status Pass. Updated `build-instructions.md`, `unit-test-instructions.md`, `integration-test-instructions.md`, `performance-test-instructions.md` and `build-and-test-summary.md`. The original MVP evidence was preserved while worktree config, focused commands, isolated Git/fake runner integration, PBT replay and explicit performance/real-CLI/browser limitations were added. Security and Resiliency disabled/N/A. PBT Partial per-rule review found PBT-02/03/07/08/09 compliant and no blocking finding. Plain Markdown only; no Mermaid/ASCII. Build and Test remains approval-pending until Q1 B.
+**Approval Prompt**: "Build and test instructions complete. Ready to proceed to Operations stage? Q1에 A(Request Changes), B(Approve & Continue), 또는 X(Other)를 기록해 주세요."
+
+---
+
+## Build and Test Stage — Final Content Validation
+**Timestamp**: 2026-09-09T03:57:58Z
+**User Input**: No additional user input.
+**AI Response**: "Build and Test five-file instruction set, summary, plan, approval question과 state의 final consistency를 검증했다. 사용자 승인 단계 하나만 열려 있다."
+**Context**: `git diff --check` passed. All five required Build and Test files exist and were updated in place, preserving original MVP evidence. The focused plan has only Step 11 approval/Operations transition unchecked. The approval file contains the exact required readiness question, blank-separated A/B/X choices, Other last and one empty `[Answer]:`. The summary contains Security, Resiliency and all PBT-01..10 status rows. Links to spike verification and plan resolve. No diagrams are present. No product code, dependencies, runtime data, Git history or external system changed during this stage.
+
+---

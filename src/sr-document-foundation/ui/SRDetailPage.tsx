@@ -13,6 +13,7 @@ import { PlanningPanel } from '../../aidlc-planning/ui/PlanningPanel.js';
 import { isWorkflow } from '../../aidlc-planning/ui/planning-client.js';
 import { ReviewPanel } from '../../review-implementation/ui/ReviewPanel.js';
 import { useRole } from '../../app/WorkspaceShell.js';
+import { WorktreeSpikePanel } from '../../worktree-spike/ui/WorktreeSpikePanel.js';
 export function SRDetailPage() {
   const { srId = '', documentId, versionId } = useParams();
   const [revision, setRevision] = useState(0); const query = useQuery(`/api/srs/${srId}`, isSR);
@@ -24,6 +25,7 @@ export function SRDetailPage() {
     <ErrorNotice error={query.error} retry={query.reload} /><AsyncStatus loading={query.loading} />
     {sr && <>
       <div className="page-heading detail-heading"><div><p className="eyebrow">SERVICE REQUEST</p><h1>{sr.title}</h1><div className="subtitle"><span className="badge">{COLUMNS.find(([key]) => key === sr.column)?.[1]}</span><span>{role === 'author' ? '작성자' : '리뷰어'} · {new Date(sr.createdAt).toLocaleDateString('ko-KR')}</span></div></div></div>
+      <WorktreeSpikePanel srId={srId} revision={revision} />
       <fieldset className="planning-role-scope" disabled={role === 'reviewer'} aria-label="작성자 계획 진행"><PlanningPanel key={role} srId={srId} revision={revision} changed={changed} /></fieldset>
       <ReviewPanel srId={srId} column={sr.column} target={target} role={role} revision={revision} workflowRevision={workflow.data?.revision ?? -1} changed={changed} />
       <ErrorNotice error={workflow.error} retry={workflow.reload} />

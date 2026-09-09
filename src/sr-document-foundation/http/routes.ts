@@ -11,7 +11,7 @@ import { planningRoutes } from '../../aidlc-planning/http/planning-routes.js';
 import type { Router as ExpressRouter } from 'express';
 const param = (r: Request, name: string) => id(r.params[name], name);
 const ref = (r: Request, version: unknown): VersionRef => ({ srId: param(r, 'srId'), documentId: param(r, 'documentId'), versionId: id(version, 'versionId') });
-export function routes(boundary: LocalAppBoundary, planning?: PlanningService, review?: ExpressRouter): Router {
+export function routes(boundary: LocalAppBoundary, planning?: PlanningService, review?: ExpressRouter, worktreeSpike?: ExpressRouter): Router {
   const router = Router();
   router.use((req, res, next) => {
     res.setHeader('Cache-Control', 'no-store');
@@ -42,6 +42,7 @@ export function routes(boundary: LocalAppBoundary, planning?: PlanningService, r
   });
   if (planning) router.use(planningRoutes(planning));
   if (review) router.use(review);
+  if (worktreeSpike) router.use(worktreeSpike);
   router.use((_req, res) => sendResult(res, { ok: false, error: { code: 'NOT_FOUND', message: 'API 경로를 찾을 수 없습니다.' } }));
   router.use(errorHandler); return router;
 }
