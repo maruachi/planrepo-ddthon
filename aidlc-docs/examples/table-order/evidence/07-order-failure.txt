@@ -1,0 +1,16 @@
+The following is a diff from the previous accessibility tree for Window: "PlanRepo" with ~ and + representing changed and added elements, respectively. Removed elements are summarized by ID range.
+~										1149 전환 버튼 주문 성공, Value: 0
+~										1150 전환 버튼 주문 실패, Value: 1
+~									1154 container 주문 실패
+~										1155 텍스트 실패
+~										1156 항목 주문 실패, Value: 4
+~											1157 텍스트 주문 실패
+~										1158 텍스트 잠시 후 다시 시도해 주세요. 담은 메뉴는 그대로 있습니다
+~										1159 버튼 다시 시도
+~									1161 항목 주문 실패, Value: 3
+~										1162 텍스트 주문 실패
+~									1163 텍스트 전송 실패 시 에러를 표시하고 장바구니를 보존합니다.
+~									1164 텍스트 고객이 다시 시도합니다.
+~									1165 텍스트 잠시 후 다시 시도해 주세요. 담은 메뉴는 그대로 있습니다
+~									1167 텍스트 에러 메시지를 표시하고 장바구니를 보존합니다
+The focused UI element is 1150 전환 버튼 주문 실패, Value: 1

@@ -1,0 +1,235 @@
+{
+  "source": "aidlc-docs/examples/table-order/table-order-full.mp4",
+  "output": "aidlc-docs/examples/table-order/table-order-demo-60s.mp4",
+  "duration": 60,
+  "fps": 24,
+  "captions": false,
+  "audio": false,
+  "clips": [
+    {
+      "clip": 1,
+      "sourceStart": 3.8,
+      "sourceEnd": 6.8,
+      "outputStart": 0,
+      "outputDuration": 3,
+      "speed": 1,
+      "action": "초안 등록"
+    },
+    {
+      "clip": 2,
+      "sourceStart": 14.5,
+      "sourceEnd": 17.5,
+      "outputStart": 3,
+      "outputDuration": 2,
+      "speed": 1.5,
+      "action": "AI 질문 열기"
+    },
+    {
+      "clip": 3,
+      "sourceStart": 51.8,
+      "sourceEnd": 54.3,
+      "outputStart": 5,
+      "outputDuration": 2,
+      "speed": 1.25,
+      "action": "생성된 질문 표시"
+    },
+    {
+      "clip": 4,
+      "sourceStart": 81,
+      "sourceEnd": 87.5,
+      "outputStart": 7,
+      "outputDuration": 3,
+      "speed": 2.166667,
+      "action": "질문 추가 및 답변 창 열기"
+    },
+    {
+      "clip": 5,
+      "sourceStart": 89.5,
+      "sourceEnd": 95.5,
+      "outputStart": 10,
+      "outputDuration": 3,
+      "speed": 2,
+      "action": "첫 질문 답변"
+    },
+    {
+      "clip": 6,
+      "sourceStart": 135,
+      "sourceEnd": 139.8,
+      "outputStart": 13,
+      "outputDuration": 3,
+      "speed": 1.6,
+      "action": "마지막 답변 저장"
+    },
+    {
+      "clip": 7,
+      "sourceStart": 145.8,
+      "sourceEnd": 148.8,
+      "outputStart": 16,
+      "outputDuration": 2,
+      "speed": 1.5,
+      "action": "문서 보완 실행"
+    },
+    {
+      "clip": 8,
+      "sourceStart": 253.2,
+      "sourceEnd": 255.7,
+      "outputStart": 18,
+      "outputDuration": 2,
+      "speed": 1.25,
+      "action": "AI 문서 생성 결과"
+    },
+    {
+      "clip": 9,
+      "sourceStart": 345.8,
+      "sourceEnd": 348.8,
+      "outputStart": 20,
+      "outputDuration": 2,
+      "speed": 1.5,
+      "action": "누락 조건 보완 요청"
+    },
+    {
+      "clip": 10,
+      "sourceStart": 637.8,
+      "sourceEnd": 640.8,
+      "outputStart": 22,
+      "outputDuration": 3,
+      "speed": 1,
+      "action": "보완안 반영"
+    },
+    {
+      "clip": 11,
+      "sourceStart": 646.8,
+      "sourceEnd": 650.8,
+      "outputStart": 25,
+      "outputDuration": 3,
+      "speed": 1.333333,
+      "action": "문서 직접 편집 및 저장"
+    },
+    {
+      "clip": 12,
+      "sourceStart": 657.2,
+      "sourceEnd": 660.2,
+      "outputStart": 28,
+      "outputDuration": 3,
+      "speed": 1,
+      "action": "전체 흐름 시각화"
+    },
+    {
+      "clip": 13,
+      "sourceStart": 666.8,
+      "sourceEnd": 669.3,
+      "outputStart": 31,
+      "outputDuration": 2,
+      "speed": 1.25,
+      "action": "전체 흐름 표시 전환"
+    },
+    {
+      "clip": 14,
+      "sourceStart": 691.8,
+      "sourceEnd": 694.3,
+      "outputStart": 33,
+      "outputDuration": 2,
+      "speed": 1.25,
+      "action": "메뉴 화면 시각화"
+    },
+    {
+      "clip": 15,
+      "sourceStart": 698.3,
+      "sourceEnd": 700.8,
+      "outputStart": 35,
+      "outputDuration": 2,
+      "speed": 1.25,
+      "action": "주문 성공 화면"
+    },
+    {
+      "clip": 16,
+      "sourceStart": 706.3,
+      "sourceEnd": 708.8,
+      "outputStart": 37,
+      "outputDuration": 2,
+      "speed": 1.25,
+      "action": "주문 실패 화면"
+    },
+    {
+      "clip": 17,
+      "sourceStart": 710.8,
+      "sourceEnd": 713.3,
+      "outputStart": 39,
+      "outputDuration": 2,
+      "speed": 1.25,
+      "action": "관리자 화면"
+    },
+    {
+      "clip": 18,
+      "sourceStart": 715.8,
+      "sourceEnd": 718.3,
+      "outputStart": 41,
+      "outputDuration": 2,
+      "speed": 1.25,
+      "action": "이용 완료 화면"
+    },
+    {
+      "clip": 19,
+      "sourceStart": 720.5,
+      "sourceEnd": 723,
+      "outputStart": 43,
+      "outputDuration": 2,
+      "speed": 1.25,
+      "action": "새 세션 화면"
+    },
+    {
+      "clip": 20,
+      "sourceStart": 731.5,
+      "sourceEnd": 734,
+      "outputStart": 45,
+      "outputDuration": 2,
+      "speed": 1.25,
+      "action": "원문 근거 이동"
+    },
+    {
+      "clip": 21,
+      "sourceStart": 747.5,
+      "sourceEnd": 750,
+      "outputStart": 47,
+      "outputDuration": 2,
+      "speed": 1.25,
+      "action": "규칙 화면 전환"
+    },
+    {
+      "clip": 22,
+      "sourceStart": 763.2,
+      "sourceEnd": 766.2,
+      "outputStart": 49,
+      "outputDuration": 3,
+      "speed": 1,
+      "action": "검토 요청"
+    },
+    {
+      "clip": 23,
+      "sourceStart": 793.2,
+      "sourceEnd": 796.7,
+      "outputStart": 52,
+      "outputDuration": 3,
+      "speed": 1.166667,
+      "action": "검토 항목 체크 및 의견 입력"
+    },
+    {
+      "clip": 24,
+      "sourceStart": 802,
+      "sourceEnd": 804,
+      "outputStart": 55,
+      "outputDuration": 2,
+      "speed": 1,
+      "action": "동료 검토 승인"
+    },
+    {
+      "clip": 25,
+      "sourceStart": 820.4,
+      "sourceEnd": 823.4,
+      "outputStart": 57,
+      "outputDuration": 3,
+      "speed": 1,
+      "action": "최종 결재"
+    }
+  ]
+}

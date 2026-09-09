@@ -1,0 +1,10 @@
+[
+  {
+    "run_id": "run-d372cc6c-9426-464d-b283-4f53d57f068f",
+    "task_kind": "QUESTION_PROPOSALS",
+    "status": "succeeded",
+    "started_at": "2026-09-09T07:32:41.988Z",
+    "finished_at": "2026-09-09T07:33:18.981Z",
+    "error_code": null
+  }
+]

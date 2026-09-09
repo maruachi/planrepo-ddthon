@@ -1,0 +1,12 @@
+objc[68578]: class `NSKVONotifying_AVCaptureScreenInput' not linked into application
+objc[68578]: class `NSKVONotifying_AVCaptureScreenInput' not linked into application
+objc[68578]: class `NSKVONotifying_AVCaptureScreenInput' not linked into application
+[AVFoundation indev @ 0xc30c10140] Configuration of video device failed, falling back to default.
+[in#0 @ 0xc30c14000] Selected pixel format (yuv420p) is not supported by the input device.
+[in#0 @ 0xc30c14000] Supported pixel formats:
+[in#0 @ 0xc30c14000]   uyvy422
+[in#0 @ 0xc30c14000]   yuyv422
+[in#0 @ 0xc30c14000]   nv12
+[in#0 @ 0xc30c14000]   0rgb
+[in#0 @ 0xc30c14000]   bgr0
+[in#0 @ 0xc30c14000] Overriding selected pixel format to use uyvy422 instead.

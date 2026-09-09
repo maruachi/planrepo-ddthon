@@ -1,0 +1,80 @@
+[
+  {
+    "start": 0,
+    "end": 24,
+    "caption": 1,
+    "speed": 1
+  },
+  {
+    "start": 62,
+    "end": 86,
+    "caption": 2,
+    "speed": 1
+  },
+  {
+    "start": 86,
+    "end": 146,
+    "caption": 3,
+    "speed": 1
+  },
+  {
+    "start": 146,
+    "end": 154,
+    "caption": 4,
+    "speed": 1
+  },
+  {
+    "start": 274,
+    "end": 286,
+    "caption": 5,
+    "speed": 1
+  },
+  {
+    "start": 328,
+    "end": 350,
+    "caption": 5,
+    "speed": 1
+  },
+  {
+    "start": 601,
+    "end": 639,
+    "caption": 6,
+    "speed": 1
+  },
+  {
+    "start": 639,
+    "end": 657,
+    "caption": 6,
+    "speed": 1
+  },
+  {
+    "start": 657,
+    "end": 676,
+    "caption": 7,
+    "speed": 1
+  },
+  {
+    "start": 676,
+    "end": 752,
+    "caption": 8,
+    "speed": 1
+  },
+  {
+    "start": 752,
+    "end": 790,
+    "caption": 9,
+    "speed": 1
+  },
+  {
+    "start": 790,
+    "end": 820,
+    "caption": 9,
+    "speed": 1
+  },
+  {
+    "start": 820,
+    "end": 847,
+    "caption": 10,
+    "speed": 1
+  }
+]

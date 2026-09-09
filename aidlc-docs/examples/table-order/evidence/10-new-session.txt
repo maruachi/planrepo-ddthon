@@ -1,0 +1,16 @@
+The following is a diff from the previous accessibility tree for Window: "PlanRepo" with ~ and + representing changed and added elements, respectively. Removed elements are summarized by ID range.
+~										1152 전환 버튼 이용 완료와 과거 이력, Value: 0
+~										1153 전환 버튼 다음 고객 새 세션, Value: 1
+~									1154 container 새 세션
+~										1155 텍스트 대기
+~										1156 항목 새 세션, Value: 4
+~											1157 텍스트 새 세션
+~										1158 텍스트 이전 주문 내역 없이 새로 주문해 주세요
+~										1159 버튼 메뉴 보기
+~									1161 항목 다음 고객 새 세션, Value: 3
+~										1162 텍스트 다음 고객 새 세션
+~									1163 텍스트 리셋이 끝나면 다음 고객이 새 세션으로 시작합니다.
+~									1164 텍스트 새 고객이 이전 내역 없이 시작합니다.
+~									1165 텍스트 이전 주문 내역 없이 새로 주문해 주세요
+~									1167 텍스트 새 세션으로 시작합니다
+The focused UI element is 1153 전환 버튼 다음 고객 새 세션, Value: 1

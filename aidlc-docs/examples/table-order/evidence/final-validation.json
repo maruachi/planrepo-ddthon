@@ -1,0 +1,39 @@
+{
+  "visualization": "ready",
+  "sections": 6,
+  "nodes": 7,
+  "edges": 6,
+  "scenarios": 6,
+  "screens": 6,
+  "questions": 5,
+  "answers": 5,
+  "runs": [
+    {
+      "task": "QUESTION_PROPOSALS",
+      "status": "succeeded"
+    },
+    {
+      "task": "ARTIFACT_REVISION",
+      "status": "succeeded"
+    },
+    {
+      "task": "ARTIFACT_REVISION",
+      "status": "succeeded"
+    }
+  ],
+  "versions": [
+    1,
+    2,
+    3
+  ],
+  "approvals": 1,
+  "gateStates": [
+    {
+      "gate": "G1"
+    },
+    {
+      "gate": "G2"
+    }
+  ],
+  "sourceRestored": true
+}

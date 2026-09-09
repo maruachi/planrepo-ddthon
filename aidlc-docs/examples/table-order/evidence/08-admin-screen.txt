@@ -1,0 +1,16 @@
+The following is a diff from the previous accessibility tree for Window: "PlanRepo" with ~ and + representing changed and added elements, respectively. Removed elements are summarized by ID range.
+~										1150 전환 버튼 주문 실패, Value: 0
+~										1151 전환 버튼 관리자 접수와 상태 변경, Value: 1
+~									1154 container 실시간 주문
+~										1155 텍스트 실시간
+~										1156 항목 실시간 주문, Value: 4
+~											1157 텍스트 실시간 주문
+~										1158 텍스트 테이블별 신규 주문을 확인하고 상태를 변경해 주세요
+~										1159 버튼 상태 변경
+~									1161 항목 관리자 접수와 상태 변경, Value: 3
+~										1162 텍스트 관리자 접수와 상태 변경
+~									1163 텍스트 관리자가 SSE로 신규 주문을 받아 상태를 변경합니다.
+~									1164 텍스트 주문 상태가 갱신됩니다.
+~									1165 텍스트 테이블별 신규 주문을 확인하고 상태를 변경해 주세요
+~									1167 텍스트 대기중·준비중·완료로 상태를 변경합니다
+The focused UI element is 1151 전환 버튼 관리자 접수와 상태 변경, Value: 1

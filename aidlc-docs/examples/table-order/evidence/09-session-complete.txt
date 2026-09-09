@@ -1,0 +1,16 @@
+The following is a diff from the previous accessibility tree for Window: "PlanRepo" with ~ and + representing changed and added elements, respectively. Removed elements are summarized by ID range.
+~										1151 전환 버튼 관리자 접수와 상태 변경, Value: 0
+~										1152 전환 버튼 이용 완료와 과거 이력, Value: 1
+~									1154 container 이용 완료
+~										1155 텍스트 확인 필요
+~										1156 항목 이용 완료, Value: 4
+~											1157 텍스트 이용 완료
+~										1158 텍스트 이 테이블 이용을 완료하시겠습니까? 주문 내역은 과거 이력으로 이동합니다
+~										1159 버튼 이용 완료
+~									1161 항목 이용 완료와 과거 이력, Value: 3
+~										1162 텍스트 이용 완료와 과거 이력
+~									1163 텍스트 이용 완료 시 세션 주문이 과거 이력으로 이동합니다.
+~									1164 텍스트 현재 목록과 금액이 리셋됩니다.
+~									1165 텍스트 이 테이블 이용을 완료하시겠습니까? 주문 내역은 과거 이력으로 이동합니다
+~									1167 텍스트 과거 이력으로 이동하고 목록과 금액이 0으로 리셋됩니다
+The focused UI element is 1152 전환 버튼 이용 완료와 과거 이력, Value: 1

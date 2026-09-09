@@ -1,0 +1,22 @@
+{
+  "programs": [],
+  "stream_groups": [],
+  "streams": [
+    {
+      "codec_name": "h264",
+      "codec_type": "video",
+      "width": 1440,
+      "height": 936,
+      "avg_frame_rate": "24/1",
+      "nb_frames": "1440"
+    }
+  ],
+  "format": {
+    "duration": "60.000000",
+    "size": "4434614"
+  },
+  "sha256": "a7ece00ade878d8d9daedd9ac4eea207491d09d7f059899f1d2825ec81ef5f43",
+  "decodeExitCode": 0,
+  "captions": false,
+  "clips": 25
+}

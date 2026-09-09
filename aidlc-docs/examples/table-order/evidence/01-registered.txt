@@ -1,0 +1,593 @@
+The following is a diff from the previous accessibility tree for Window: "PlanRepo" with ~ and + representing changed and added elements, respectively. Removed elements are summarized by ID range.
+Removed element IDs: 81-111
+~1 표준 윈도우 PlanRepo - Chrome, URL: 127.0.0.1:4173/?sr=sr-63bb1d22-6550-4689-8284-bd9059e09fee&view=documents, Secondary Actions: Raise
+~	2 container PlanRepo - Chrome, URL: 127.0.0.1:4173/?sr=sr-63bb1d22-6550-4689-8284-bd9059e09fee&view=documents
+~				5 HTML 콘텐츠 PlanRepo, URL: 127.0.0.1:4173/?sr=sr-63bb1d22-6550-4689-8284-bd9059e09fee&view=documents
+~						78 container [시연] 테이블오더 서비스 MVP
+~							79 버튼 ← 팀 보드
+~							80 버튼 최신 상태 확인
++							81 container
++								82 텍스트 SR-MVP
++								83 항목 [시연] 테이블오더 서비스 MVP, Value: 1
++									84 텍스트 [시연] 테이블오더 서비스 MVP
++								85 text 담당자  SR 담당자 Plan 상태 문서 작성 중
++							86 텍스트 문서와 필요한 보완안·시각화를 함께 검토한 뒤 최종 결재합니다. AI 보완은 선택입니다.
++							87 버튼 링크 복사
++							88 버튼 문서 다운로드
++							89 container Plan 작업
++								90 버튼 문서
++								91 버튼 요약·시각화
++								92 버튼 공유·리뷰
++							93 container
++								94 container 결재 전 문서 보완
++									95 텍스트 문서를 다듬고 함께 검토합니다
++									96 텍스트 질문에 답을 고르거나 직접 적고, 필요한 보완안과 시각화를 확인합니다. 아래 AI 기능은 선택 사항입니다.
++									97 버튼 AI 질문으로 내용 확인
++									98 버튼 AI로 문서 보완
++									99 버튼 AI로 시각화 제안받기
++								100 텍스트 PLAN 문서
++								101 항목 [시연] 테이블오더 서비스 MVP, Value: 2
++									102 텍스트 [시연] 테이블오더 서비스 MVP
++								103 텍스트 문서 v1 · 사람이 작성
++								104 버튼 문서 편집
++								105 항목 테이블오더 서비스 요구사항 정의서, Value: 1
++									106 텍스트 테이블오더 서비스 요구사항 정의서
++								107 항목 1. 프로젝트 개요, Value: 2
++									108 텍스트 1. 프로젝트 개요
++								109 항목 1.1 서비스 비전, Value: 3
++									110 텍스트 1.1 서비스 비전
++								111 텍스트 디지털 주문 시스템을 통해 고객에게는 편리한 주문 경험을, 매장 운영자에게는 효율적인 운영 환경을 제공하는 차세대 테이블오더 플랫폼
++								112 항목 1.2 핵심 가치 제안, Value: 3
++									113 텍스트 1.2 핵심 가치 제안
++								114 텍스트 고객 관점
++								115 내용 목록
++									116 container
++										117 AXListMarker • 
++										118 텍스트 대기 시간 없는 즉시 주문
++									119 container
++										120 AXListMarker • 
++										121 텍스트 직관적이고 사용하기 쉬운 인터페이스
++								122 텍스트 매장 운영자 관점
++								123 내용 목록
++									124 container
++										125 AXListMarker • 
++										126 텍스트 인건비 절감 및 운영 효율성 증대
++									127 container
++										128 AXListMarker • 
++										129 텍스트 실시간 주문 관리 및 모니터링
++								130 텍스트 시장 차별화
++								131 내용 목록
++									132 container
++										133 AXListMarker • 
++										134 텍스트 다양한 업종에 적용 가능한 유연한 구조
++									135 container
++										136 AXListMarker • 
++										137 텍스트 직관적인 관리자 도구
++								138 항목 2. 서비스 구성, Value: 2
++									139 텍스트 2. 서비스 구성
++								140 항목 2.1 주요 구성 요소, Value: 3
++									141 텍스트 2.1 주요 구성 요소
++								142 내용 목록
++									143 container
++										144 AXListMarker • 
++										145 text 고객용 인터페이스 : 테이블에서 고객이 사용하는 주문 화면 (브라우저에서 동작하는 웹UI 방식)
++									146 container
++										147 AXListMarker • 
++										148 text 관리자용 인터페이스 : 매장 운영자가 사용하는 관리 화면
++									149 container
++										150 AXListMarker • 
++										151 text 서버 시스템 : 주문 처리 및 데이터 관리
++									152 container
++										153 AXListMarker • 
++										154 text 데이터 저장소 : 매장, 메뉴, 주문 정보 저장
++								155 항목 3. 핵심 기능 요구사항, Value: 2
++									156 텍스트 3. 핵심 기능 요구사항
++								157 항목 3.1 고객용 기능 (Customer Features), Value: 3
++									158 텍스트 3.1 고객용 기능 (Customer Features)
++								159 항목 3.1.1 테이블 태블릿 자동 로그인 및 세션 관리, Value: 4
++									160 텍스트 3.1.1 테이블 태블릿 자동 로그인 및 세션 관리
++								161 container
++									162 text 목적 : 고객이 별도 로그인 절차 없이 즉시 주문할 수 있도록 자동 인증
++								163 container
++									164 text 기능 요구사항 :
++								165 내용 목록
++									166 container
++										167 AXListMarker • 
++										168 text 초기 설정 (관리자가 1회 수행) :
++										169 내용 목록
++											170 container
++												171 AXListMarker ◦ 
++												172 텍스트 매장 식별자 입력
++											173 container
++												174 AXListMarker ◦ 
++												175 텍스트 테이블 번호 입력
++											176 container
++												177 AXListMarker ◦ 
++												178 텍스트 테이블 비밀번호 입력
++											179 container
++												180 AXListMarker ◦ 
++												181 텍스트 최종 로그인 정보 로컬 저장
++									182 container
++										183 AXListMarker • 
++										184 text 자동 로그인 :
++										185 내용 목록
++											186 container
++												187 AXListMarker ◦ 
++												188 텍스트 1회 로그인 성공 후, 저장된 정보로 자동 로그인
++								189 항목 3.1.2 메뉴 조회 및 탐색, Value: 4
++									190 텍스트 3.1.2 메뉴 조회 및 탐색
++								191 container
++									192 text 목적 : 고객이 매장의 메뉴를 쉽게 탐색하고 선택할 수 있도록 지원
++								193 container
++									194 text 기능 요구사항 :
++								195 내용 목록
++									196 container
++										197 AXListMarker • 
++										198 text 기본 화면 : 메뉴 화면이 기본 화면으로 항상 표시
++									199 container
++										200 AXListMarker • 
++										201 텍스트 카테고리별 메뉴 분류 및 표시
++									202 container
++										203 AXListMarker • 
++										204 텍스트 메뉴 상세 정보 표시
++										205 내용 목록
++											206 container
++												207 AXListMarker ◦ 
++												208 텍스트 메뉴명
++											209 container
++												210 AXListMarker ◦ 
++												211 텍스트 가격
++											212 container
++												213 AXListMarker ◦ 
++												214 텍스트 메뉴 설명
++											215 container
++												216 AXListMarker ◦ 
++												217 텍스트 메뉴 이미지
++									218 container
++										219 AXListMarker • 
++										220 텍스트 카테고리 간 빠른 이동
++								221 container
++									222 text UI/UX 요구사항 :
++								223 내용 목록
++									224 container
++										225 AXListMarker • 
++										226 텍스트 카드 형태의 메뉴 레이아웃
++									227 container
++										228 AXListMarker • 
++										229 텍스트 터치 친화적인 버튼 크기 (최소 44x44px)
++									230 container
++										231 AXListMarker • 
++										232 텍스트 명확한 시각적 계층 구조
++								233 항목 3.1.3 장바구니 관리, Value: 4
++									234 텍스트 3.1.3 장바구니 관리
++								235 container
++									236 text 목적 : 주문 전 선택한 메뉴를 임시 저장하고 수정할 수 있는 기능
++								237 container
++									238 text 기능 요구사항 :
++								239 내용 목록
++									240 container
++										241 AXListMarker • 
++										242 텍스트 메뉴 추가/삭제
++									243 container
++										244 AXListMarker • 
++										245 텍스트 수량 조절 (증가/감소)
++									246 container
++										247 AXListMarker • 
++										248 텍스트 총 금액 실시간 계산
++									249 container
++										250 AXListMarker • 
++										251 텍스트 장바구니 비우기
++									252 container
++										253 AXListMarker • 
++										254 텍스트 로컬 저장 (페이지 새로고침 시에도 유지)
++								255 container
++									256 text 데이터 관리 :
++								257 내용 목록
++									258 container
++										259 AXListMarker • 
++										260 텍스트 클라이언트 측 임시 저장 (페이지 새로고침 시에도 유지)
++									261 container
++										262 AXListMarker • 
++										263 텍스트 서버 전송은 주문 확정 시에만 수행
++								264 항목 3.1.4 주문 생성, Value: 4
++									265 텍스트 3.1.4 주문 생성
++								266 container
++									267 text 목적 : 장바구니의 메뉴를 실제 주문으로 전환
++								268 container
++									269 text 기능 요구사항 :
++								270 내용 목록
++									271 container
++										272 AXListMarker • 
++										273 텍스트 주문 내역 최종 확인
++									274 container
++										275 AXListMarker • 
++										276 텍스트 주문 확정 버튼
++									277 container
++										278 AXListMarker • 
++										279 text 주문 성공 플로우 :
++										280 내용 목록
++											281 container
++												282 AXListMarker ◦ 
++												283 텍스트 주문 번호 표시
++											284 container
++												285 AXListMarker ◦ 
++												286 텍스트 장바구니 자동 비우기
++											287 container
++												288 AXListMarker ◦ 
++												289 텍스트 메뉴 화면으로 자동 리다이렉트
++									290 container
++										291 AXListMarker • 
++										292 텍스트 주문 실패 시 에러 메시지 표시 및 장바구니 유지
++								293 container
++									294 text 주문 정보 포함 항목 :
++								295 내용 목록
++									296 container
++										297 AXListMarker • 
++										298 텍스트 매장 식별 정보
++									299 container
++										300 AXListMarker • 
++										301 텍스트 테이블 식별 정보
++									302 container
++										303 AXListMarker • 
++										304 텍스트 주문 메뉴 목록 (메뉴명, 수량, 단가)
++									305 container
++										306 AXListMarker • 
++										307 텍스트 총 주문 금액
++									308 container
++										309 AXListMarker • 
++										310 텍스트 세션 ID (테이블 세션 추적용)
++								311 항목 3.1.5 주문 내역 조회, Value: 4
++									312 텍스트 3.1.5 주문 내역 조회
++								313 container
++									314 text 목적 : 현재 테이블의 주문 이력을 확인
++								315 container
++									316 text 기능 요구사항 :
++								317 내용 목록
++									318 container
++										319 AXListMarker • 
++										320 텍스트 주문 시간 순 정렬
++									321 container
++										322 AXListMarker • 
++										323 텍스트 주문별 상세 정보 표시
++										324 내용 목록
++											325 container
++												326 AXListMarker ◦ 
++												327 텍스트 주문 번호
++											328 container
++												329 AXListMarker ◦ 
++												330 텍스트 주문 시각
++											331 container
++												332 AXListMarker ◦ 
++												333 텍스트 주문 메뉴 및 수량
++											334 container
++												335 AXListMarker ◦ 
++												336 텍스트 주문 금액
++											337 container
++												338 AXListMarker ◦ 
++												339 텍스트 주문 상태 (대기중/준비중/완료)
++									340 container
++										341 AXListMarker • 
++										342 텍스트 주문 상태 실시간 업데이트 (선택사항)
++								343 container
++									344 text 데이터 필터링 :
++								345 내용 목록
++									346 container
++										347 AXListMarker • 
++										348 text 현재 테이블 세션 주문만 표시  (이전 식사 세션 제외)
++									349 container
++										350 AXListMarker • 
++										351 텍스트 매장 이용 완료 처리된 주문은 제외
++									352 container
++										353 AXListMarker • 
++										354 텍스트 페이지네이션 또는 무한 스크롤
++								355 항목 3.2 관리자용 기능 (Admin Features), Value: 3
++									356 텍스트 3.2 관리자용 기능 (Admin Features)
++								357 항목 3.2.1 매장 인증, Value: 4
++									358 텍스트 3.2.1 매장 인증
++								359 container
++									360 text 목적 : 관리자가 자신의 매장 관리 시스템에 접근
++								361 container
++									362 text 기능 요구사항 :
++								363 내용 목록
++									364 container
++										365 AXListMarker • 
++										366 텍스트 매장 식별자 입력
++									367 container
++										368 AXListMarker • 
++										369 텍스트 사용자명 및 비밀번호 입력
++									370 container
++										371 AXListMarker • 
++										372 text 세션 관리 :
++										373 내용 목록
++											374 container
++												375 AXListMarker ◦ 
++												376 텍스트 16시간 세션 유지
++											377 container
++												378 AXListMarker ◦ 
++												379 텍스트 JWT 토큰 기반 인증
++											380 container
++												381 AXListMarker ◦ 
++												382 텍스트 브라우저 새로고침 시 세션 유지
++											383 container
++												384 AXListMarker ◦ 
++												385 텍스트 16시간 후 자동 로그아웃
++								386 container
++									387 text 보안 요구사항 :
++								388 내용 목록
++									389 container
++										390 AXListMarker • 
++										391 텍스트 비밀번호 안전한 저장 (bcrypt 해싱)
++									392 container
++										393 AXListMarker • 
++										394 텍스트 로그인 시도 제한
++									395 container
++										396 AXListMarker • 
++										397 텍스트 세션 기반 인증
++								398 항목 3.2.2 실시간 주문 모니터링, Value: 4
++									399 텍스트 3.2.2 실시간 주문 모니터링
++								400 container
++									401 text 목적 : 들어오는 주문을 실시간으로 확인하고 관리
++								402 container
++									403 text 기능 요구사항 :
++								404 내용 목록
++									405 container
++										406 AXListMarker • 
++										407 text 주문 목록 실시간 업데이트  (Server-Sent Events 사용)
++									408 container
++										409 AXListMarker • 
++										410 text 그리드/대시보드 레이아웃 :
++										411 내용 목록
++											412 container
++												413 AXListMarker ◦ 
++												414 텍스트 테이블별 카드 형태 표시
++											415 container
++												416 AXListMarker ◦ 
++												417 텍스트 각 테이블 카드에 총 주문액 표시
++											418 container
++												419 AXListMarker ◦ 
++												420 텍스트 최신 주문 n개 미리보기
++									421 container
++										422 AXListMarker • 
++										423 텍스트 주문별 상세 정보 표시
++										424 내용 목록
++											425 container
++												426 AXListMarker ◦ 
++												427 텍스트 테이블 번호
++											428 container
++												429 AXListMarker ◦ 
++												430 텍스트 주문 번호
++											431 container
++												432 AXListMarker ◦ 
++												433 텍스트 주문 시각
++											434 container
++												435 AXListMarker ◦ 
++												436 텍스트 주문 메뉴 및 수량 (축약)
++											437 container
++												438 AXListMarker ◦ 
++												439 텍스트 총 금액
++									440 container
++										441 AXListMarker • 
++										442 text 주문 카드 클릭 시 : 전체 메뉴 목록 상세 보기
++									443 container
++										444 AXListMarker • 
++										445 텍스트 주문 상태 변경 (대기중/준비중/완료)
++									446 container
++										447 AXListMarker • 
++										448 텍스트 신규 주문 시각적 강조 (색상 변경, 애니메이션)
++								449 container
++									450 text 업데이트 방식 :
++								451 내용 목록
++									452 container
++										453 AXListMarker • 
++										454 텍스트 Server-Sent Events (SSE) 기반 실시간 통신
++									455 container
++										456 AXListMarker • 
++										457 텍스트 2초 이내 주문 표시
++								458 container
++									459 text UI 요구사항 :
++								460 내용 목록
++									461 container
++										462 AXListMarker • 
++										463 텍스트 그리드 형태의 테이블별 레이아웃
++									464 container
++										465 AXListMarker • 
++										466 텍스트 최신 주문 강조 표시
++									467 container
++										468 AXListMarker • 
++										469 텍스트 테이블별 필터링 기능
++								470 항목 3.2.3 테이블 관리, Value: 4
++									471 텍스트 3.2.3 테이블 관리
++								472 container
++									473 text 목적 : 테이블별 주문 상태 관리 및 세션 라이프사이클 관리
++								474 container
++									475 text 기능 요구사항 :
++								476 container
++									477 text 1. 테이블 태블릿 초기 설정 :
++								478 내용 목록
++									479 container
++										480 AXListMarker • 
++										481 텍스트 테이블 번호 및 테이블 비밀번호 설정
++									482 container
++										483 AXListMarker • 
++										484 텍스트 16시간 세션 생성
++									485 container
++										486 AXListMarker • 
++										487 텍스트 설정 정보 저장 및 자동 로그인 활성화
++								488 container
++									489 text 2. 주문 삭제 (직권 수정) :
++								490 내용 목록
++									491 container
++										492 AXListMarker • 
++										493 텍스트 특정 주문 삭제 버튼
++									494 container
++										495 AXListMarker • 
++										496 텍스트 확인 팝업 표시
++									497 container
++										498 AXListMarker • 
++										499 텍스트 주문 즉시 삭제
++									500 container
++										501 AXListMarker • 
++										502 텍스트 테이블 총 주문액 재계산
++									503 container
++										504 AXListMarker • 
++										505 텍스트 성공/실패 피드백
++								506 container
++									507 text 3. 테이블 세션 처리 :
++								508 내용 목록
++									509 container
++										510 AXListMarker • 
++										511 텍스트 테이블 세션 시작(세션의 첫 주문) 및 종료 관리(테이블 이용 완료)
++									512 container
++										513 AXListMarker • 
++										514 텍스트 확인 팝업 표시
++									515 container
++										516 AXListMarker • 
++										517 텍스트 테이블 세션 종료(이용 완료) 시, 해당 세션의 주문 내역을 과거 이력으로 이동
++									518 container
++										519 AXListMarker • 
++										520 텍스트 테이블 세션 종료(이용 완료) 시, 테이블 현재 주문 목록 및 총 주문액 0으로 리셋
++									521 container
++										522 AXListMarker • 
++										523 텍스트 새 고객이 이전 주문 내역 없이 시작 가능
++									524 container
++										525 AXListMarker • 
++										526 텍스트 성공/실패 피드백
++								527 container
++									528 text 4. 과거 주문 내역 조회 :
++								529 내용 목록
++									530 container
++										531 AXListMarker • 
++										532 텍스트 "과거 내역" 버튼
++									533 container
++										534 AXListMarker • 
++										535 텍스트 테이블별 과거 주문 목록 표시 (시간 역순)
++									536 container
++										537 AXListMarker • 
++										538 텍스트 각 주문 정보: 주문 번호, 시각, 메뉴 목록, 총 금액, 매장 이용 완료 시각
++									539 container
++										540 AXListMarker • 
++										541 텍스트 날짜 필터링 기능
++									542 container
++										543 AXListMarker • 
++										544 텍스트 "닫기" 버튼으로 대시보드 복귀
++								545 container
++									546 text 데이터 관리 :
++								547 내용 목록
++									548 container
++										549 AXListMarker • 
++										550 텍스트 주문 이력 데이터베이스 저장 (OrderHistory 테이블)
++									551 container
++										552 AXListMarker • 
++										553 텍스트 세션 ID로 주문 그룹화
++									554 container
++										555 AXListMarker • 
++										556 텍스트 완료 시각 기록
++								557 항목 3.2.4 메뉴 관리, Value: 4
++									558 텍스트 3.2.4 메뉴 관리
++								559 container
++									560 text 목적 : 메뉴 정보를 동적으로 관리
++								561 container
++									562 text 기능 요구사항 :
++								563 내용 목록
++									564 container
++										565 AXListMarker • 
++										566 텍스트 메뉴 조회 (카테고리별)
++									567 container
++										568 AXListMarker • 
++										569 텍스트 메뉴 등록
++										570 내용 목록
++											571 container
++												572 AXListMarker ◦ 
++												573 텍스트 메뉴명
++											574 container
++												575 AXListMarker ◦ 
++												576 텍스트 가격
++											577 container
++												578 AXListMarker ◦ 
++												579 텍스트 설명
++											580 container
++												581 AXListMarker ◦ 
++												582 텍스트 카테고리
++											583 container
++												584 AXListMarker ◦ 
++												585 텍스트 이미지 URL
++									586 container
++										587 AXListMarker • 
++										588 텍스트 메뉴 수정
++									589 container
++										590 AXListMarker • 
++										591 텍스트 메뉴 삭제
++									592 container
++										593 AXListMarker • 
++										594 텍스트 메뉴 노출 순서 조정
++								595 container
++									596 text 데이터 검증 :
++								597 내용 목록
++									598 container
++										599 AXListMarker • 
++										600 텍스트 필수 필드 검증
++									601 container
++										602 AXListMarker • 
++										603 텍스트 가격 범위 검증
++								604 항목 4. MVP 개발 범위, Value: 2
++									605 텍스트 4. MVP 개발 범위
++								606 항목 핵심 기능 (필수), Value: 3
++									607 텍스트 핵심 기능 (필수)
++								608 container
++									609 text 목표 : 기본적인 주문 프로세스 구현
++								610 container
++									611 text 고객용 :
++								612 내용 목록
++									613 container
++										614 AXListMarker • 
++										615 텍스트 테이블 태블릿 자동 로그인 및 세션 관리
++									616 container
++										617 AXListMarker • 
++										618 텍스트 메뉴 조회
++									619 container
++										620 AXListMarker • 
++										621 텍스트 장바구니 관리
++									622 container
++										623 AXListMarker • 
++										624 텍스트 주문 생성 (5초 표시 후 자동 리다이렉트)
++									625 container
++										626 AXListMarker • 
++										627 텍스트 주문 내역 조회 (현재 세션만)
++								628 container
++									629 text 관리자용 :
++								630 내용 목록
++									631 container
++										632 AXListMarker • 
++										633 텍스트 매장 인증 (16시간 세션)
++									634 container
++										635 AXListMarker • 
++										636 텍스트 실시간 주문 모니터링 (그리드 레이아웃, SSE)
++									637 container
++										638 AXListMarker • 
++										639 텍스트 테이블 관리 (초기 설정, 주문 삭제, 매장 이용 완료, 과거 내역 조회)
++								640 항목 부록, Value: 2
++									641 텍스트 부록
++								642 항목 A. 용어 정의, Value: 3
++									643 텍스트 A. 용어 정의
++								644 내용 목록
++									645 container
++										646 AXListMarker • 
++										647 text MVP : Minimum Viable Product (최소 기능 제품)
++									648 container
++										649 AXListMarker • 
++										650 text API : Application Programming Interface (애플리케이션 프로그래밍 인터페이스)
++									651 container
++										652 AXListMarker • 
++										653 text UI/UX : User Interface / User Experience (사용자 인터페이스 / 사용자 경험)
++									654 container
++										655 AXListMarker • 
++										656 text 테이블 세션 : 특정 테이블에 고객이 앉아서 첫 주문 시작한 후 부터 해당 테이블 이용 완료 처리까지의 시간. 세션 종료 후 다른 고객의 첫 주문 시작 시, 새로운 세션 시작.
++								657 펼치기/접기 삼각형 문단별 의견 남기기
++									658 텍스트 문단별 의견 남기기
++								659 펼치기/접기 삼각형 AI 질문·보완안·시각화 (선택)
++									660 텍스트 AI 질문·보완안·시각화 
++									661 텍스트 (선택)
++								662 펼치기/접기 삼각형 등록 원문과 참고 자료
++									663 텍스트 등록 원문과 참고 자료
+~						41 텍스트 필드 (settable) Description: 주소창 및 검색창, Value: 127.0.0.1:4173/?sr=sr-63bb1d22-6550-4689-8284-bd9059e09fee&view=documents, Placeholder: Google에서 검색하거나 URL을 입력하세요.
+The focused UI element is 5 HTML 콘텐츠 PlanRepo, URL: 127.0.0.1:4173/?sr=sr-63bb1d22-6550-4689-8284-bd9059e09fee&view=documents
