@@ -34,10 +34,10 @@ export interface RunView {
 }
 export interface ContextSnapshot {
   sr: SR; runId: string; stage: StageId; workflow: WorkflowState; documents: (DocumentView & { logicalKey: string })[];
-  history: HistoryEvent[]; rules: string; scope: 'planning-only';
+  history: HistoryEvent[]; rules: string; scope: 'planning-only'; finalize: boolean;
 }
 export interface PlanningRun extends RunView { inputRefs: VersionRef[]; context?: ContextSnapshot }
-export interface RunSpecification { stage: StageId; workflow: WorkflowState }
+export interface RunSpecification { stage: StageId; workflow: WorkflowState; finalize?: boolean }
 export interface ExecutionScope { signal?: AbortSignal }
 export interface PlanRunnerPort { execute(context: ContextSnapshot, scope: ExecutionScope): Promise<Result<RunnerOutcome>>; close?(): Promise<void> }
 export interface DecisionInput { kind: 'approve' | 'request_changes'; comment: string; targets: VersionRef[]; revision: number }

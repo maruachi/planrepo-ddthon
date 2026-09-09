@@ -10,7 +10,7 @@ import { PlanningContextBuilder } from '../context/planning-context-builder.js';
 import { parseRunnerOutput } from '../cli/claude-plan-runner.js';
 
 export type PlanningCommand =
-  | { kind: 'planning_advance'; srId: string; revision: number; action: PlanningAction }
+  | { kind: 'planning_advance'; srId: string; revision: number; action: PlanningAction; finalize?: boolean }
   | { kind: 'planning_answer'; srId: string; questionSetId: string; answers: Record<string, string>; revision: number }
   | ({ kind: 'planning_decide'; srId: string; decision: DecisionInput })
   | { kind: 'planning_complete'; srId: string; revision: number };
@@ -73,25 +73,26 @@ export class PlanningService {
       return old.runId ? unwrap(this.getRun(old.srId, old.runId)) : unwrap(this.getWorkflow(old.srId));
     }
     switch (command.kind) {
-      case 'planning_advance': return unwrap(this.advance(command.srId, command.action, actor, command.revision, context));
+      case 'planning_advance': return unwrap(this.advance(command.srId, command.action, actor, command.revision, context, command.finalize));
       case 'planning_answer': return unwrap(this.answer(command.srId, command.questionSetId, command, actor, context));
       case 'planning_decide': return unwrap(this.decide(command.srId, command.decision, actor, context));
       case 'planning_complete': return unwrap(this.completePlanning(command.srId, actor, command.revision, context));
     }
   }); }
 
-  advance(srId: string, action: PlanningAction, actor: ActorContext, revision: number, command?: CommandContext): Result<RunView> { return result(() => {
+  advance(srId: string, action: PlanningAction, actor: ActorContext, revision: number, command?: CommandContext, finalize = false): Result<RunView> { return result(() => {
     if (this.closed) fail('PLANNING_ACTION_BLOCKED', '앱이 종료 중입니다.');
     const old = this.state(srId); this.checkRevision(old, revision);
     if (action === 'next' && !this.approvalValid(old)) fail('APPROVAL_REQUIRED', '현재 최신 문서 묶음을 먼저 승인해 주세요.');
-    const evaluation = unwrap(this.policy.evaluate(old, action));
+    const evaluation = unwrap(this.policy.evaluate(old, action, finalize));
     const now = new Date().toISOString(); const runId = randomUUID();
     const state: WorkflowState = { ...old, ...evaluation, latestRunId: runId, status: 'running', reviewTargets: [] };
     // Prior answers/decision are part of the execution input; new output replaces them only on completion.
-    const snapshot = this.context.build(srId, runId, { stage: evaluation.stage, workflow: state });
+    // finalize 는 남은 미응답 질문을 무시하고 지금까지의 대화로 문서를 만들라는 신호로 문맥에 전달한다.
+    const snapshot = this.context.build(srId, runId, { stage: evaluation.stage, workflow: state, finalize });
     const inputs = snapshot.ok ? snapshot.data.documents.map(({ srId, documentId, versionId }) => ({ srId, documentId, versionId })) : [];
     const run: PlanningRun = { id: runId, srId, stage: evaluation.stage, status: 'running', startedAt: now, inputRefs: inputs, outputRefs: [], ...(snapshot.ok ? { context: snapshot.data } : {}) };
-    const c = this.changes(old, 'planning_started', `${PLANNING_STAGES[evaluation.stageIndex].label} 생성을 시작했습니다.`, actor, inputs, { runId, action, stage: evaluation.stage });
+    const c = this.changes(old, 'planning_started', `${PLANNING_STAGES[evaluation.stageIndex].label} 생성을 시작했습니다.`, actor, inputs, { runId, action, stage: evaluation.stage, ...(finalize ? { finalize: true } : {}) });
     c.planning!.state = { ...state, revision: old.revision + 1 }; c.planning!.run = run;
     if (snapshot.ok) c.expectedDocumentSet = { srId, refs: inputs };
     if (action === 'next') c.expected = old.decision!.targets;

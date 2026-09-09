@@ -16,9 +16,10 @@ export function planningRoutes(service: PlanningService): Router {
   router.get('/srs/:srId/workflow', (req, res) => sendResult(res, service.getWorkflow(srId(req))));
   router.get('/srs/:srId/runs/:runId', (req, res) => sendResult(res, service.getRun(srId(req), id(req.params.runId))));
   router.post('/srs/:srId/planning/advance', (req, res) => {
-    const b = object(req.body, ['action', 'revision']);
+    const b = object(req.body, ['action', 'revision', 'finalize']);
     if (!['generate', 'revise', 'next'].includes(String(b.action))) fail('VALIDATION_ERROR', '지원하지 않는 계획 행동입니다.');
-    sendResult(res, service.command({ kind: 'planning_advance', srId: srId(req), action: b.action as PlanningAction, revision: revision(b.revision) }, AUTHOR, operation(req)), 202);
+    if (b.finalize !== undefined && typeof b.finalize !== 'boolean') fail('VALIDATION_ERROR', 'finalize 값이 올바르지 않습니다.');
+    sendResult(res, service.command({ kind: 'planning_advance', srId: srId(req), action: b.action as PlanningAction, revision: revision(b.revision), ...(b.finalize === true ? { finalize: true } : {}) }, AUTHOR, operation(req)), 202);
   });
   router.post('/srs/:srId/planning/answers', (req, res) => {
     const b = object(req.body, ['questionSetId', 'answers', 'revision']);

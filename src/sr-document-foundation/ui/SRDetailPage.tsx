@@ -20,7 +20,7 @@ export function SRDetailPage() {
   const target = documentId && versionId ? { srId, documentId, versionId } : undefined;
   const changed = () => { setRevision(n => n + 1); query.reload(); };
   return <div className="detail-page">
-    <nav className="breadcrumbs"><Link data-testid="detail-board-link" to="/">계획 보드</Link><span>/</span><span>SR {srId.slice(0, 8)}</span></nav>
+    <nav className="breadcrumbs"><Link data-testid="detail-board-link" to="/">← Workspace</Link><span>/</span><span>SR {srId.slice(0, 8)}</span></nav>
     <ErrorNotice error={query.error} retry={query.reload} /><AsyncStatus loading={query.loading} />
     {sr && <>
       <div className="page-heading detail-heading"><div><p className="eyebrow">SERVICE REQUEST</p><h1>{sr.title}</h1><div className="subtitle"><span className="badge">{COLUMNS.find(([key]) => key === sr.column)?.[1]}</span><span>{role === 'author' ? '작성자' : '리뷰어'} · {new Date(sr.createdAt).toLocaleDateString('ko-KR')}</span></div></div></div>

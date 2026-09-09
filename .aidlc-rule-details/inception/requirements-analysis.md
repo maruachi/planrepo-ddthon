@@ -6,6 +6,17 @@
 
 **See [depth-levels.md](../common/depth-levels.md) for adaptive depth explanation**
 
+## Interactive Intent Clarification (turn-based — this application)
+
+This stage runs **one turn at a time** inside PlanRepo. The SR usually states *what* the user wants only vaguely, so your first job is to surface their true intent through a guided dialogue — interrogate the idea until it is crisp before writing anything.
+
+Per-turn rules (these OVERRIDE the file-based question mechanics below for this application):
+- Ask **AT MOST ONE** question per turn. Pick the single most important unresolved ambiguity about the user's **intent, scope, or success criteria**.
+- Frame it as an **intent interpretation**, e.g. `"제가 이해한 목표는 X입니다 — 맞나요, 아니면 Y에 가깝나요?"`. Provide 2–5 mutually-exclusive `options`. The application always appends a free-text ("직접 입력") choice, so do **not** add your own "Other"/"기타" option.
+- While intent is still ambiguous, return **only** the question with an **empty `artifacts` array**. Do **not** write `requirements.md` yet.
+- Before each turn, read the prior questions and the user's answers from the supplied `workflow.questionSet` and `history`. Never repeat a resolved point; always build on previous answers.
+- **Stop and produce the document** — return `requirements.md` as an artifact with an **empty `questions` array** — when either (a) intent, scope, and key requirements are clear enough to write a faithful spec, or (b) the supplied context field `finalize` is `true` (the user asked to finish now; do your best from the conversation so far).
+
 ## Prerequisites
 - Workspace Detection must be complete
 - Reverse Engineering must be complete (if brownfield)

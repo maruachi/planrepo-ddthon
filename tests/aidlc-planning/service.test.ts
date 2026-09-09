@@ -93,6 +93,23 @@ describe('PlanningService persistence and workflow', () => {
     } finally { t.close(); }
   });
 
+  it('finalizes requirements grilling into a document even with an unanswered question', async () => {
+    const t = setup();
+    try {
+      t.runner.respond = async () => ({ ok: true, data: { artifacts: [], questions: [{ id: 'goal', prompt: '목표는?', options: ['A', 'B'] }], summary: '확인 필요' } });
+      await t.generate();
+      const pending = t.view(); expect(pending.status).toBe('awaiting_answers');
+      expect(t.runner.contexts[0]?.finalize).toBe(false);
+      t.runner.respond = async context => ({ ok: true, data: output(context.stage) });
+      const run = unwrap(t.planning.advance(t.sr.id, 'generate', AUTHOR, pending.revision, undefined, true));
+      await t.planning.waitForIdle();
+      expect(unwrap(t.planning.getRun(t.sr.id, run.id)).status).toBe('succeeded');
+      expect(t.runner.contexts.at(-1)?.finalize).toBe(true);
+      expect(t.view()).toMatchObject({ status: 'awaiting_approval' });
+      expect(t.view().questionSet).toBeUndefined();
+    } finally { t.close(); }
+  });
+
   it('rejects next if the approved input is edited while building its execution context', async () => {
     const t = setup();
     try {

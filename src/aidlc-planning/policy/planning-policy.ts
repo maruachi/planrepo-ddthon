@@ -11,10 +11,14 @@ function unresolvedQuestions(state: WorkflowState): boolean {
 }
 
 export class PlanningPolicy {
-  evaluate(state: WorkflowState, action: PlanningAction): Result<ActionEvaluation> {
+  evaluate(state: WorkflowState, action: PlanningAction, finalize = false): Result<ActionEvaluation> {
     return result(() => {
-      if (!PLANNING_STAGES[state.stageIndex] || state.status === 'running' || state.status === 'complete' || unresolvedQuestions(state)) {
+      // finalize (요구사항 grilling 즉시 마무리) 는 미응답 질문 가드를 우회한다.
+      if (!PLANNING_STAGES[state.stageIndex] || state.status === 'running' || state.status === 'complete' || (!finalize && unresolvedQuestions(state))) {
         fail('PLANNING_ACTION_BLOCKED', '현재 상태에서는 계획을 실행할 수 없습니다. 실행 상태와 질문 응답을 확인해 주세요.');
+      }
+      if (finalize && (action !== 'generate' || PLANNING_STAGES[state.stageIndex]!.id !== 'requirements-analysis')) {
+        fail('PLANNING_ACTION_BLOCKED', '요구사항 분석 단계의 생성에서만 즉시 마무리할 수 있습니다.');
       }
       let stageIndex = state.stageIndex;
       if (action === 'next') {
@@ -22,7 +26,8 @@ export class PlanningPolicy {
         if (stageIndex === PLANNING_STAGES.length - 1) fail('PLANNING_ACTION_BLOCKED', '마지막 단계입니다. 계획 완료를 선택해 주세요.');
         stageIndex += 1;
       } else if (action === 'generate') {
-        if (state.status !== 'idle' && state.status !== 'failed') fail('PLANNING_ACTION_BLOCKED', '현재 상태에서는 최초 생성 또는 실패 재시도만 할 수 있습니다.');
+        const allowed = finalize ? ['idle', 'failed', 'awaiting_answers'] : ['idle', 'failed'];
+        if (!allowed.includes(state.status)) fail('PLANNING_ACTION_BLOCKED', '현재 상태에서는 최초 생성 또는 실패 재시도만 할 수 있습니다.');
       } else if (action === 'revise') {
         if (!['awaiting_approval', 'approved', 'changes_requested'].includes(state.status)) fail('PLANNING_ACTION_BLOCKED', '검토 가능한 단계에서만 재생성할 수 있습니다.');
       } else {

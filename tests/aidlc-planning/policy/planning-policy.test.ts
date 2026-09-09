@@ -25,6 +25,14 @@ describe('PlanningPolicy', () => {
     expect(policy.evaluate(state({ stageIndex: 8, status: 'approved' }), 'next').ok).toBe(false);
     expect(policy.evaluate(state({ status: 'idle', questionSet: { id: 'q', runId: 'r', stage: 'requirements-analysis', questions: [{ id: 'a', prompt: '?', options: [] }], answers: { a: 'yes' } } }), 'generate').ok).toBe(true);
   });
+  it('finalize bypasses unresolved questions for requirements-analysis generate only', () => {
+    const pending = state({ status: 'awaiting_answers', questionSet: { id: 'q', runId: 'r', stage: 'requirements-analysis', questions: [{ id: 'a', prompt: '?', options: [] }] } });
+    expect(policy.evaluate(pending, 'generate').ok).toBe(false);
+    expect(unwrap(policy.evaluate(pending, 'generate', true))).toMatchObject({ action: 'generate', stageIndex: 0, stage: 'requirements-analysis' });
+    expect(policy.evaluate(pending, 'revise', true).ok).toBe(false);
+    expect(policy.evaluate(state({ stageIndex: 1, status: 'awaiting_answers' }), 'generate', true).ok).toBe(false);
+    expect(policy.evaluate(state({ status: 'running' }), 'generate', true).ok).toBe(false);
+  });
   it('requires a nonempty outcome and never carries approval into new results', () => {
     const running = state({ status: 'running', decision: { id: 'd', stage: 'requirements-analysis', runId: 'old', kind: 'approve', comment: '', targets: [], createdAt: '' } });
     expect(policy.evaluateOutcome(running, { artifacts: [], questions: [], summary: '' }).ok).toBe(false);

@@ -38,6 +38,13 @@ describe('PlanningContextBuilder', () => {
     expect(snapshot.workflow.questionSet?.answers?.['1']).toBe('my answer');
     expect(calls.filter(q => q.kind === 'event')).toHaveLength(2);
   });
+  it('propagates the finalize signal into the snapshot and defaults it off', () => {
+    const workflow = initialWorkflow('s');
+    const build = (finalize?: boolean) => unwrap(new PlanningContextBuilder(fixture().store, root).build('s', 'r', { stage: 'requirements-analysis', workflow, finalize }));
+    expect(build(true).finalize).toBe(true);
+    expect(build(false).finalize).toBe(false);
+    expect(build().finalize).toBe(false);
+  });
   it('fails oversized context and storage errors without returning partial data', () => {
     const spec = { stage: 'requirements-analysis' as const, workflow: initialWorkflow('s') };
     expect(new PlanningContextBuilder(fixture(true).store, root).build('s', 'r', spec)).toMatchObject({ ok: false, error: { code: 'CONTEXT_TOO_LARGE' } });

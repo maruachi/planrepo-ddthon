@@ -4,6 +4,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { WorkspaceShell } from './WorkspaceShell.js';
 import { BoardPage } from '../sr-document-foundation/ui/BoardPage.js';
 import { SRDetailPage } from '../sr-document-foundation/ui/SRDetailPage.js';
+import { PlanReviewPage } from '../aidlc-planning/ui/PlanReviewPage.js';
 import './styles.css';
-const router = createBrowserRouter([{ element: <WorkspaceShell />, children: [{ path: '/', element: <BoardPage /> }, { path: '/srs/:srId', element: <SRDetailPage /> }, { path: '/srs/:srId/documents/:documentId/versions/:versionId', element: <SRDetailPage /> }, { path: '*', element: <p>화면을 찾을 수 없습니다. <a href="/">보드로 이동</a></p> }] }]);
+const router = createBrowserRouter([{ element: <WorkspaceShell />, children: [{ path: '/', element: <BoardPage /> }, { path: '/plan-review', element: <PlanReviewPage /> }, { path: '/srs/:srId', element: <SRDetailPage /> }, { path: '/srs/:srId/documents/:documentId/versions/:versionId', element: <SRDetailPage /> }, { path: '*', element: <p>화면을 찾을 수 없습니다. <a href="/">보드로 이동</a></p> }] }]);
 createRoot(document.getElementById('root')!).render(<React.StrictMode><RouterProvider router={router} /></React.StrictMode>);

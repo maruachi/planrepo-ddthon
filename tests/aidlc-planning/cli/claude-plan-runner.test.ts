@@ -8,7 +8,7 @@ const executable = fileURLToPath(new URL('./fake-claude.mjs', import.meta.url));
 const context = (title = 'success'): ContextSnapshot => ({
   sr: { id: 'sr', title, description: '요구 사항', column: 'sr_list', createdAt: '', actor: { source: 'user' } }, runId: 'run', stage: 'requirements-analysis',
   workflow: { srId: 'sr', revision: 0, stageIndex: 0, column: 'sr_list', status: 'running', inceptionCycle: 0, constructionCycle: 0, reviewTargets: [] },
-  documents: [], history: [], rules: 'Generate requirements.', scope: 'planning-only',
+  documents: [], history: [], rules: 'Generate requirements.', scope: 'planning-only', finalize: false,
 });
 const valid = { artifacts: [{ logicalKey: 'plan', title: 'Plan', body: 'Details' }], questions: [], summary: 'Ready' };
 beforeAll(async () => { await chmod(executable, 0o700); });

@@ -77,6 +77,7 @@ test('planning HTTP rejects malformed JSON, invalid revisions, unknown fields, a
     const srId = await t.createSR(); const prefix = `/api/srs/${srId}/planning`;
     for (const revision of [-1, 0.5, '0', null]) expect((await t.post(`${prefix}/advance`, { action: 'generate', revision })).status).toBe(400);
     expect((await t.post(`${prefix}/advance`, { action: 'generate', revision: 0, command: 'shell' })).status).toBe(400);
+    for (const finalize of ['true', 1, null]) expect((await t.post(`${prefix}/advance`, { action: 'generate', revision: 0, finalize })).status).toBe(400);
     for (const kind of [['approve'], { toString: 'approve' }, null, 'unknown']) expect((await t.post(`${prefix}/decisions`, { kind, comment: '', targets: [], revision: 0 })).status).toBe(400);
     const malformed = await fetch(t.base + prefix + '/advance', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Operation-Id': randomUUID() }, body: '{bad' });
     expect(malformed.status).toBe(400); expect((await malformed.json()).error.code).toBe('VALIDATION_ERROR');

@@ -12,4 +12,143 @@
 .planning-panel li { overflow-wrap: anywhere; margin-block: 5px; }
 .planning-summary { white-space: pre-wrap; overflow-wrap: anywhere; }
 .planning-panel button:disabled { opacity: .55; cursor: not-allowed; }
+/* 모달을 닫아둔 동안 패널에 남는 "다시 열기" 안내 카드 */
+.planning-grill-reopen { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; background: #f5f6fb; border: 1px solid #e4e7f3; border-radius: 9px; padding: 14px 16px; }
+.planning-grill-reopen p { margin: 0; font-weight: 400; font-size: 13px; color: #66708a; flex: 1; min-width: 180px; }
+.planning-grill-reopen button { flex-shrink: 0; }
+
+/* grill-me: 한 번에 하나씩 물어보는 질문 필드셋 (모달 안에서 사용) */
+.planning-question.grill { min-width: 0; }
+.planning-panel .grill-option { display: flex; flex-direction: row; align-items: flex-start; gap: 11px; cursor: pointer; font-weight: 400; }
+
+/* grill-me 모달: 질문을 한 번에 하나씩 진행 */
+.grill-modal { max-width: 600px; padding: 26px 28px 24px; animation: grill-in .22s cubic-bezier(.2, .7, .3, 1); }
+@keyframes grill-in { from { opacity: 0; transform: translateY(10px) scale(.985); } }
+.grill-modal::backdrop { background: #1c294161; backdrop-filter: blur(3px); }
+
+.grill-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.grill-head .eyebrow { color: var(--accent); margin-bottom: 6px; }
+.grill-head h2 { margin: 0; font-size: 20px; letter-spacing: -.4px; }
+.grill-total { color: #aab2c4; font-weight: 500; font-size: 15px; margin-left: 2px; }
+.grill-close { border-color: transparent; background: transparent; color: #9aa2b4; font-size: 15px; line-height: 1; padding: 6px 9px; border-radius: 6px; }
+.grill-close:hover { background: #f0f2f8; color: #5b6478; }
+
+/* 진행 표시: 질문 개수만큼의 세그먼트 (답변한 것/현재 위치 구분) */
+.grill-progress { display: flex; gap: 5px; margin: 18px 0 6px; }
+.grill-dot { flex: 1; height: 5px; border-radius: 3px; background: var(--line); transition: background .18s, transform .18s; }
+.grill-dot.done { background: #aeb9ea; }
+.grill-dot.current { background: var(--accent); transform: scaleY(1.5); }
+
+.grill-lead { font-size: 12.5px; color: var(--muted); margin: 10px 0 18px; line-height: 1.7; }
+
+.grill-modal .planning-question.grill { border: none; padding: 0; margin: 0; }
+.grill-modal .grill legend { font-size: 15px; font-weight: 650; line-height: 1.6; padding: 0; margin-bottom: 14px; color: var(--ink); }
+
+/* 보기 카드: 선택 시 accent 로 강조 */
+.grill-modal .grill-option { align-items: flex-start; gap: 11px; padding: 12px 14px; border: 1.5px solid var(--line); border-radius: 9px; margin-bottom: 9px; transition: border-color .12s, background .12s, box-shadow .12s; }
+.grill-modal .grill-option:hover { border-color: #b3bce4; background: #fafbff; }
+.grill-modal .grill-option:has(input:checked) { border-color: var(--accent); background: #f2f4fd; box-shadow: inset 0 0 0 1px var(--accent); }
+.grill-modal .grill-option input { accent-color: var(--accent); width: 16px; height: 16px; margin-top: 2px; flex-shrink: 0; }
+.grill-modal .grill-option span { font-size: 13px; line-height: 1.6; color: #48526b; }
+.grill-modal .grill textarea { width: 100%; min-height: 88px; margin-top: 8px; }
+
+/* grill me: 질문·선택지를 자유롭게 되물으며 끝까지 이해하는 터미널형 대화 화면 (프론트 전용 예시 데이터) */
+.grill-terminal { margin-top: 14px; border: 1px solid #222a3d; border-radius: 10px; overflow: hidden; background: #0f1421; box-shadow: 0 10px 34px #0a0f2033; animation: grill-in .16s ease;
+  font-family: "Cascadia Code", "CaskaydiaCove Nerd Font", "JetBrains Mono", "Fira Code", "Source Code Pro", "IBM Plex Mono", ui-monospace, "SFMono-Regular", "D2Coding", "Noto Sans Mono CJK KR", Consolas, monospace;
+  font-feature-settings: "calt" 1, "liga" 1, "ss01" 1; font-variant-ligatures: contextual; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; }
+.grill-term-bar { display: flex; align-items: center; gap: 7px; padding: 9px 13px; background: #171e2e; border-bottom: 1px solid #232b3f; }
+.gt-dot { width: 10px; height: 10px; border-radius: 50%; background: #39415a; }
+.gt-dot:nth-child(1) { background: #e26d5c; } .gt-dot:nth-child(2) { background: #e0b64f; } .gt-dot:nth-child(3) { background: #6fbf73; }
+.gt-title { margin-left: 8px; font-size: 11px; color: #7c88a6; letter-spacing: .3px; overflow-wrap: anywhere; }
+.grill-term-log { max-height: 262px; overflow-y: auto; padding: 15px 16px; display: flex; flex-direction: column; gap: 10px; font-size: 13px; line-height: 1.72; letter-spacing: .1px; }
+.grill-term-log::-webkit-scrollbar { width: 9px; } .grill-term-log::-webkit-scrollbar-thumb { background: #2a3247; border-radius: 5px; }
+.gt-line { display: flex; gap: 9px; }
+.gt-mark { flex-shrink: 0; width: 12px; text-align: center; user-select: none; }
+.gt-text { white-space: pre-wrap; overflow-wrap: anywhere; }
+.gt-ai .gt-mark { color: #6f8fe0; } .gt-ai .gt-text { color: #cfd8ee; }
+.gt-you .gt-mark { color: #6fbf73; } .gt-you .gt-text { color: #eef3ff; font-weight: 500; }
+.gt-sys .gt-mark { color: #566079; } .gt-sys .gt-text { color: #8892ab; font-style: italic; }
+.gt-typing { color: #6f8fe0; letter-spacing: 3px; animation: gt-blink 1s steps(1) infinite; }
+@keyframes gt-blink { 50% { opacity: .3; } }
+.grill-term-input { display: flex; align-items: center; gap: 8px; padding: 10px 13px; background: #131a29; border-top: 1px solid #232b3f; }
+.gt-prompt { color: #6fbf73; font-size: 13px; flex-shrink: 0; }
+.grill-term-input input { flex: 1; min-width: 0; border: none; background: transparent; color: #eef3ff; font-family: inherit; font-feature-settings: inherit; font-size: 13px; letter-spacing: .1px; padding: 6px 2px; }
+.grill-term-input input:focus { outline: none; }
+.grill-term-input input::placeholder { color: #5c667e; }
+.gt-send { flex-shrink: 0; background: #2a3550; border: 1px solid #384467; color: #cdd8f2; font-size: 11px; padding: 6px 12px; border-radius: 6px; }
+.gt-send:hover { background: #334066; }
+.gt-send:disabled { opacity: .45; cursor: not-allowed; }
+
+/* 하단 네비게이션 (이전 / 진행 개수 / grill me · 다음·제출) */
+.grill-nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 22px; }
+.grill-nav .quiet { padding: 8px 12px; color: #6b7488; }
+.grill-nav .primary { padding: 9px 18px; }
+.grill-nav-right { display: flex; align-items: center; gap: 9px; }
+.grill-me { padding: 8px 13px; border-color: #cdd4ec; background: #f5f6fd; color: var(--accent); font-weight: 600; }
+.grill-me:hover { background: #eceffb; border-color: var(--accent); }
+.grill-me[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+.grill-count { font-size: 12px; color: #98a1b3; font-variant-numeric: tabular-nums; }
+
+.grill-finalize { margin-top: 16px; text-align: center; border-top: 1px solid #eef0f5; padding-top: 14px; }
+.grill-finalize button { font-size: 12px; color: #8b93a6; }
+.grill-finalize button:hover { color: var(--accent); background: transparent; text-decoration: underline; }
+
 @media (max-width: 600px) { .planning-panel { padding: 16px; } .planning-actions button { width: 100%; } }
+
+/* Plan 리뷰 탭: 확정된 Inception 결정을 한 건씩 승인/수정요청하는 리뷰 (프론트 전용 예시 데이터) */
+.plan-review-page .page-heading { align-items: flex-start; margin-bottom: 20px; }
+
+/* Plan 리뷰 목록: 리뷰 대기 중인 Inception SR 을 카드 리스트로 나열 (프론트 전용 예시 데이터) */
+.pr-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 14px; }
+.pr-item { display: flex; align-items: center; gap: 24px; background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 20px 24px; }
+.pr-item-body { flex: 1; min-width: 0; }
+.pr-item-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+.pr-sr-id { font-size: 11px; font-weight: 700; letter-spacing: .5px; color: #fff; background: var(--accent); border-radius: 6px; padding: 4px 9px; }
+.pr-ai-badge { font-size: 10px; font-weight: 700; letter-spacing: .4px; color: var(--accent); background: #e8ebf9; border-radius: 6px; padding: 4px 9px; }
+.pr-item-title { font-size: 16px; font-weight: 700; color: #2c3752; margin: 0 0 7px; line-height: 1.45; overflow-wrap: anywhere; }
+.pr-item-summary { margin: 0 0 14px; font-size: 12.5px; line-height: 1.7; color: #5b6580; overflow-wrap: anywhere; }
+.pr-line { display: block; }
+.pr-line + .pr-line { margin-top: 4px; }
+.pr-item-side { flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+.pr-item-side .quiet { font-size: 11px; padding: 4px 6px; }
+.pr-item-btn { padding: 11px 22px; font-size: 13px; }
+
+.pr-gauge { height: 7px; background: #eef0f5; border-radius: 5px; overflow: hidden; max-width: 420px; }
+.pr-gauge span { display: block; height: 100%; background: var(--accent); border-radius: 5px; transition: width .2s ease; }
+.pr-progress-text { font-size: 12px; color: #7f899c; margin: 9px 0 0; font-variant-numeric: tabular-nums; }
+
+/* 결정 검토 모달 (grill-modal 스타일 재사용) */
+.pr-modal { max-width: 580px; }
+.pr-modal-body { margin: 18px 0 4px; }
+.pr-question { font-size: 12.5px; color: #8590a4; margin: 0 0 2px; line-height: 1.6; overflow-wrap: anywhere; }
+.pr-choice { display: flex; gap: 9px; align-items: baseline; font-size: 15px; font-weight: 650; color: #2c3752; margin: 12px 0 8px; line-height: 1.55; overflow-wrap: anywhere; }
+.pr-choice-label { flex-shrink: 0; font-size: 10px; font-weight: 700; color: #fff; background: var(--accent); border-radius: 5px; padding: 3px 8px; letter-spacing: .5px; }
+.pr-rationale { font-size: 13px; color: #5c6782; line-height: 1.75; margin: 0; overflow-wrap: anywhere; }
+.pr-caution { font-size: 12px; color: #9a6a1c; background: #fdf6e7; border: 1px solid #f0e2c4; border-radius: 8px; padding: 11px 13px; margin: 13px 0 0; line-height: 1.65; overflow-wrap: anywhere; }
+.pr-actions { display: flex; gap: 9px; margin-top: 16px; }
+.pr-vote { flex: 1; font-size: 13px; font-weight: 600; padding: 11px; border-radius: 8px; border: 1.5px solid #d8dde8; background: #fff; color: #5a6480; }
+.pr-vote:hover { border-color: #b9c1d8; background: #f8f9fc; }
+.pr-vote.on { border-color: #5aa07f; background: #eef6f1; color: #3f8168; }
+.pr-vote-changes.on { border-color: #d6a63f; background: #fbf3e2; color: #a9761d; }
+.pr-comment { width: 100%; min-height: 72px; margin-top: 12px; font-size: 12.5px; box-sizing: border-box; }
+
+.grill-dot.pr-approve { background: #6fae90; }
+.grill-dot.pr-changes { background: #d9a441; }
+.pr-badge-changes { background: #fbf1de; color: #a9761d; font-weight: 600; }
+
+/* 제출 결과 */
+.pr-result { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; margin-bottom: 16px; }
+.pr-result p { margin: 0; }
+.pr-result strong { font-size: 14px; color: #3d7a5e; }
+.pr-result.pr-result-changes { background: #fdf6e7; border-color: #f0e2c4; color: #8a6a2e; }
+.pr-result.pr-result-changes strong { color: #a9761d; }
+.pr-result button { margin-top: 8px; }
+.pr-outcome-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; max-width: 760px; }
+.pr-outcome-list li { display: flex; align-items: center; gap: 11px; flex-wrap: wrap; background: #fff; border: 1px solid #e6e9f0; border-left: 3px solid #dfe4ee; border-radius: 9px; padding: 13px 16px; }
+.pr-outcome-list li.pr-approve { border-left-color: #6fae90; }
+.pr-outcome-list li.pr-changes { border-left-color: #d9a441; }
+.pr-num { font-size: 12px; font-weight: 700; color: #aeb6ca; font-variant-numeric: tabular-nums; letter-spacing: .5px; flex-shrink: 0; }
+.pr-outcome-topic { font-size: 13.5px; font-weight: 600; color: #38425c; flex: 1; min-width: 0; }
+.pr-outcome-comment { flex-basis: 100%; margin: 4px 0 0; font-size: 12px; color: #8a6a2e; background: #fbf6ec; border-radius: 7px; padding: 9px 11px; line-height: 1.6; }
+
+@media (max-width: 600px) { .pr-item { flex-direction: column; align-items: stretch; } .pr-item-side { flex-direction: row; align-items: center; justify-content: space-between; } .pr-item-btn { flex: 1; } }

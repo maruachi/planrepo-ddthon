@@ -23,7 +23,7 @@ it('migrates populated v2 preserving run context, original input, generated vers
     const input = documentFixture(sr.id, '최초 입력 버전\r\n'); unwrap(store.commit(input));
     const runId = randomUUID();
     const workflow: WorkflowState = { ...initialWorkflow(sr.id), column: 'requirements_analysis', status: 'running', revision: 1, latestRunId: runId };
-    const run: PlanningRun = { id: runId, srId: sr.id, stage: 'requirements-analysis', status: 'running', startedAt: sr.createdAt, inputRefs: input.pointers, outputRefs: [], context: { sr, runId, stage: 'requirements-analysis', workflow, documents: [{ ...unwrap(store.read({ kind: 'version', target: input.pointers[0]! })), logicalKey: input.documents[0]!.logicalKey }], history: [], rules: '기존 실행 규칙\r\n', scope: 'planning-only' } };
+    const run: PlanningRun = { id: runId, srId: sr.id, stage: 'requirements-analysis', status: 'running', startedAt: sr.createdAt, inputRefs: input.pointers, outputRefs: [], context: { sr, runId, stage: 'requirements-analysis', workflow, documents: [{ ...unwrap(store.read({ kind: 'version', target: input.pointers[0]! })), logicalKey: input.documents[0]!.logicalKey }], history: [], rules: '기존 실행 규칙\r\n', scope: 'planning-only', finalize: false } };
     const start = emptyChanges(); start.planning = { expectedRevision: null, state: workflow, run }; unwrap(store.commit(start));
     const generated = documentFixture(sr.id, '생성 결과 보존\r\n'); generated.versions[0]!.runId = runId;
     const finished: PlanningRun = { ...run, status: 'succeeded', outputRefs: generated.pointers, completedAt: sr.createdAt, summary: '완료' };
