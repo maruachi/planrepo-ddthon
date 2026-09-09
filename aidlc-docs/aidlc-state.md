@@ -121,3 +121,11 @@
 후속 요청에 따라 업로드용 1분 압축본도 만들었습니다. `aidlc-docs/examples/table-order/table-order-demo-60s.mp4`는 클릭·입력·화면 전환 25개를 이어 붙인 정확히 60초 영상입니다. 하단 자막과 음성은 없습니다. 1,440프레임과 전체 디코딩을 검증했고 최종 장면 25개를 육안으로 확인했습니다. 원본과 앞선 편집본은 보존했습니다.
 
 결과를 더 보여달라는 후속 요청을 반영했습니다. 최신 영상은 `aidlc-docs/examples/table-order/table-order-demo-60s-results.mp4`입니다. 전체 60초 중 문서·흐름·여섯 화면·규칙·승인 결과를 49초 보여줍니다. 여섯 화면을 약 1.33배 확대했으며 하단 자막은 없습니다. 길이·전체 디코딩·최종 17개 장면 검증을 마쳤습니다. 갱신 시각은 2026-09-09T08:03:54Z입니다.
+
+## README 영상 재생과 commit 시간 정리 (2026-09-09)
+
+- [x] 사용자 요청에 따라 main의 17시 이후 commit 5e5aa4b를 a312e57로 바꿨습니다. author·committer 시각은 한국 시간 16:59:40이며 파일 트리는 같습니다. 원본은 로컬 refs/backup/before-readme-time-rewrite-20260909에 보존했습니다.
+- [x] 루트 README.md에 결과 중심 60초 영상의 미리보기와 재생 링크를 추가했습니다. 문서 commit의 author·committer 시각은 한국 시간 16:59:50입니다.
+- [x] --force-with-lease로 origin/main에 반영하고 GitHub README 미리보기 클릭 후 실제 재생을 확인했습니다. 60초·1440x936·readyState 4·paused false·error null이며 원격 파일과 로컬 파일의 SHA-256이 같습니다.
+
+재생 링크는 공개 저장소의 고정 commit 자산을 jsDelivr로 제공합니다. 감사 기록은 실제 시각을 유지합니다. 제품 코드 변경이 없어 TDD·앱 테스트·빌드는 생략했으며 비활성 확장 세 개는 N/A입니다. 이 기록은 기존 제품 개발 단계의 완료 여부를 변경하지 않습니다.
