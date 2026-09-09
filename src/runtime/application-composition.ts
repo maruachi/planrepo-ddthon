@@ -350,7 +350,11 @@ export function createApplicationComposition(dependencies: {
   });
   const artifacts = createArtifactService(dependencies.persistence, dependencies.projectRules);
   const questions = createQuestionDecisionService(dependencies.persistence);
-  const reviewPolicies = createReviewPolicyService(dependencies.persistence);
+  const reviewPolicies = createReviewPolicyService(dependencies.persistence, {
+    ...(dependencies.documentReviewMode === undefined
+      ? {}
+      : { documentReviewMode: dependencies.documentReviewMode }),
+  });
   const reviews = createReviewWorkflowService(dependencies.persistence, {
     ...(dependencies.documentReviewMode === undefined
       ? {}

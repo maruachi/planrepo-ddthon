@@ -12,6 +12,7 @@ const developmentOrigin = `http://${runtime.server.host}:${runtime.server.devPor
 const devRoots = [
   resolve(projectRoot, 'src/web'),
   resolve(projectRoot, 'src/contracts'),
+  resolve(projectRoot, 'src/domain'),
   resolve(projectRoot, 'node_modules'),
 ].map((path) => realpathSync(path));
 

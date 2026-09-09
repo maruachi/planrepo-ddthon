@@ -33,10 +33,11 @@ function stageMessage(checkpoint: OnboardingCheckpoint | undefined): string {
   return '업무 등록부터 진행합니다.';
 }
 
-export function SRRegistrationForm({ actorId, projectId, owners, onCancel, onSaved }: {
+export function SRRegistrationForm({ actorId, projectId, owners, onBusyChange, onCancel, onSaved }: {
   readonly actorId: string;
   readonly projectId: string;
   readonly owners: readonly { readonly actorId: string; readonly displayName: string }[];
+  onBusyChange(busy: boolean): void;
   onCancel(): void;
   onSaved(srId: string): void;
 }) {
@@ -48,6 +49,8 @@ export function SRRegistrationForm({ actorId, projectId, owners, onCancel, onSav
   const descriptionEdited = useRef(false);
   const mounted = useRef(true);
   const executing = useRef(false);
+  const onBusyChangeRef = useRef(onBusyChange);
+  onBusyChangeRef.current = onBusyChange;
   const assignmentAttempt = useRef<{ readonly input: ReviewerAssignment; readonly expectedRevision: number } | undefined>(undefined);
   const [snapshot, setSnapshot] = useState(draft.snapshot());
   const [checkpoint, setCheckpoint] = useState<OnboardingCheckpoint>();
@@ -57,8 +60,16 @@ export function SRRegistrationForm({ actorId, projectId, owners, onCancel, onSav
 
   useEffect(() => {
     mounted.current = true;
-    return () => { mounted.current = false; };
+    return () => {
+      mounted.current = false;
+      onBusyChangeRef.current(false);
+    };
   }, []);
+
+  const setBusy = (busy: boolean) => {
+    onBusyChangeRef.current(busy);
+    if (mounted.current) setPending(busy);
+  };
 
   const edit = (patch: Partial<RegistrationInput>) => {
     if (checkpoint !== undefined) return;
@@ -100,7 +111,7 @@ export function SRRegistrationForm({ actorId, projectId, owners, onCancel, onSav
     let sr = checkpoint?.sr;
     let source = checkpoint?.source;
     let artifact = checkpoint?.artifact;
-    setPending(true); setError(undefined); setUncertain(false);
+    setBusy(true); setError(undefined); setUncertain(false);
     try {
       if (frozen.title.trim() === '' || frozen.key.trim() === '') {
         setError('업무를 구분할 수 있도록 제목을 입력해 주세요.');
@@ -189,7 +200,7 @@ export function SRRegistrationForm({ actorId, projectId, owners, onCancel, onSav
       } else setError(caught instanceof Error ? caught.message : '초안 등록을 완료하지 못했습니다.');
     } finally {
       executing.current = false;
-      if (mounted.current) setPending(false);
+      setBusy(false);
     }
   };
 
@@ -197,7 +208,7 @@ export function SRRegistrationForm({ actorId, projectId, owners, onCancel, onSav
     if (executing.current) return;
     executing.current = true;
     const input = draft.snapshot().input;
-    setPending(true); setError(undefined);
+    setBusy(true); setError(undefined);
     try {
       const result = await invoke('M-004', { actorId, projectId, requestId: requestIds.current.import, idempotencyKey: requestIds.current.import }, input.ticketKey);
       if (!mounted.current) return;
@@ -209,21 +220,21 @@ export function SRRegistrationForm({ actorId, projectId, owners, onCancel, onSav
       setError(caught instanceof Error ? caught.message : 'Mock 요청을 가져오지 못했습니다.');
     } finally {
       executing.current = false;
-      if (mounted.current) setPending(false);
+      setBusy(false);
     }
   };
 
   return <section className="form-panel draft-first-form" aria-labelledby="registration-title">
-    <div className="section-heading"><div><p className="eyebrow">초안으로 시작</p><h2 id="registration-title">SR 작성</h2></div>
-      <button type="button" className="text-button" onClick={() => checkpoint?.sr === undefined ? onCancel() : onSaved(checkpoint.sr.scope.srId)}>{checkpoint?.sr === undefined ? '닫기' : '등록된 SR 열기'}</button></div>
-    <p>원하는 일을 적어 주세요. 가지고 있는 문서를 바로 등록하고, 필요할 때 AI의 도움을 받을 수 있습니다.</p>
+    <div className="section-heading"><div><p className="eyebrow">새 요청</p><h2 id="registration-title">초안으로 Plan 시작하기</h2></div>
+      <button type="button" className="text-button" disabled={pending} onClick={() => checkpoint?.sr === undefined ? onCancel() : onSaved(checkpoint.sr.scope.srId)}>{checkpoint?.sr === undefined ? '닫기' : '등록된 SR 열기'}</button></div>
+    <p className="registration-lead">가지고 있는 초안을 붙여 넣어 주세요. 등록한 문서를 읽고 다듬은 뒤 동료에게 검토를 요청합니다.</p>
     <form onSubmit={(event) => { event.preventDefault(); void continueDirect(); }}>
-      <div className="draft-primary">
-        <label>제목<input required data-testid="sr-registration-form-title-input" value={snapshot.input.title} disabled={checkpoint !== undefined} onChange={(event) => editTitle(event.target.value)} placeholder="예: 결제 취소 기능 개선" /></label>
-        <label>가지고 있는 문서<textarea rows={14} value={snapshot.input.draftMarkdown} disabled={checkpoint !== undefined} onChange={(event) => editMarkdown(event.target.value)} placeholder={'결제 취소 요청을 받은 뒤 환불 상태를 확인할 수 있어야 합니다.\n\n완료 기준: 사용자가 처리 결과를 바로 확인할 수 있습니다.'} /><small>등록한 원문을 그대로 Plan 문서로 보관합니다. AI 정리는 선택 사항입니다.</small></label>
-        <label>Markdown 파일 선택<input type="file" accept=".md,.markdown,text/markdown,text/plain" disabled={checkpoint !== undefined} onChange={(event) => { void loadDraftFile(event.target.files?.[0]); }} /><small>파일 내용은 바꾸지 않고 위 초안에 불러옵니다.</small></label>
-        <label>담당자<select value={snapshot.input.ownerId} disabled={checkpoint !== undefined} onChange={(event) => edit({ ownerId: event.target.value, reviewerIds: snapshot.input.reviewerIds.filter((id) => id !== event.target.value) })}>{owners.map((owner) => <option key={owner.actorId} value={owner.actorId}>{owner.displayName}</option>)}</select><small>다른 담당자를 지정하면 초안은 원 설명에 보존되고, 담당자가 상세 화면에서 문서로 정리합니다.</small></label>
-        <fieldset><legend>Plan 검토자</legend><p className="quiet">지금 선택하거나 상세 화면에서 나중에 정할 수 있습니다.</p>{owners.filter((owner) => owner.actorId !== snapshot.input.ownerId).map((owner) => <label className="checkbox-label" key={owner.actorId}><input type="checkbox" checked={snapshot.input.reviewerIds.includes(owner.actorId)} disabled={checkpoint !== undefined} onChange={(event) => edit({ reviewerIds: event.target.checked ? [...snapshot.input.reviewerIds, owner.actorId] : snapshot.input.reviewerIds.filter((id) => id !== owner.actorId) })} />{owner.displayName}</label>)}</fieldset>
+      <div className="draft-primary registration-document-fields">
+        <label>제목 <span className="required-label">필수</span><input required data-testid="sr-registration-form-title-input" value={snapshot.input.title} disabled={checkpoint !== undefined} onChange={(event) => editTitle(event.target.value)} placeholder="어떤 기능을 계획하고 있나요?" /></label>
+        <label>초안 문서<textarea rows={10} data-testid="sr-registration-document-input" value={snapshot.input.draftMarkdown} disabled={checkpoint !== undefined} onChange={(event) => editMarkdown(event.target.value)} placeholder={'결제 취소 요청을 받은 뒤 환불 상태를 확인할 수 있어야 합니다.\n\n완료 기준: 사용자가 처리 결과를 바로 확인할 수 있습니다.'} /><small>입력한 원문을 그대로 보관합니다. 등록 후 질문·보완안·시각화를 선택해 사용할 수 있습니다.</small></label>
+        <label className="registration-attachment">문서 파일 불러오기 <small>선택 · Markdown 또는 텍스트</small><input type="file" accept=".md,.markdown,text/markdown,text/plain" disabled={checkpoint !== undefined} onChange={(event) => { void loadDraftFile(event.target.files?.[0]); }} /><small>파일 내용은 바꾸지 않고 위 초안에 불러옵니다.</small></label>
+        </div><div className="registration-people"><label>문서를 다듬을 담당자<select value={snapshot.input.ownerId} disabled={checkpoint !== undefined} onChange={(event) => edit({ ownerId: event.target.value, reviewerIds: snapshot.input.reviewerIds.filter((id) => id !== event.target.value) })}>{owners.map((owner) => <option key={owner.actorId} value={owner.actorId}>{owner.displayName}</option>)}</select><small>다른 담당자를 지정하면 초안은 원 설명에 보존되고, 담당자가 상세 화면에서 문서로 정리합니다.</small></label>
+        <fieldset className="registration-reviewers"><legend>함께 검토할 동료</legend><p className="quiet">지금 선택하거나 상세 화면에서 나중에 정할 수 있습니다.</p>{owners.filter((owner) => owner.actorId !== snapshot.input.ownerId).map((owner) => <label className="checkbox-label" key={owner.actorId}><input type="checkbox" checked={snapshot.input.reviewerIds.includes(owner.actorId)} disabled={checkpoint !== undefined} onChange={(event) => edit({ reviewerIds: event.target.checked ? [...snapshot.input.reviewerIds, owner.actorId] : snapshot.input.reviewerIds.filter((id) => id !== owner.actorId) })} />{owner.displayName}</label>)}</fieldset>
       </div>
       <details className="advanced-fields"><summary>세부 등록 정보</summary><div>
         <label>SR 키<input value={snapshot.input.key} disabled={checkpoint !== undefined} onChange={(event) => { keyEdited.current = true; edit({ key: event.target.value }); }} /><small>제목에서 자동 제안합니다. 중복이면 바꿔 주세요.</small></label>
@@ -234,7 +245,7 @@ export function SRRegistrationForm({ actorId, projectId, owners, onCancel, onSav
       </div></details>
       {checkpoint !== undefined && <div className="onboarding-progress" role="status"><strong>저장 진행 상황</strong><ol><li>업무 등록 완료</li><li>{checkpoint.source === undefined ? '원문 저장 대기' : '원문 저장 완료'}</li><li>{checkpoint.artifact === undefined ? 'Plan 문서 저장 대기' : 'Plan 문서 저장 완료'}</li><li>{snapshot.input.reviewerIds.length === 0 ? '검토자는 나중에 지정' : '검토자 지정 대기'}</li></ol><p>{stageMessage(checkpoint)}</p></div>}
       {error !== undefined && <div className="command-feedback error" role="alert"><strong>{error}</strong></div>}
-      <button className="primary-button" type="submit" disabled={pending}>{pending ? '등록 중…' : uncertain ? '같은 요청 확인' : checkpoint !== undefined ? '완료되지 않은 단계 다시 시도' : 'SR 등록하고 Plan 시작'}</button>
+      <div className="registration-footer"><p>AI 없이도 문서를 작성하고 검토받을 수 있습니다.</p><button className="primary-button" type="submit" disabled={pending}>{pending ? '등록 중…' : uncertain ? '같은 요청 확인' : checkpoint !== undefined ? '완료되지 않은 단계 다시 시도' : '문서 등록하고 시작'}</button></div>
     </form>
     <details className="advanced-fields"><summary>Mock 키 가져오기</summary><div><label>Mock 티켓 키<input value={snapshot.input.ticketKey} disabled={checkpoint !== undefined} onChange={(event) => edit({ ticketKey: event.target.value })} placeholder="PAY-102" /></label><button type="button" disabled={pending || snapshot.input.ticketKey.trim() === ''} onClick={() => { void importMock(); }}>가져오기</button></div></details>
     {snapshot.dirty && checkpoint === undefined && <p className="dirty-indicator">저장하지 않은 입력이 있습니다.</p>}

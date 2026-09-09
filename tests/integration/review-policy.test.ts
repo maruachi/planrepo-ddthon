@@ -308,6 +308,75 @@ describe('review policy and assignment', () => {
     }
   });
 
+  it('문서 검토 모드에서 M030 배정은 새 검토본과 검토 요청을 자동 생성하지 않습니다', async () => {
+    const app = await createTestApp({ fixture: 'DEMO-4', testRunId: randomUUID(), documentReviewMode: true });
+    try {
+      const srId = srIdForKey(app.db, 'PAY-102');
+      const before = app.db.prepare(
+        `SELECT
+           (SELECT count(*) FROM review_bundles WHERE project_id=? AND sr_id=? AND gate='G1') AS bundles,
+           (SELECT count(*) FROM review_requests WHERE project_id=? AND sr_id=? AND gate='G1') AS requests`,
+      ).get(projectId, srId, projectId, srId) as { readonly bundles: number; readonly requests: number };
+      const priorState = app.db.prepare(
+        `SELECT review_epoch,assignment_id,assignment_version
+           FROM review_gate_states WHERE project_id=? AND sr_id=? AND gate='G1'`,
+      ).get(projectId, srId) as { readonly review_epoch: number; readonly assignment_id: string; readonly assignment_version: number };
+
+      const assigned = await app.invoke('M-030', {
+        actorId: ownerId, projectId, srId,
+        requestId: 'document-mode-assign', idempotencyKey: 'document-mode-assign',
+        guard: gateGuard(app.db, srId, 'G1'),
+      }, {
+        gate: 'G1', reviewerIds: [reviewerId],
+        previousAssignmentRef: {
+          kind: 'review_assignment', projectId, srId,
+          entityId: priorState.assignment_id, version: priorState.assignment_version,
+        },
+        changeReason: '문서 리뷰어를 명시적으로 선택합니다.',
+      });
+      expect(assigned.ok).toBe(true);
+      if (!assigned.ok) return;
+      expect(assigned.value.ready).toBe(true);
+
+      const after = app.db.prepare(
+        `SELECT
+           (SELECT count(*) FROM review_bundles WHERE project_id=? AND sr_id=? AND gate='G1') AS bundles,
+           (SELECT count(*) FROM review_requests WHERE project_id=? AND sr_id=? AND gate='G1') AS requests`,
+      ).get(projectId, srId, projectId, srId) as { readonly bundles: number; readonly requests: number };
+      expect(after).toEqual(before);
+      expect(app.db.prepare(
+        `SELECT count(*) AS n FROM review_requests
+          WHERE project_id=? AND sr_id=? AND gate='G1' AND review_epoch>?`,
+      ).get(projectId, srId, priorState.review_epoch)).toEqual({ n: 0 });
+      const afterState = app.db.prepare(
+        `SELECT revision,review_epoch,needs_new_bundle
+           FROM review_gate_states WHERE project_id=? AND sr_id=? AND gate='G1'`,
+      ).get(projectId, srId) as { readonly revision: number; readonly review_epoch: number; readonly needs_new_bundle: number };
+      expect(afterState.review_epoch).toBeGreaterThan(priorState.review_epoch);
+      expect(afterState.needs_new_bundle).toBe(1);
+
+      const detail = await app.invoke('M-047', { actorId: ownerId, projectId, srId }, {});
+      expect(detail.ok).toBe(true);
+      if (!detail.ok) return;
+      const preparation = detail.value.reviewPreparations.find((item) => item.gate === 'G1');
+      if (preparation?.kind !== 'Ready') throw new Error('명시적 검토 요청 입력이 준비되지 않았습니다.');
+      const requested = await app.invoke('M-020', {
+        actorId: ownerId, projectId, srId,
+        requestId: 'document-mode-review', idempotencyKey: 'document-mode-review',
+        guard: gateGuard(app.db, srId, 'G1'),
+      }, preparation.input);
+      expect(requested.ok).toBe(true);
+      if (requested.ok) expect(requested.value.kind).toBe('BundleAvailable');
+      expect(app.db.prepare(
+        `SELECT
+           (SELECT count(*) FROM review_bundles WHERE project_id=? AND sr_id=? AND gate='G1') AS bundles,
+           (SELECT count(*) FROM review_requests WHERE project_id=? AND sr_id=? AND gate='G1') AS requests`,
+      ).get(projectId, srId, projectId, srId)).toEqual({ bundles: before.bundles + 1, requests: before.requests + 1 });
+    } finally {
+      await app.close();
+    }
+  });
+
   it('후속 활동 저장 실패는 배정·gate·receipt를 모두 rollback합니다', async () => {
     const app = await createTestApp({ fixture: 'DEMO-4', testRunId: randomUUID() });
     try {

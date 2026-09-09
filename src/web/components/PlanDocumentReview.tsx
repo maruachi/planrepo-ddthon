@@ -180,6 +180,23 @@ function documentTitle(artifact: ArtifactView): string {
   return '인프라 설계';
 }
 
+function aiRevisionContext(
+  artifact: ArtifactView,
+  section: { readonly title: string; readonly startOffset: number; readonly endOffset: number },
+  request?: ChangeRequestView,
+): string {
+  const sectionBody = artifact.markdown.slice(section.startOffset, section.endOffset).trim().slice(0, 120_000);
+  return [
+    `현재 문서: ${documentTitle(artifact)} v${artifact.versionRef.version}`,
+    `선택 문단: ${section.title}`,
+    `현재 문단 본문:\n${sectionBody}`,
+    request === undefined ? undefined : `사람이 남긴 수정 요청 원문:\n${request.body}`,
+    '현재 문단의 사실과 문서 구조를 보존하면서 사람이 비교해 선택할 문서 수정안만 제안하세요.',
+    '문서 규칙과 사람이 이미 선택한 내용을 임의로 바꾸지 마세요.',
+    'M024나 승인을 자동으로 실행하지 마세요. 반영과 확인은 사람이 현재 문서를 읽고 별도로 결정합니다.',
+  ].filter((line): line is string => line !== undefined).join('\n\n');
+}
+
 function CommentComposer({ actorId, projectId, detail, artifact, sectionId, reviewContext, onSaved }: {
   readonly actorId: string;
   readonly projectId: string;
@@ -281,13 +298,14 @@ function ChangeRequestComposer({ actorId, projectId, detail, artifact, sectionId
   </form>;
 }
 
-function ChangeRequestCard({ actorId, projectId, detail, artifact, request, actorName, onSaved }: {
+function ChangeRequestCard({ actorId, projectId, detail, artifact, request, actorName, onRequestAi, onSaved }: {
   readonly actorId: string;
   readonly projectId: string;
   readonly detail: SRDetailView;
   readonly artifact: ArtifactView;
   readonly request: ChangeRequestView;
   readonly actorName: (id: string) => string;
+  readonly onRequestAi?: (context: string) => void;
   onSaved(): void;
 }) {
   const [applicationSummary, setApplicationSummary] = useState('');
@@ -357,6 +375,8 @@ function ChangeRequestCard({ actorId, projectId, detail, artifact, request, acto
     <div className="entity-heading"><h4>{sectionTitle(artifact, request.originalSectionId)}</h4><span>{request.status === 'open' ? '수정 중' : request.status === 'awaiting_confirmation' ? '확인 대기' : '해결됨'}</span></div>
     <p>{request.body}</p>
     <p className="quiet">요청자 {actorName(request.requesterId)} · 담당자 {actorName(request.assigneeId)}</p>
+    {request.status !== 'resolved' && detail.sr.ownerId === actorId && onRequestAi !== undefined && currentSection !== undefined &&
+      <button type="button" className="text-button" onClick={() => onRequestAi(aiRevisionContext(artifact, currentSection, request))}>AI로 수정안 받기</button>}
     {historical && <p className="quiet">이 요청은 이전 문서의 문단을 가리킵니다. 현재 문서에 이어진 요청만 여기서 처리할 수 있습니다.</p>}
     {request.events.length > 0 && <details><summary>처리 이력 {request.events.length}건</summary><ul>{request.events.map((event) => <li key={event.eventRef.entityId}>
       {event.kind === 'applied' ? `반영 보고: ${event.applicationSummary}` : event.kind === 'resolved' ? `해결 확인: ${event.verification}` : event.kind === 'further_change' ? `추가 수정: ${event.feedback}` : '새 문서에 요청을 이어갔습니다.'}
@@ -413,13 +433,14 @@ function ChangeRequestCard({ actorId, projectId, detail, artifact, request, acto
   </article>;
 }
 
-export function PlanDocumentReview({ actorId, projectId, detail, artifact, selectedSectionId, actorName, onSaved }: {
+export function PlanDocumentReview({ actorId, projectId, detail, artifact, selectedSectionId, actorName, onRequestAi, onSaved }: {
   readonly actorId: string;
   readonly projectId: string;
   readonly detail: SRDetailView;
   readonly artifact: ArtifactView;
   readonly selectedSectionId?: string;
   readonly actorName: (id: string) => string;
+  readonly onRequestAi?: (context: string) => void;
   onSaved(): void;
 }) {
   const requestedSectionId = selectedSectionId !== undefined &&
@@ -434,6 +455,8 @@ export function PlanDocumentReview({ actorId, projectId, detail, artifact, selec
   if (section === undefined) return <section className="entity-panel"><p>검토할 문서 문단이 없습니다.</p></section>;
 
   const contexts = currentReviewContexts(detail, artifact);
+  const hasCurrentApproval = contexts.some(({ bundle }) => detail.approvals.some((approval) =>
+    sameBundle(approval.bundleRef, bundle.bundleRef) && approval.reviewEpoch === bundle.reviewEpoch));
   const commentContext = preferredContext(contexts, artifact);
   const changeContext = preferredContext(
     contexts.filter(({ configuration }) => configuration.assignment?.reviewerIds.includes(actorId) === true),
@@ -453,6 +476,8 @@ export function PlanDocumentReview({ actorId, projectId, detail, artifact, selec
       {artifact.sectionIndex.map((candidate) => <option key={candidate.sectionId} value={candidate.sectionId}>{candidate.title}</option>)}
     </select></label>}
     <article className="frozen-review-content"><SafeMarkdown>{selectedMarkdown}</SafeMarkdown></article>
+    {detail.sr.ownerId === actorId && onRequestAi !== undefined && !hasCurrentApproval &&
+      <button type="button" className="text-button" onClick={() => onRequestAi(aiRevisionContext(artifact, section))}>AI로 이 문단 보완하기</button>}
 
     <section aria-label="문단 댓글">
       <h4>이 문단의 의견</h4>
@@ -478,6 +503,7 @@ export function PlanDocumentReview({ actorId, projectId, detail, artifact, selec
         artifact={artifact}
         request={request}
         actorName={actorName}
+        {...(onRequestAi === undefined ? {} : { onRequestAi })}
         onSaved={onSaved}
       />)}
     </section>

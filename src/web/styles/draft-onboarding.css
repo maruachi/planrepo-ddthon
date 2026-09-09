@@ -9,3 +9,24 @@
 .document-guidance { padding: 12px 14px; border-left: 3px solid #397653; background: #edf4ef; }
 .document-advanced { margin: 14px 0; padding: 12px 14px; border: 1px solid #d9dfda; border-radius: 8px; }
 .document-advanced summary { cursor: pointer; font-weight: 750; }
+
+.registration-lead { color: var(--muted, #7b8495); font-size: 14px; margin: 0 0 24px; }
+.registration-document-fields { display: grid; gap: 20px; }
+.registration-document-fields label .required-label { display: contents; color: #a05260; font-size: 11px; }
+.registration-document-fields label small { color: var(--muted, #7b8495); font-size: 12px; font-weight: 400; }
+.registration-document-fields .registration-attachment { max-width: 440px; }
+.registration-attachment input { border-style: dashed; font-size: 13px; }
+.registration-people { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 24px; padding: 22px 0; border-top: 1px solid var(--line, #e3e7ee); }
+.registration-people > label { align-content: start; }
+.registration-people small { font-weight: 400; color: var(--muted, #7b8495); font-size: 12px; }
+.registration-reviewers { margin: 0; padding: 0; border: 0; min-width: 0; }
+.registration-reviewers legend { font-size: 14px; font-weight: 550; }
+.registration-reviewers .checkbox-label { padding: 5px 0; font-weight: 400; }
+.registration-reviewers .quiet { margin: 7px 0; }
+.registration-footer { display: flex; align-items: center; justify-content: space-between; gap: 20px; border-top: 1px solid var(--line, #e3e7ee); padding-top: 20px; }
+.registration-footer p { margin: 0; color: var(--muted, #7b8495); font-size: 12px; }
+.draft-first-form > details { margin-top: 22px; }
+@media (max-width: 640px) {
+  .registration-people { grid-template-columns: 1fr; gap: 20px; }
+  .registration-footer { flex-direction: column; align-items: stretch; gap: 12px; }
+}

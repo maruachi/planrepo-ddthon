@@ -4279,3 +4279,286 @@ SR을 작성하고, 여기서 AIDLC의 문서를 작성한다고 보면되고, �
 **Context**: "현재 localhost M-047 재조회 결과: 문서 v3, Claude 생성 2건 succeeded, 댓글 1건, 수정 요청 1건 resolved, 승인 1건, G1 validity valid. 상태만 DB에 직접 채운 목업이 아니라 실제 앱 흐름의 실행 결과입니다."
 
 ---
+
+## 사용자 요청에 따른 원격 branch 강제 push
+**Timestamp**: 2026-09-09T06:22:27Z
+**User Input**: "https://github.com/maruachi/planrepo-ddthon/tree/aidlc/ljh 여기에 강제로 푸시해"
+**AI Response**: "현재 저장소와 대상 branch를 확인한 뒤 aidlc/ljh에 강제 push하겠습니다. superpowers:using-superpowers와 superpowers:verification-before-completion 스킬을 적용합니다. 현재 branch는 feat/planrepo-implementation이고 미커밋 변경은 없습니다. 대상 aidlc/ljh의 commit d533e94를 현재 commit 518d146으로 교체하겠습니다. push 후 원격 commit도 확인하겠습니다."
+**Context**: 사용자가 강제 push를 명시적으로 승인했습니다. 원격 URL은 https://github.com/maruachi/planrepo-ddthon.git입니다. push 대상은 현재 HEAD 518d1462f10f02141a6097d93aa8ceffdfc619d8이며 원격 branch의 기존 HEAD는 d533e94de740eb7d18d5cffb4e7d6e8a675c50d6입니다. 이 원격 HEAD를 지정하는 force-with-lease로 대상 branch 하나만 갱신합니다. 기존 개발 단계를 재개하지 않는 Git 작업입니다. 코드 변경이 없어 TDD와 앱 테스트는 생략합니다. 확장 3개는 aidlc-docs/aidlc-state.md의 Enabled=No에 따라 적용을 생략합니다. 이 감사 기록은 로컬 변경으로 보존하며 push를 위해 별도 commit을 만들지 않습니다.
+
+---
+
+## 원격 branch 강제 push 검증
+**Timestamp**: 2026-09-09T06:22:43Z
+**AI Response**: "aidlc/ljh에 commit 518d146을 강제 push했습니다. git ls-remote로 원격 HEAD 일치를 확인했습니다. 코드 변경이 없어 앱 테스트는 생략했습니다. push 감사 기록은 aidlc-docs/audit.md에 로컬 변경으로 남겼습니다."
+**Context**: git push --force-with-lease=refs/heads/aidlc/ljh:d533e94de740eb7d18d5cffb4e7d6e8a675c50d6 https://github.com/maruachi/planrepo-ddthon.git HEAD:refs/heads/aidlc/ljh 명령이 exit 0이며 forced update를 반환했습니다. git ls-remote https://github.com/maruachi/planrepo-ddthon.git refs/heads/aidlc/ljh 명령도 exit 0이며 원격 HEAD=518d1462f10f02141a6097d93aa8ceffdfc619d8, 로컬 HEAD=518d1462f10f02141a6097d93aa8ceffdfc619d8 일치를 검증했습니다. 로컬 branch와 remote 설정은 변경하지 않았습니다.
+
+---
+
+## 예시 개발건 제안
+**Timestamp**: 2026-09-09T06:27:00Z
+**User Input**: "하나의 예시 개발건 제시해줘봐"
+**AI Response**: "사내 회의실 예약과 중복 예약 방지를 예시 개발건으로 제안합니다. 채팅으로 예약하다 중복되는 문제, 직원의 예약 현황 조회·예약·본인 취소, 시간 중복 방지와 경계 조건을 초안 문서 형태로 설명합니다. 반복 예약, 외부 일정 연동, 알림은 첫 범위에서 제외합니다."
+**Context**: "새 개발건의 제안만 요청받았습니다. 앱에 새 SR을 등록하거나 개발·AI 생성·승인 절차를 시작하지 않습니다."
+
+---
+
+## 사용자 직접 UI 체험 안내 시작
+**Timestamp**: 2026-09-09T06:28:02Z
+**User Input**: "나한테 시켜봐 내가 어떻게 차례대로 진행하면될지 내가 직접 ui를 사용해서 한번 돌려볼게"
+**AI Response**: "사용자가 직접 조작하도록 한 단계씩 안내합니다. 첫 단계는 localhost에서 SR 담당자 역할, 팀 보드의 초안 문서로 시작, 회의실 예약 제목과 초안 입력, 동료 검토자 지정, SR 등록하고 Plan 시작입니다. 등록 뒤 문서 탭에 원문이 나타나는지 확인하고 사용자 응답에 따라 다음 안내를 이어갑니다."
+**Context**: "현재 등록 폼과 팀 보드 소스의 실제 버튼·입력명을 읽고 서버 준비 상태를 확인했습니다. 사용자 대신 클릭·등록·AI 생성·승인하지 않았습니다. 문서 보완과 검토·승인은 후속 단계로 안내합니다."
+
+---
+
+## 사용자 직접 UI 체험 — 문서 보완 안내
+**Timestamp**: 2026-09-09T06:29:37Z
+**User Input**: "등록했어"
+**AI Response**: "회의실 예약 개발건이 문서 v1과 동료 검토자 지정 상태로 저장된 것을 확인했습니다. 다음은 사용자가 문서 편집에서 동시 예약 시 한 명만 확정하고 나머지 사용자에게 안내한다는 예시 기준을 추가한 뒤 문서 저장을 눌러 v2로 바꾸는 단계입니다."
+**Context**: "읽기 전용 M-045/M-047로 sr-53e3cc7a-e013-4b9c-acfc-ed2388723be6을 확인했습니다. 최초 조회 보조 코드에서 card.title 대신 card.sr.title을 읽어야 하는 KeyError가 있어 계약 확인 후 다시 조회했습니다. 사용자 대신 문서 수정·버튼 클릭·생성을 실행하지 않았습니다."
+
+---
+
+## 사용자 직접 UI 체험 — 검토자 확인 위치 안내
+**Timestamp**: 2026-09-09T06:34:27Z
+**User Input**: "수정했어를 입력했는데 검토요청이계속되어있어 검토자가 어디서 허가해야함"
+**AI Response**: "문서 v2 저장과 반영 보고는 완료됐으며, 동시예약기능 수정 요청이 검토자 확인 대기입니다. 체험 역할을 동료 검토자로 바꾸고 문서 탭의 문단별 의견 남기기를 펼친 뒤 수정 내용 확인 완료를 누르도록 안내합니다. 전체 문서 승인은 이후 담당자의 새 검토 요청 뒤 공유·리뷰에서 진행합니다."
+**Context**: "읽기 전용 M-047로 문서 v2와 awaiting_confirmation 상태를 확인했습니다. 기존 검토본은 현재 문서에 유효하지 않습니다. 사용자 대신 확인·승인하지 않았습니다. 최초 감사 로그 append 스크립트는 문자열 종료 누락으로 실행되지 않았으며 수정 후 append합니다."
+
+---
+
+## 사용자 직접 UI 체험 — 승인 뒤 시각화 안내
+**Timestamp**: 2026-09-09T06:37:42Z
+**User Input**: "결재 완료된다음에 그래프같은건 어떻게 추가해?"
+**AI Response**: "현재 회의실 예약 문서 v2는 결재 완료됐지만 시각화 자료는 없습니다. 담당자 역할에서 문서 아래 AI로 문서 정리하기를 열고, 업무 규칙을 유지한 예약 성공·시간 중복·동시 예약·취소의 흐름과 조건·결과를 요청한 뒤 문서 보완안 만들기를 누르도록 안내합니다. 현재 기능은 시각화를 포함한 문서 보완안을 만들며 별도 그래프 편집기가 아닙니다. 생성만 하면 승인은 유지되지만 보완안을 반영하면 새 문서 버전으로 재검토가 필요함을 먼저 알립니다."
+**Context**: "M-047 읽기 전용 확인 결과 문서 v2, G1 valid, needsNewBundle false, visualization 없음, 참고 질문 생성 2건 succeeded입니다. 실제 UI 버튼과 시각화 생성 프롬프트를 확인했습니다. 사용자가 직접 UI를 조작하는 중이므로 대신 생성·문서 적용·승인을 실행하지 않았습니다."
+
+---
+
+## 사용자 직접 UI 체험 — 질문 선택과 리뷰 보완 기능 점검
+**Timestamp**: 2026-09-09T06:42:46Z
+**User Input**: "지금은 초안 작성할때 질문에대한 선택같은건 없는건가? 보완안이 그거랑 리뷰에있어야하잖아 지금도 존재하나?"
+**AI Response**: "일부만 구현돼 있습니다. 등록 화면에는 질문과 보완안이 없고 등록 후 문서 아래 선택형 AI 영역에서 참고 질문 생성, 채택할 질문 선택, 답변 작성과 문서 보완안 생성·반영을 제공합니다. AI 생성 질문은 답변 후보가 안내되지만 free_text로 저장하므로 답변을 클릭해 선택하는 동작은 연결되지 않았습니다. 리뷰 문단이나 수정 요청에서 바로 AI 보완안을 제안받고 선택 반영하는 통합 UI는 없습니다. 작성과 리뷰 맥락 안에서 질문의 의미와 답변 선택, 변경 제안 확인이 이어져야 한다는 사용자 의도에는 미완성입니다."
+**Context**: "등록 폼, InceptionConversation, PlanDocumentReview, BundleReviewForm, question-decision-repository를 읽었습니다. AI 질문 적용은 answerMode free_text/options []이고 후보만 보존합니다. 현재 회의실 업무는 질문 생성 2건과 문서 보완 생성 1건 succeeded, 채택된 질문 0건입니다. 사용자 대신 등록·생성·반영·승인을 실행하지 않았습니다."
+
+---
+
+## 결재 전 보완 흐름 수정 시작
+**Timestamp**: 2026-09-09T06:46:27Z
+**User Input**: "결재이후바꾸는건 이상한거잖아"
+**AI Response**: "맞습니다. 제가 시각화와 보완안 확인을 건너뛰고 결재부터 안내한 순서가 잘못됐습니다. 결재 전에 문서의 질문·답변과 선택한 보완안·시각화를 함께 검토하도록 기존 UI를 수정합니다. 작성 중 답변 후보 선택과 리뷰 의견 기반 AI 제안을 연결하고, 결재 완료 기본 화면은 읽기 전용으로 바꿉니다. 새 변경이 있을 때 명시적으로 개정안을 준비하며, 현재 승인된 회의실 문서는 대신 수정하지 않습니다."
+**Context**: "기존 개발 승인과 프로토타입/TDD 보류 지시에 따른 후속 수정입니다. Superpowers brainstorming과 verification-before-completion을 적용하고 관련 AI-DLC 공통/Code Generation/Build and Test 규칙을 로드했습니다. 세 확장은 Enabled=No로 본문 적용 N/A입니다. 최초 불필요한 skill 경로 조회는 파일 없음으로 끝났으며 목록의 정확한 경로를 읽었습니다. backend/schema/외부 기록은 변경하지 않습니다."
+
+---
+
+## 브랜치 목업과 디자인 반영 요청
+**Timestamp**: 2026-09-09T06:50:56Z
+**User Input**: "feat/planrepo-implementation 브랜치에서의 내용을 저 초안 작성에 있어서 제시해주는 목업인거거든? 확인해보고 해당 브랜치의 내용을 현 프로젝트에  반영할 수 있는 지 확인하고 괜찮다면 반영해줘.  해당브랜치의 디자인이 더 나은 것 같으니 해당 브랜치의 디자인도  현 브랜치에 반영해줘."
+**AI Response**: "브랜치의 초안 작성 목업과 디자인을 비교해 결재 전 질문·보완·시각화 흐름에 반영합니다. 현재 폴더는 동명 로컬 브랜치 518d146이며 remote가 없습니다. maruachi/planrepo-ddthon 원격에 동일 이름의 브랜치가 없어 다른 체크아웃을 조사하고 정확한 저장소 URL 또는 경로를 질문했습니다."
+**Context**: "기존 작성 중 수정 보존. 브랜치 교체·reset·사용자 문서 변경 없이 읽기 전용 조사."
+
+---
+
+## 공통 입력 디자인 추가 요청
+**Timestamp**: 2026-09-09T06:50:56Z
+**User Input**: "마찬가지로 현재 프로젝트에서 셀렉트박스나 텍스트박스도 해당브랜치의 디자인을 따라가면좋을것같아"
+**AI Response**: "셀렉트박스와 텍스트박스도 같은 디자인으로 맞춥니다. 원본이 식별되면 공통 스타일로 반영합니다."
+**Context**: "목업 원본 확인 대기 중에도 이미 승인된 결재 전 UI 수정의 typecheck와 검증을 계속합니다. npm run typecheck exit0."
+
+---
+
+## 디자인 기준 브랜치 정정
+**Timestamp**: 2026-09-09T06:52:25Z
+**User Input**: "feature/feature-jy0620.choi"
+**AI Response**: "원격 branch feature/feature-jy0620.choi commit 971044894d7e7dd061494166538bc8d771b515e8을 별도 임시 폴더에서 확인했습니다. 흰색 상단 메뉴, 보라색 강조, 옅은 회색 배경, 공통 입력 스타일을 현재 실제 기능에 맞춰 옮깁니다. 질문을 하나씩 읽고 선택·직접 입력하는 UI는 재사용 후보입니다. 원본 grill-me 터미널은 실시간 AI가 아닌 예시 응답으로 구현돼 있어 그대로 AI 기능으로 표시하지 않습니다."
+**Context**: "현재 branch와 working diff 보존. 임시 clone 및 reference 설치만 진행. 현 저장·검토·Claude API와 사용자 데이터 유지."
+
+---
+
+## 디자인 통합과 격리 UI 중간 확인
+**Timestamp**: 2026-09-09T06:59:25Z
+**User Input**: ""
+**AI Response**: "정정된 원본 브랜치의 흰색 header/로고/색상/입력 디자인을 반영하고, 질문 모달을 기존 M008 답변 저장 및 실제 Claude 설명 호출에 연결했습니다. 원본 mock 대화와 로컬 승인 상태는 반영하지 않았습니다. 격리 UI에서 초안 등록, 문서 저장, 검토자 선택, 390px 화면의 가로 넘침 없음까지 확인했습니다. 검토자 배정 M030이 자동 review request를 생성하는 기존 행동을 발견해 프로토타입에서 명시적 검토 요청으로 분리합니다."
+**Context**: "IP14/IP15/IP17 구현 및 비교 완료, IP16 최종 검증 대기. 임시 QA helper 첫 실행은 /tmp .ts CJS top-level await 오류로 실패해 .mts로 수정했습니다. dev preview에서는 src/domain 공유 모듈을 Vite 허용 경로가 누락해 403이 발생했습니다. src/domain만 개발 모듈 범위에 추가했습니다. 사용자4173는 계속 정상이며 비종료 generation0, SR7개,30개 SR 범위 테이블을 백업/해시 보관했습니다. 테스트용 Vite proxy Origin은 격리 helper Origin으로만 맞췄고 제품 server Origin 정책은 변경하지 않았습니다."
+
+---
+## 브랜치 디자인 통합 최종 검증
+**Timestamp**: 2026-09-09T07:11:58Z
+**User Input**: ""
+**AI Response**: "feature/feature-jy0620.choi 기준 디자인과 질문 모달을 현재 실제 API에 연결했습니다. M030 배정과 M020 검토 요청을 분리했습니다. typecheck와 build, 관련 10개 파일 100개 테스트가 통과했습니다. 격리 브라우저에서 초안 등록부터 최종 결재, 선택 답변의 명시적 저장, 모바일 표시와 등록 중 이동 보호를 확인했습니다. localhost4173에 최신 빌드를 반영했고 기존 SR7건과 업무 테이블30개를 보존했습니다."
+**Context**: "IP14/IP15/IP16/IP17/IP18/IP19 완료. 질문 생성 결과는 격리 fixture이며 이번 검증에서 실제 Claude를 재호출하지 않았습니다. Vite chunk 크기와 향후 config 안내 경고는 남습니다. 전체 품질 확대·성능·운영 배포는 생략합니다. 세 확장은 비활성 N/A입니다. 영구 화면 증거와 정확한 명령은 reference-design-integration-report.md에 기록했습니다."
+
+---
+
+## 초안 Grill-me 필수화 의견
+**Timestamp**: 2026-09-09T07:11:58Z
+**User Input**: "feature/feature-jy0620.choi에 있는 grill-me부분을 초안 단계에서 grill-me로 강제하려고해 어떻게생각해?"
+**AI Response**: "초안 단계에서 사람과 AI의 이해를 맞추는 과정의 필수화는 제품 목적에 맞습니다. 초안 저장은 즉시 허용하고 검토 요청 전 AI가 이해한 목적·범위·중요 결정을 확인하도록 권합니다. 문서에 명확한 내용은 다시 묻지 않고 중요한 모호함만 질문합니다. 원본 되묻기 터미널은 고정 예시 응답이므로 필수 흐름에는 실제 Claude 대화 연결과 완료 기준이 필요합니다. 필수화는 아직 코드에 적용하지 않았습니다."
+**Context**: "진행 중 디자인 통합은 마무리합니다. 새 메시지는 후속 제품 흐름에 대한 의견 요청으로 해석했습니다. 기존 승인된 사용자 문서는 변경하지 않습니다."
+
+---
+## 최종 데이터 보존 수치 정정
+**Timestamp**: 2026-09-09T07:12:53Z
+**User Input**: ""
+**AI Response**: "최종 재조회에서 30개 테이블 중 27개의 행 수와 hash가 동일했습니다. input_snapshots1행, execution_observations1행, activity_events2행은 기준 이후 회의실 SR의 질문 생성 이력으로 추가됐습니다. 30개 테이블의 기준 행은 모두 보존됐으며 SR7건, 문서와 승인 기록도 유지됐습니다. 직전 완료 기록의 30개 보존은 기존 행 보존을 뜻하며 모든 테이블 hash가 같다는 뜻으로 해석하면 안 됩니다. 보고서와 preservation.json을 현재 수치로 정정했습니다."
+**Context**: "두 DB를 mode=ro, query_only로 열어 기준 행과 값을 비교했습니다. 추가 생성의 실행 주체는 기록만으로 단정하지 않습니다. 사용자 서버 health·board·최신 JS/CSS는 HTTP200이며 generationReady=true입니다."
+
+---
+
+## eSPEC 초안 기반 PlanRepo 실제 시연 요청
+**Timestamp**: 2026-09-09T07:14:21Z
+**User Input**: "현 경로 프로젝트에 대해 이해하고 진행해.
+
+
+
+아래 초안으로 진행하고 한 사이클을 끝까지 진행하면돼.
+--
+
+# PLAN — eSPEC 첨부파일 업로드 오류 조회/재처리 기능
+
+## 1. 목적
+
+eSPEC 문서(PRC/INS) 첨부파일 중 `USE_YN = 'Y'` 이지만 `FILE_UPLOAD_DTTM`이 없는 비정상 건을 운영자가 직접 조회하고 재처리할 수 있도록 기능을 추가한다.\
+현재는 DB 조회 및 수동 확인이 필요하므로, Portal에서 대상 문서와 첨부파일 상태를 확인하고 재처리 결과까지 추적 가능하도록 개선한다.
+
+## 2. 변경 범위
+
+- **Frontend**: `dks-espec-portal` / Vue.js
+- **Backend**: `dks-espec-endpoint` / Spring Boot
+- **DB**: Oracle (`RPT_DOC`, `ESPEC_ATTACH_FILE`)
+- **제외 범위**: 파일 저장소 구조 변경, 기존 정상 첨부파일 이관, 인증/권한 체계 변경
+
+## 3. 사용자 흐름
+
+`문서번호/기간 검색` → `업로드 오류 첨부파일 조회` → `대상 선택` → `재처리 요청` → `성공/실패 결과 표시`
+
+- 조회 조건: `RPT_DOC_ID`, 등록일자, 문서구분(PRC/INS)
+- 오류 판정: `ESPEC_ATTACH_FILE.USE_YN = 'Y' AND FILE_UPLOAD_DTTM IS NULL`
+- 문서별 첨부파일이 여러 건인 경우 **1건이라도 오류이면 문서 단위로 노출**
+- 재처리 성공 후 목록에서 즉시 상태 갱신
+
+## 4. Backend / API
+
+### GET `/api/attachments/upload-errors`
+
+**입력**
+
+- `rptDocId?`
+- `fromDate?`
+- `toDate?`
+- `docType?` (`PRC` / `INS`)
+
+**처리**
+
+1. `RPT_DOC` 대상 문서 조회
+2. `ESPEC_ATTACH_FILE` 조인
+3. 활성 첨부파일 중 `FILE_UPLOAD_DTTM IS NULL` 존재 여부 확인
+4. 문서번호 기준으로 오류 파일 수와 상세 반환
+
+**응답 예시**
+```json
+{
+  "rptDocId": "INS00649-019",
+  "errorFileCount": 2,
+  "files": [
+    { "fileId": "12345", "fileName": "spec.xlsx", "uploadDttm": null }
+  ]
+}
+```
+
+### POST `/api/attachments/{fileId}/retry`
+
+- 기존 파일 업로드 Service 로직 재사용
+- 성공 시 `FILE_UPLOAD_DTTM` 갱신
+- 실패 시 원인 로그 기록 및 오류 메시지 반환
+- 중복 요청 방지를 위해 현재 상태 재확인 후 처리
+
+## 5. DB / Query
+```sql
+SELECT
+    R.RPT_DOC_ID,
+    COUNT(*) AS ERROR_FILE_COUNT
+FROM RPT_DOC R
+JOIN ESPEC_ATTACH_FILE A
+  ON A.MAPPING_1ST_KEY_ID = R.RPT_DOC_ID
+WHERE A.USE_YN = 'Y'
+  AND A.FILE_UPLOAD_DTTM IS NULL
+  AND (R.RPT_DOC_ID LIKE 'PRC%' OR R.RPT_DOC_ID LIKE 'INS%')
+GROUP BY R.RPT_DOC_ID;
+```
+
+- 신규 테이블 생성 없음
+- 기존 인덱스 확인: `ESPEC_ATTACH_FILE(MAPPING_1ST_KEY_ID)`
+- 조회 성능 문제 시 `USE_YN`, `FILE_UPLOAD_DTTM` 조건 포함 인덱스 검토
+
+## 6. Frontend
+
+- 운영 메뉴에 **첨부파일 업로드 오류** 화면 추가
+- 검색영역: 문서번호 / 기간 / 문서구분
+- Grid: 문서번호, 오류 파일 수, 파일명, 상태, 재처리 버튼
+- 재처리 전 Confirm 표시
+- 처리 중 버튼 비활성화
+- 성공: 해당 Row 재조회
+- 실패: 서버 오류 메시지 표시
+
+## 7. Risk / 대응방안
+
+| Risk영향대응방안                           |                       |                                                           |
+| ------------------------------------ | --------------------- | --------------------------------------------------------- |
+| 동일 파일 재처리로 인한 **중복 업로드**             | 파일 중복 저장 또는 상태 불일치    | 재처리 직전 `FILE_UPLOAD_DTTM` 재확인, 이미 정상 처리된 건은 Skip          |
+| 재처리 중 일부 단계만 성공하는 **부분 실패**          | 파일 저장소와 DB 상태 불일치     | 기존 업로드 Service의 트랜잭션 경계 확인, 실패 시 DB 상태를 정상적으로 Rollback/보정 |
+| 오류 건 대량 조회 시 **Oracle 부하 증가**        | 운영 DB 응답 지연           | 조회 기간 제한, Pagination 적용, 실행계획 및 인덱스 확인                    |
+| 원본 파일이 이미 삭제되었거나 접근 불가               | 재처리 자체가 불가능           | 재처리 전 원본 존재 여부 확인 후 사용자에게 명확한 실패 사유 반환                    |
+| 운영자 외 사용자의 재처리 API 호출                | 비정상 데이터 변경 가능         | 기존 eSPEC 권한 체계를 사용하여 운영 권한 사용자만 재처리 허용                    |
+| 기존 첨부파일 업로드 로직 변경에 따른 **Regression** | 정상 PRC/INS 첨부파일 처리 영향 | 신규 로직 구현보다 기존 Service 재사용 우선, 기존 등록/업로드 시나리오 회귀 테스트 수행    |
+| 동일 파일에 대한 동시 재처리 요청                  | Race condition, 중복 처리 | 처리 전 상태 재검증 및 필요 시 DB Lock/처리 상태값 적용 검토                   |
+
+**주요 확인 필요사항**
+
+- 기존 파일 업로드 Service가 재호출 가능한 구조인지 확인
+- 실제 원본 파일의 보관 위치 및 재처리 시 접근 가능 여부 확인
+- `ESPEC_ATTACH_FILE` 대량 데이터 기준 실행계획 확인
+
+## 8. 테스트
+
+- 정상 파일만 존재하는 문서는 조회되지 않아야 함
+- 동일 `RPT_DOC_ID`에 정상/오류 파일이 섞여 있으면 문서는 조회되어야 함
+- `USE_YN = 'N'` 파일은 오류 판정에서 제외
+- 재처리 성공 시 `FILE_UPLOAD_DTTM`이 생성되어야 함
+- 이미 처리된 파일에 재요청 시 중복 업로드되지 않아야 함
+- PRC / INS 각각 조회 검증
+- 대량 조회 시 응답시간 및 Oracle 실행계획 확인
+
+## 9. 예상 변경 파일
+```bash
+dks-espec-portal
+└─ src/views/.../AttachmentUploadError.vue
+└─ src/api/attachment.ts
+
+dks-espec-endpoint
+└─ controller/AttachmentController.java
+└─ service/AttachmentService.java
+└─ repository/AttachmentRepository.java
+└─ dto/AttachmentUploadErrorDto.java
+
+Oracle
+└─ 기존 RPT_DOC / ESPEC_ATTACH_FILE 조회
+```
+
+--
+이 초안에 대해 현 프로젝트의 테스트를 진행하고 프로세스를 시각화단계까지 끝까지 진행하는 것을 시연영상으로 만들어줘. 
+시행하는 것을 영상으로 녹화하면돼. [@컴퓨터](plugin://computer-use@openai-bundled)
+
+그소리가 아니라, espec, oracle등은 플랜을 제시해주는거겠지. 그 시스템에서 하라는 것도 이 단계에서 플랜을 통해 결과 인셉션플랜이 나오겠지 ㅇㅇ 진행해봐다시"
+**AI Response**: "현재 프로젝트를 이해하고 eSPEC 초안으로 Inception Plan 생성·검토·시각화와 로컬 결재 시연을 실행합니다. 화면을 연속 녹화하고 기존 테스트를 검증합니다."
+**Context**: 기존 개발 사이클 재개입니다. eSPEC/Oracle은 계획 대상입니다. 기존 SR와 소스 변경을 보존합니다. 확장 3개는 Enabled=No로 본문 로딩과 적용을 생략했습니다. JSON 예시는 파싱 가능하지만 errorFileCount 2와 files 예시 1건이 불일치해 보완 검토합니다.
+
+---
+
+## eSPEC 실제 시연 중간 검증
+**Timestamp**: 2026-09-09T07:18:55Z
+**User Input**: ""
+**AI Response**: "PlanRepo가 Inception Plan을 작성·검토하는 앱임을 확인했습니다. localhost4173 readiness는 ready=true와 generationReady=true입니다. 원문으로 새 SR을 등록하고 제목 입력 오류를 UI에서 수정했습니다. 실제 Claude CLI 질문 5개를 생성하고 데모 담당자 역할로 답을 저장했습니다. 기존 Service와 권한 코드·조회 수치는 미확인으로 유지했습니다. 답을 반영하는 문서 생성과 시각화를 요청했습니다."
+**Context**: Computer Use·Superpowers using-superpowers/systematic-debugging/verification-before-completion을 적용했습니다. npm run typecheck와 npm run build는 exit0입니다. npm test 최초 443개 중442개 통과·1개 실패(실제 DB owner process 종료 확인 timeout)였고, 단독 재실행7개와 전체 재실행443개는 통과했습니다. 테스트는25ms 종료 확인·150ms 대기 조건을 포함해 타이밍에 민감합니다. 제품 결함으로 단정하지 않았고 소스 수정은 하지 않았습니다. 녹화는 ffmpeg avfoundation 화면 연속 캡처입니다. 마이크는 녹음하지 않습니다. 옵트인 경로 첫 glob과 readiness 경로 첫 조회는 잘못되어 정확한 경로로 바로잡았습니다. 한글 키 입력·clipboard 붙여넣기에서 제목이 잘못 입력되어 AX set_value로 수정 후 저장을 확인했습니다.
+
+---

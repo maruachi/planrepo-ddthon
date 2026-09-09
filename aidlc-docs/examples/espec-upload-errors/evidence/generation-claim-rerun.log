@@ -1,0 +1,18 @@
+
+> planrepo@0.1.0 test
+> vitest run tests/integration/generation-claim.test.ts
+
+
+ RUN  v5.0.0 /Users/jwlee/workspace/codex/ddcon3
+
+
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+   Start at  16:15:09
+   Duration  2.95s (tests 84%, transform 12%, import 3%)
+
+npm notice
+npm notice New major version of npm available! 10.9.8 -> 12.0.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.0.2
+npm notice To update run: npm install -g npm@12.0.2
+npm notice

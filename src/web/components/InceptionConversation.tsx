@@ -14,6 +14,7 @@ import { deriveDraftDocumentStructure } from '../state/draft-document';
 import { PLAN_VISUALIZATION_PROMPT } from '../state/plan-visualization-prompt';
 import { invoke, TransportUncertainError } from '../api/client';
 import './InceptionConversation.css';
+import { InceptionQuestionDialog, type InceptionQuestionDraft } from './InceptionQuestionDialog';
 import { SafeMarkdown } from './SafeMarkdown';
 
 interface LoadedDraft {
@@ -29,9 +30,12 @@ type WorkState =
   | { readonly kind: 'error'; readonly message: string }
   | { readonly kind: 'uncertain'; readonly message: string; retry(): void };
 
-interface AnswerDraft {
-  readonly optionId: string;
-  readonly text: string;
+type AnswerDraft = InceptionQuestionDraft;
+
+export interface InceptionAssistanceRequest {
+  readonly requestId: string;
+  readonly kind: 'questions' | 'plan' | 'visualization' | 'review';
+  readonly context: string;
 }
 
 const INCEPTION_PLAN_PROMPT = `한 개의 requirements 문서로 Inception Plan 문서 보완안을 작성하세요.
@@ -84,20 +88,62 @@ function questionSupplement(detail: SRDetailView, supplement: string): string | 
   return blocks.length === 0 ? undefined : blocks.join('\n\n');
 }
 
-function explanationSupplement(proposal: QuestionProposal, supplement: string): string {
+function explanationSupplement(proposal: Pick<QuestionProposal, 'text' | 'reason' | 'candidateAnswers'> & {
+  readonly options?: readonly { readonly text: string }[];
+}, supplement: string): string {
+  const answerCandidates = proposal.options !== undefined && proposal.options.length > 0
+    ? proposal.options.map((option) => option.text)
+    : proposal.candidateAnswers;
   return [
     supplement.trim() === '' ? undefined : `사용자가 추가로 설명한 내용:\n${supplement.trim()}`,
     `선택한 질문: ${proposal.text}`,
     `이 질문이 필요한 이유와 선택의 영향: ${proposal.reason}`,
-    proposal.candidateAnswers.length === 0 ? undefined : `답변 후보: ${proposal.candidateAnswers.join(' / ')}`,
+    answerCandidates.length === 0 ? undefined : `답변 후보: ${answerCandidates.join(' / ')}`,
     '이 질문을 전문 용어 없이 더 쉽게 풀어 설명하고, 사용자가 답하기 좋은 후속 질문으로 제안하세요.',
     '현재 Inception 범위 밖의 상세 설계나 구현 질문으로 넓히지 마세요.',
   ].filter((item): item is string => item !== undefined).join('\n\n');
 }
 
-function planInput(detail: SRDetailView, supplement: string): GenerationInput {
+function documentSupplement(
+  detail: SRDetailView,
+  supplement: string,
+  focus: InceptionAssistanceRequest['kind'] = 'plan',
+): string {
   const current = detail.artifacts.find((artifact) => artifact.kind === 'requirements');
-  const prompt = [INCEPTION_PLAN_PROMPT, supplement.trim() === '' ? undefined : `사용자의 추가 설명:\n${supplement.trim()}`]
+  const answers = detail.questions.flatMap((question) => {
+    const answer = question.currentResult.selectedAnswer?.answer.text;
+    return answer === undefined ? [] : [`질문: ${question.text}\n사람이 저장한 답변: ${answer}`];
+  });
+  const comments = detail.comments
+    .filter((comment) => current !== undefined &&
+      comment.artifactVersionRef.entityId === current.artifactId &&
+      comment.artifactVersionRef.version === current.versionRef.version)
+    .map((comment) => `문단 '${comment.sectionId}' 검토 의견: ${comment.body}`);
+  const changes = detail.changeRequests
+    .filter((request) => request.status !== 'resolved' && request.affectedGate === 'G1')
+    .map((request) => `미해결 수정 요청(${request.status === 'open' ? '수정 필요' : '반영 확인 필요'}): ${request.body}`);
+  const focusInstruction = focus === 'visualization'
+    ? '현재 문서에 실제로 있는 내용만 사용해 최대 네 가지 상황과 조건을 시각화 자료로 정리하세요. 화면은 문서에 실제 문구가 있거나 명시적으로 제안이라고 표시할 수 있을 때만 제안하세요. 기존 시각화 규칙은 바꾸지 마세요.'
+    : focus === 'review'
+      ? '아래 검토 의견과 수정 요청을 반영한 문서 보완안을 제안하세요. 사람이 확인하지 않은 결론을 확정하지 마세요.'
+      : undefined;
+  return [
+    supplement.trim() === '' ? undefined : `사용자가 요청한 내용:\n${supplement.trim()}`,
+    answers.length === 0 ? undefined : `사람이 저장한 답변:\n${answers.join('\n\n')}`,
+    comments.length === 0 ? undefined : `현재 문서의 검토 의견:\n${comments.join('\n')}`,
+    changes.length === 0 ? undefined : `아직 끝나지 않은 수정 요청:\n${changes.join('\n')}`,
+    focusInstruction,
+  ].filter((item): item is string => item !== undefined).join('\n\n');
+}
+
+function planInput(
+  detail: SRDetailView,
+  supplement: string,
+  focus: InceptionAssistanceRequest['kind'] = 'plan',
+): GenerationInput {
+  const current = detail.artifacts.find((artifact) => artifact.kind === 'requirements');
+  const context = documentSupplement(detail, supplement, focus);
+  const prompt = [INCEPTION_PLAN_PROMPT, context === '' ? undefined : context]
     .filter((item): item is string => item !== undefined).join('\n\n');
   return current === undefined
     ? { taskKind: 'ARTIFACT_DRAFT', documentKind: 'requirements', targetBasis: { kind: 'absent', logicalKey: 'requirements' }, supplement: prompt }
@@ -114,11 +160,12 @@ function answerDraft(question: QuestionView): AnswerDraft {
   return { optionId: question.options[0]?.optionId ?? '', text: '' };
 }
 
-export function InceptionConversation({ actorId, projectId, detail, actorName, onSaved, onOpenDocument }: {
+export function InceptionConversation({ actorId, projectId, detail, actorName, request, onSaved, onOpenDocument }: {
   readonly actorId: string;
   readonly projectId: string;
   readonly detail: SRDetailView;
   readonly actorName?: (actorId: string) => string;
+  readonly request?: InceptionAssistanceRequest;
   onSaved(): void;
   onOpenDocument?(): void;
 }) {
@@ -127,6 +174,9 @@ export function InceptionConversation({ actorId, projectId, detail, actorName, o
   const scope = useMemo(() => ({ actorId, projectId, srId }), [actorId, projectId, srId]);
   const activeContext = useRef(contextKey(actorId, projectId, srId));
   const sequence = useRef(0);
+  const handledRequests = useRef(new Set<string>());
+  const resumedRuns = useRef(new Set<string>());
+  const generationAttempt = useRef<string | undefined>(undefined);
   const [supplement, setSupplement] = useState('');
   const [work, setWork] = useState<WorkState>({ kind: 'idle' });
   const [selectedProposalIds, setSelectedProposalIds] = useState<readonly string[]>([]);
@@ -135,6 +185,7 @@ export function InceptionConversation({ actorId, projectId, detail, actorName, o
   const [commandError, setCommandError] = useState<string>();
   const [commandRetry, setCommandRetry] = useState<(() => void) | undefined>();
   const [commandBusy, setCommandBusy] = useState(false);
+  const [questionDialog, setQuestionDialog] = useState<{ readonly initialQuestionId?: string }>();
   const answersRef = useRef(answers);
   answersRef.current = answers;
 
@@ -148,6 +199,9 @@ export function InceptionConversation({ actorId, projectId, detail, actorName, o
     setCommandMessage(undefined);
     setCommandError(undefined);
     setCommandRetry(undefined);
+    setQuestionDialog(undefined);
+    resumedRuns.current.clear();
+    generationAttempt.current = undefined;
   }, [actorId, projectId, srId]);
 
   const accepts = (key: string, requestSequence: number): boolean =>
@@ -166,6 +220,8 @@ export function InceptionConversation({ actorId, projectId, detail, actorName, o
       return;
     }
     setSelectedProposalIds([]);
+    setCommandError(undefined);
+    setCommandRetry(undefined);
     setWork({ kind: 'ready', draft: { detail: loaded.value, run, presentation } });
     onSaved();
   };
@@ -206,8 +262,29 @@ export function InceptionConversation({ actorId, projectId, detail, actorName, o
     presentation: LoadedDraft['presentation'],
     idempotencyKey = crypto.randomUUID(),
   ) => {
+    if (!owner) return;
+    if (generationAttempt.current !== undefined) return;
     const key = contextKey(actorId, projectId, srId);
     const requestSequence = ++sequence.current;
+    const attemptToken = `${key}:${requestSequence}`;
+    generationAttempt.current = attemptToken;
+    setCommandError(undefined);
+    setCommandRetry(undefined);
+    const activeRun = detail.generationRuns.find((run) => run.status === 'pending' || run.status === 'running');
+    if (activeRun !== undefined) {
+      resumedRuns.current.add(activeRun.runId);
+      setWork({ kind: 'working', message: activeRun.status === 'pending' ? '기존 AI 작업이 실행을 기다리고 있습니다.' : '기존 AI 작업을 이어서 확인하고 있습니다.' });
+      try {
+        await poll(activeRun, key, requestSequence, activeRun.taskKind === 'QUESTION_PROPOSALS' ? 'questions' : 'plan');
+      } catch {
+        if (accepts(key, requestSequence)) {
+          setWork({ kind: 'error', message: '진행 중인 AI 작업을 확인하지 못했습니다. 상세를 새로 읽은 뒤 다시 확인하세요.' });
+        }
+      } finally {
+        if (generationAttempt.current === attemptToken) generationAttempt.current = undefined;
+      }
+      return;
+    }
     setWork({ kind: 'working', message: 'AI 생성 준비 상태를 확인하고 있습니다.' });
     try {
       if (!(await generationReady())) {
@@ -232,6 +309,7 @@ export function InceptionConversation({ actorId, projectId, detail, actorName, o
         setWork({ kind: 'error', message: requested.error.message });
         return;
       }
+      resumedRuns.current.add(requested.value.runId);
       await poll(requested.value, key, requestSequence, presentation);
     } catch (error) {
       if (!accepts(key, requestSequence)) return;
@@ -242,7 +320,54 @@ export function InceptionConversation({ actorId, projectId, detail, actorName, o
             retry: () => { void generate(input, presentation, idempotencyKey); },
           }
         : { kind: 'error', message: 'AI 생성 연결을 사용할 수 없습니다. 직접 Plan을 작성할 수 있습니다.' });
+    } finally {
+      if (generationAttempt.current === attemptToken) generationAttempt.current = undefined;
     }
+  };
+
+  const activeGenerationRun = detail.generationRuns.find((run) => run.status === 'pending' || run.status === 'running');
+  useEffect(() => {
+    if (activeGenerationRun === undefined || resumedRuns.current.has(activeGenerationRun.runId) || generationAttempt.current !== undefined) return;
+    resumedRuns.current.add(activeGenerationRun.runId);
+    const key = contextKey(actorId, projectId, srId);
+    const requestSequence = ++sequence.current;
+    const attemptToken = `${key}:${requestSequence}`;
+    generationAttempt.current = attemptToken;
+    setCommandError(undefined);
+    setCommandRetry(undefined);
+    setWork({ kind: 'working', message: activeGenerationRun.status === 'pending' ? '기존 AI 작업이 실행을 기다리고 있습니다.' : '기존 AI 작업을 이어서 확인하고 있습니다.' });
+    void poll(activeGenerationRun, key, requestSequence, activeGenerationRun.taskKind === 'QUESTION_PROPOSALS' ? 'questions' : 'plan')
+      .catch(() => {
+        if (activeContext.current === key && sequence.current === requestSequence) {
+          setWork({ kind: 'error', message: '진행 중인 AI 작업을 확인하지 못했습니다. 상세를 새로 읽은 뒤 다시 확인하세요.' });
+        }
+      })
+      .finally(() => {
+        if (generationAttempt.current === attemptToken) generationAttempt.current = undefined;
+      });
+  }, [activeGenerationRun?.runId, actorId, projectId, srId]);
+
+  useEffect(() => {
+    if (request === undefined || !owner) return;
+    const requestContext = `${contextKey(actorId, projectId, srId)}:${request.requestId}`;
+    if (handledRequests.current.has(requestContext)) return;
+    handledRequests.current.add(requestContext);
+    setSupplement(request.context);
+    if (request.kind === 'questions') {
+      void generate(questionsInput(questionSupplement(detail, request.context)), 'questions');
+    } else {
+      void generate(planInput(detail, request.context, request.kind), 'plan');
+    }
+  }, [actorId, detail, owner, projectId, request, srId]);
+
+  const reopenSuggestion = (run: Extract<GenerationRunView, { readonly status: 'succeeded' }>) => {
+    const key = contextKey(actorId, projectId, srId);
+    const requestSequence = ++sequence.current;
+    const presentation: LoadedDraft['presentation'] = run.draft.body.kind === 'question_proposals' ? 'questions' : 'plan';
+    setCommandError(undefined);
+    setCommandRetry(undefined);
+    setWork({ kind: 'working', message: '저장된 제안을 다시 읽고 있습니다.' });
+    void loadDraft(run, key, requestSequence, presentation);
   };
 
   const runCommand = async (key: string, action: () => Promise<void>) => {
@@ -416,13 +541,18 @@ export function InceptionConversation({ actorId, projectId, detail, actorName, o
       [question.questionId]: { ...(current[question.questionId] ?? answerDraft(question)), ...patch },
     }));
     setCommandError(undefined);
+    setCommandRetry(undefined);
   };
 
   const generated = work.kind === 'ready' ? work.draft.run.draft.body : undefined;
-  const existingRun = detail.generationRuns.find((run) => run.status === 'pending' || run.status === 'running');
+  const existingRun = activeGenerationRun;
+  const previousSuggestions = detail.generationRuns
+    .filter((run): run is Extract<GenerationRunView, { readonly status: 'succeeded' }> => run.status === 'succeeded')
+    .toSorted((left, right) => right.finishedAt.localeCompare(left.finishedAt));
   const hasAnswers = detail.questions.some((question) => question.currentResult.selectedAnswer !== undefined);
-  const generationBusy = work.kind === 'working' || work.kind === 'uncertain';
+  const generationBusy = work.kind === 'working' || work.kind === 'uncertain' || existingRun !== undefined;
   const displayActor = (id: string) => actorName?.(id) ?? (id === detail.sr.ownerId ? 'SR 담당자' : '지정된 담당자');
+  const assignedQuestions = detail.questions.filter((question) => question.assigneeId === actorId);
 
   return <section className="inception-conversation" data-testid="inception-conversation">
     <header><div><p className="eyebrow">선택형 AI 보조</p><h2>AI로 문서 보완</h2></div><span>{owner ? '담당자' : '참여자'}</span></header>
@@ -439,6 +569,11 @@ export function InceptionConversation({ actorId, projectId, detail, actorName, o
     </div>}
     {!owner && <p className="inception-conversation__notice">SR 담당자가 AI 보완안을 선택해 문서에 반영합니다. 내게 배정된 참고 질문에는 아래에서 직접 답할 수 있습니다.</p>}
 
+    {assignedQuestions.length > 0 && <div className="inception-conversation__question-entry">
+      <div><strong>내게 온 참고 질문 {assignedQuestions.length}개</strong><p>한 질문씩 이유와 선택지를 보고 답할 수 있습니다. 필요한 질문만 답하고 나중에 이어서 해도 됩니다.</p></div>
+      <button className="primary-button" type="button" onClick={() => setQuestionDialog({})}>질문 답하기</button>
+    </div>}
+
     {work.kind === 'working' && <p className="inception-conversation__status" role="status">{work.message}</p>}
     {work.kind === 'error' && <div className="inception-conversation__error" role="alert"><p>{work.message}</p>{onOpenDocument && <button type="button" onClick={onOpenDocument}>Plan 직접 작성</button>}</div>}
     {work.kind === 'uncertain' && <div className="inception-conversation__error" role="alert"><p>{work.message}</p><button type="button" onClick={work.retry}>생성 이력 새로고침</button></div>}
@@ -450,7 +585,11 @@ export function InceptionConversation({ actorId, projectId, detail, actorName, o
         ? '기존 질문은 그대로 유지됩니다. 아래 내용은 설명을 돕기 위한 제안이며 새 질문으로 추가되지 않습니다.'
         : '추가할 참고 질문만 선택하세요. 선택 전에는 질문이나 답변으로 확정되지 않습니다.'}</p>
       {generated.proposals.map((proposal) => <article key={proposal.temporaryId}>
-        {work.kind === 'ready' && work.draft.presentation === 'explanation' ? <strong>{proposal.text}</strong> : <label className="inception-conversation__select"><input type="checkbox" checked={selectedProposalIds.includes(proposal.temporaryId)} onChange={(event) => setSelectedProposalIds((current) => event.target.checked ? [...current, proposal.temporaryId] : current.filter((id) => id !== proposal.temporaryId))} /><strong>{proposal.text}</strong></label>}
+        {work.kind === 'ready' && work.draft.presentation === 'explanation' ? <strong>{proposal.text}</strong> : <label className="inception-conversation__select"><input type="checkbox" checked={selectedProposalIds.includes(proposal.temporaryId)} onChange={(event) => {
+          setSelectedProposalIds((current) => event.target.checked ? [...current, proposal.temporaryId] : current.filter((id) => id !== proposal.temporaryId));
+          setCommandError(undefined);
+          setCommandRetry(undefined);
+        }} /><strong>{proposal.text}</strong></label>}
         <p><b>왜 묻나요 · 선택에 따른 영향</b><br />{proposal.reason}</p>
         <p className="quiet">참고 질문 · 답변 담당자 {displayActor(proposal.suggestedAssigneeId)}</p>
         {proposal.candidateAnswers.length > 0 && <div><b>답변을 생각할 때 참고할 후보</b><ul>{proposal.candidateAnswers.map((answer) => <li key={answer}>{answer}</li>)}</ul></div>}
@@ -469,23 +608,43 @@ export function InceptionConversation({ actorId, projectId, detail, actorName, o
       <h3>문서 보완에 참고한 질문과 답변</h3>
       {detail.questions.length === 0 ? <p className="quiet">저장된 참고 질문이 없습니다.</p> : detail.questions.map((question) => {
         const answer = question.currentResult.selectedAnswer;
-        const draft = answers[question.questionId] ?? answerDraft(question);
         const canAnswer = question.status === 'open' && question.assigneeId === actorId;
         return <article key={question.questionId} id={`inception-question-${question.questionId}`} data-testid={`inception-question-${question.questionId}`} tabIndex={-1}>
           <h4>{question.text}</h4><p className="quiet">{question.reason}</p>
           <p className="quiet">답변 담당자 · {displayActor(question.assigneeId)} · 상태 {question.status === 'open' ? '답변 대기' : question.status === 'answered' ? '답변 저장됨' : question.status === 'resolved' ? '기존 확인 완료' : '결정으로 전환됨'}</p>
-          {question.candidateAnswers.length > 0 && <p><b>답변을 위한 선택지</b> · {question.candidateAnswers.join(' / ')}</p>}
           {answer !== undefined && <blockquote><b>저장된 답변</b><br />{answer.answer.text}</blockquote>}
-          {canAnswer && <div className="inception-conversation__answer">
-            {question.answerMode === 'choice' ? <fieldset><legend>답변 선택</legend>{question.options.map((option) => <label key={option.optionId}><input type="radio" name={`inception-answer-${question.questionId}`} checked={draft.optionId === option.optionId} onChange={() => updateAnswer(question, { optionId: option.optionId })} />{option.text}</label>)}</fieldset> : <label>내 답변<textarea rows={3} value={draft.text} onChange={(event) => updateAnswer(question, { text: event.target.value })} /></label>}
-            <button type="button" disabled={commandBusy} onClick={() => saveAnswer(question)}>답변 저장</button>
-          </div>}
+          {canAnswer && <button type="button" onClick={() => setQuestionDialog({ initialQuestionId: question.questionId })}>이 질문에 답하기</button>}
           {question.status === 'open' && !canAnswer && <p className="inception-conversation__notice">{displayActor(question.assigneeId)}님의 답변을 기다립니다.</p>}
         </article>;
       })}
     </section>
 
+    {previousSuggestions.length > 0 && <details className="inception-conversation__past-suggestions">
+      <summary>이전에 만든 제안 {previousSuggestions.length}개</summary>
+      <div>{previousSuggestions.map((run) => <article key={run.runId}>
+        <div><strong>{run.draft.body.kind === 'question_proposals' ? '참고 질문 제안' : '문서 보완안'}</strong><small>{new Intl.DateTimeFormat('ko-KR', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(run.finishedAt))}</small></div>
+        <span>{run.application.kind === 'applied' ? '문서에 반영됨' : '검토 가능'}</span>
+        <button type="button" disabled={generationBusy} onClick={() => reopenSuggestion(run)}>제안 다시 보기</button>
+      </article>)}</div>
+    </details>}
+
     {commandError && <div className="inception-conversation__error" role="alert"><p>{commandError}</p>{commandRetry && <button type="button" onClick={commandRetry}>같은 요청 결과 확인</button>}</div>}
     {commandMessage && <p className="inception-conversation__success" role="status">{commandMessage}</p>}
+    {questionDialog !== undefined && assignedQuestions.length > 0 && <InceptionQuestionDialog
+      questions={assignedQuestions}
+      {...(questionDialog.initialQuestionId === undefined ? {} : { initialQuestionId: questionDialog.initialQuestionId })}
+      drafts={answers}
+      busy={commandBusy || generationBusy}
+      {...(commandError === undefined ? {} : { error: commandError })}
+      {...(commandMessage === undefined ? {} : { message: commandMessage })}
+      actorName={displayActor}
+      onChange={updateAnswer}
+      onSave={saveAnswer}
+      {...(owner ? { onExplain: (question: QuestionView) => {
+          setQuestionDialog(undefined);
+          void generate(questionsInput(explanationSupplement(question, supplement)), 'explanation');
+        } } : {})}
+      onClose={() => setQuestionDialog(undefined)}
+    />}
   </section>;
 }

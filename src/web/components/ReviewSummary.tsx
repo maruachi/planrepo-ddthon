@@ -11,7 +11,7 @@ function sameBundle(left: BundleRef | undefined, right: BundleRef | undefined): 
     left.gate === right.gate && left.bundleId === right.bundleId && left.version === right.version;
 }
 
-export function ReviewSummary({ actorId, projectId, detail, actorName, gate = 'G1', displayLabel, planMode = false, showReadiness = planMode, onResolveIssue, onSaved }: {
+export function ReviewSummary({ actorId, projectId, detail, actorName, gate = 'G1', displayLabel, planMode = false, showReadiness = planMode, onResolveIssue, onReadDocument, onViewVisualization, onRequestAi, onSaved }: {
   readonly gate?: 'G1' | 'G2';
   readonly actorId: string;
   readonly projectId: string;
@@ -21,6 +21,9 @@ export function ReviewSummary({ actorId, projectId, detail, actorName, gate = 'G
   readonly planMode?: boolean;
   readonly showReadiness?: boolean;
   readonly onResolveIssue?: (issue: PlanReadinessIssue) => void;
+  readonly onReadDocument?: () => void;
+  readonly onViewVisualization?: () => void;
+  readonly onRequestAi?: (context: string) => void;
   onSaved(): void;
 }) {
   const label = displayLabel ?? (gate === 'G1' ? '요구사항' : '계획');
@@ -31,6 +34,8 @@ export function ReviewSummary({ actorId, projectId, detail, actorName, gate = 'G
   const bundle = detail.bundles.find((item) => sameBundle(item.bundleRef, config.currentBundleRef) && item.reviewEpoch === config.reviewEpoch);
   const currentApprovals = bundle === undefined ? [] : detail.approvals.filter((item) => sameBundle(item.bundleRef, bundle.bundleRef) && item.reviewEpoch === bundle.reviewEpoch);
   const currentRequests = bundle === undefined ? [] : detail.reviewRequests.filter((item) => sameBundle(item.bundleRef, bundle.bundleRef) && item.reviewEpoch === bundle.reviewEpoch);
+  const currentComments = bundle === undefined ? [] : detail.comments.filter((item) => sameBundle(item.bundleRef, bundle.bundleRef));
+  const unresolvedChanges = detail.changeRequests.filter((item) => item.affectedGate === gate && item.status !== 'resolved');
   const assignedNames = config.assignment?.reviewerIds.map(actorName) ?? [];
   const approvedNames = currentApprovals.map((item) => actorName(item.approverId));
   const allReviewersApproved = bundle !== undefined && bundle.reviewerIds.length > 0 &&
@@ -50,10 +55,24 @@ export function ReviewSummary({ actorId, projectId, detail, actorName, gate = 'G
     : config.validity === 'valid'
       ? `${label} 검토 통과`
       : config.needsNewBundle
-        ? '현재 자료로 다시 검토해야 합니다.'
+        ? config.currentBundleRef === undefined ? '검토 요청 전입니다.' : '현재 자료로 다시 검토해야 합니다.'
         : allReviewersApproved && !assessment.canTransition
           ? '검토자 승인 완료 · 추가 확인 필요'
           : assessment.reviewState;
+  const humanReviewNotes = [
+    ...currentComments.map((item) => `문단 의견: ${item.body}`),
+    ...unresolvedChanges.map((item) => `수정 요청: ${item.body}`),
+  ];
+  const aiReviewContext = [
+    `현재 검토 대상: ${label} 문서`,
+    `현재 상태: ${currentStatus}`,
+    humanReviewNotes.length === 0
+      ? '현재 미해결 사람 검토 의견은 없습니다. 문서의 명확성과 누락을 살피는 일반 보완안을 제안하세요.'
+      : `사람이 남긴 검토 의견:\n${humanReviewNotes.slice(0, 20).map((item) => item.slice(0, 8_000)).join('\n')}`,
+    'AI는 사람이 현재 문서와 비교할 리뷰 보완안만 제안합니다. 문서 내용, 검토 요청, 승인 상태를 자동으로 바꾸지 마세요.',
+  ].join('\n\n');
+  const canRequestReviewAi = detail.sr.ownerId === actorId && onRequestAi !== undefined &&
+    config.validity !== 'valid' && (currentApprovals.length === 0 || unresolvedChanges.length > 0);
 
   return <section className="entity-panel official-review" aria-label={`${label} 공식 검토`}>
     <p className="eyebrow">{label} 검토</p><h2>{label} 검토</h2>
@@ -63,6 +82,15 @@ export function ReviewSummary({ actorId, projectId, detail, actorName, gate = 'G
       <div><strong>개별 승인</strong><span>{assignedNames.length === 0 ? '검토자 배정 후 집계됩니다.' : `${approvedNames.length}/${assignedNames.length}명 승인`}</span></div>
       <div><strong>현재 상태</strong><span>{currentStatus}</span></div>
     </div>
+    {(onReadDocument !== undefined || onViewVisualization !== undefined || canRequestReviewAi) &&
+      <section aria-label="검토 자료 확인">
+        <p className="quiet">문서를 먼저 읽고, 요약·시각화가 있으면 함께 참고한 뒤 검토합니다.</p>
+        <div className="inception-conversation__actions">
+          {onReadDocument !== undefined && <button type="button" onClick={onReadDocument}>문서 읽기</button>}
+          {onViewVisualization !== undefined && <button type="button" onClick={onViewVisualization}>요약·시각화 확인</button>}
+          {canRequestReviewAi && <button type="button" onClick={() => onRequestAi(aiReviewContext)}>{currentComments.length > 0 || unresolvedChanges.length > 0 ? 'AI로 리뷰 의견 보완하기' : 'AI로 검토 전 문서 보완하기'}</button>}
+        </div>
+      </section>}
     {readinessIssues.length > 0 && <section className="plan-readiness" aria-label="검토 전에 확인할 내용">
       <div><p className="eyebrow">다음 행동</p><h3>{allReviewersApproved ? '검토자 승인은 끝났고, 아래 내용을 더 확인해야 합니다.' : '검토 요청 전에 아래 내용을 확인해 주세요.'}</h3></div>
       <ul>{readinessIssues.map((issue) => <li key={issue.id}><div><strong>{issue.title}</strong><p>{issue.detail}</p>

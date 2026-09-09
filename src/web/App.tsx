@@ -8,8 +8,10 @@ import { TeamBoard } from './components/TeamBoard';
 import { SRList } from './components/SRList';
 import { SRDetailShell } from './components/SRDetailShell';
 import { TeamPolicyEditor } from './components/TeamPolicyEditor';
+import logoUrl from './assets/logo.png';
 import './styles/base.css';
 import './styles/prototype.css';
+import './styles/reference-theme.css';
 
 declare const __PLANREPO_PROJECT_ID__: string;
 declare const __PLANREPO_DEFAULT_ACTOR_ID__: string;
@@ -26,6 +28,7 @@ export function App() {
   const [selectedSrId, setSelectedSrId] = useState<string | undefined>(() => new URLSearchParams(location.search).get('sr') ?? undefined);
   const [screen, setScreen] = useState<Screen>('board');
   const [registering, setRegistering] = useState(false);
+  const [registrationBusy, setRegistrationBusy] = useState(false);
   const [loadingBoard, setLoadingBoard] = useState(true);
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [error, setError] = useState<string>();
@@ -34,6 +37,15 @@ export function App() {
   const workspaceQueries = useRef(new QueryCoordinator());
   const boardQueries = useRef(new QueryCoordinator());
   const detailQueries = useRef(new QueryCoordinator());
+  const registrationBusyRef = useRef(false);
+  const registrationUrlRef = useRef<string | undefined>(undefined);
+
+  const setRegistrationInFlight = (busy: boolean) => {
+    registrationBusyRef.current = busy;
+    if (busy && registrationUrlRef.current === undefined) registrationUrlRef.current = location.href;
+    if (!busy) registrationUrlRef.current = undefined;
+    setRegistrationBusy(busy);
+  };
 
   const loadWorkspace = useCallback(async (nextActorId: string) => {
     const ticket = workspaceQueries.current.issue({ actorId: nextActorId, projectId: __PLANREPO_PROJECT_ID__, target: 'workspace', methodId: 'M-001' });
@@ -119,6 +131,13 @@ export function App() {
 
   useEffect(() => {
     const restoreLocation = () => {
+      if (registrationBusyRef.current) {
+        const registrationUrl = registrationUrlRef.current;
+        if (registrationUrl !== undefined && location.href !== registrationUrl) {
+          window.history.pushState(null, '', registrationUrl);
+        }
+        return;
+      }
       const params = new URLSearchParams(location.search);
       const nextSrId = params.get('sr') ?? undefined;
       setDetail(previous => previous?.sr.scope.srId === nextSrId ? previous : undefined);
@@ -129,6 +148,15 @@ export function App() {
     window.addEventListener('popstate', restoreLocation);
     return () => window.removeEventListener('popstate', restoreLocation);
   }, []);
+  useEffect(() => {
+    const protectRegistration = (event: BeforeUnloadEvent) => {
+      if (!registrationBusyRef.current) return;
+      event.preventDefault();
+      event.returnValue = '';
+    };
+    window.addEventListener('beforeunload', protectRegistration);
+    return () => window.removeEventListener('beforeunload', protectRegistration);
+  }, []);
   const openSr = (srId: string, tab = 'documents') => {
     const url = new URL(location.href); url.searchParams.set('sr', srId); url.searchParams.set('view', tab);
     window.history.pushState(null, '', url);
@@ -136,12 +164,14 @@ export function App() {
     setInitialTab(tab); setSelectedSrId(srId); setRegistering(false);
   };
   const chooseScreen = (next: Screen) => {
+    if (registrationBusyRef.current) return;
     const url = new URL(location.href); url.searchParams.delete('sr'); url.searchParams.delete('view');
     window.history.pushState(null, '', url);
     setScreen(next); setSelectedSrId(undefined); setRegistering(false);
   };
   const actorName = (id: string) => workspace?.actors.find((actor) => actor.actorId === id)?.displayName ?? '알 수 없는 사용자';
   const switchActor = (nextActorId: string) => {
+    if (registrationBusyRef.current) return;
     if (nextActorId === actorId) return;
     workspaceQueries.current.issue({ actorId: nextActorId, projectId: __PLANREPO_PROJECT_ID__, target: 'workspace', methodId: 'M-001' });
     boardQueries.current.issue({ actorId: nextActorId, projectId: __PLANREPO_PROJECT_ID__, target: 'team-board', methodId: 'M-045' });
@@ -162,31 +192,34 @@ export function App() {
 
   return (
     <div className="app-shell">
-      <aside className="sidebar">
-        <a className="brand" href="/" aria-label="PlanRepo 홈"><span className="brand-mark">P</span><span>PlanRepo</span></a>
-        <div className="workspace-name"><small>프로젝트</small><strong>{workspace?.project.name ?? '불러오는 중'}</strong></div>
-        <nav aria-label="주 메뉴">
-          <button type="button" aria-current={screen === 'board' ? 'page' : undefined} onClick={() => chooseScreen('board')}>팀 보드</button>
-          <button type="button" aria-current={screen === 'inbox' ? 'page' : undefined} onClick={() => chooseScreen('inbox')}>내 할 일</button>
-          <button type="button" aria-current={screen === 'list' ? 'page' : undefined} onClick={() => chooseScreen('list')}>SR 목록</button>
-          <button type="button" aria-current={screen === 'settings' ? 'page' : undefined} onClick={() => chooseScreen('settings')}>팀 설정</button>
+      <a className="skip" href="#main-content">본문으로 이동</a>
+      <header className="app-header">
+        <a className="brand" href="/" aria-label="PlanRepo 홈" aria-disabled={registrationBusy || undefined} onClick={(event) => { if (registrationBusyRef.current) event.preventDefault(); }}><img className="brand-logo" src={logoUrl} alt="" aria-hidden="true" width={40} height={29} /><span className="brand-word">Plan<span className="brand-word-accent">Repo</span></span></a>
+        <span className="header-divider" aria-hidden="true" />
+        <div className="header-project"><small>프로젝트</small><strong>{workspace?.project.name ?? '불러오는 중'}</strong></div>
+        <nav className="header-tabs" aria-label="주 메뉴">
+          <button type="button" className="header-tab" disabled={registrationBusy} aria-current={selectedSrId === undefined && !registering && screen === 'board' ? 'page' : undefined} onClick={() => chooseScreen('board')}>팀 보드</button>
+          <button type="button" className="header-tab" disabled={registrationBusy} aria-current={selectedSrId === undefined && !registering && screen === 'inbox' ? 'page' : undefined} onClick={() => chooseScreen('inbox')}>내 할 일</button>
+          <button type="button" className="header-tab" disabled={registrationBusy} aria-current={selectedSrId === undefined && !registering && screen === 'list' ? 'page' : undefined} onClick={() => chooseScreen('list')}>SR 목록</button>
+          <button type="button" className="header-tab" disabled={registrationBusy} aria-current={selectedSrId === undefined && !registering && screen === 'settings' ? 'page' : undefined} onClick={() => chooseScreen('settings')}>팀 설정</button>
         </nav>
-        <div className="actor-picker">
-          <label htmlFor="demo-actor">체험할 역할</label>
-          <select id="demo-actor" value={actorId} onChange={(event) => switchActor(event.target.value)}>
-            {(workspace?.actors ?? [{ actorId, displayName: '선택 사용자' }]).map((actor) => <option key={actor.actorId} value={actor.actorId}>{actor.displayName}</option>)}
-          </select>
-          <small>역할을 바꾸면 작성자와 검토자의 화면을 체험할 수 있습니다.</small>
+        <div className="header-right">
+          <span className={`connection ${workspace?.connection.available === true ? 'online' : ''}`}>{workspace?.connection.available === true ? '로컬 프로토타입' : '연결 확인 중'}</span>
+          <div className="user-chip">
+            <span className="avatar" aria-hidden="true">{actorName(actorId).trim().slice(0, 1) || 'P'}</span>
+            <label className="actor-picker" htmlFor="demo-actor"><span className="sr-only">체험할 역할</span><select id="demo-actor" aria-label="체험할 역할" value={actorId} disabled={registrationBusy} onChange={(event) => switchActor(event.target.value)}>
+              {(workspace?.actors ?? [{ actorId, displayName: '선택 사용자' }]).map((actor) => <option key={actor.actorId} value={actor.actorId}>{actor.displayName}</option>)}
+            </select></label>
+          </div>
         </div>
-      </aside>
-      <main className="content">
-        <header className="topbar"><h1>PlanRepo</h1><span className={`connection ${workspace?.connection.available === true ? 'online' : ''}`}>{workspace?.connection.available === true ? '로컬 프로토타입' : '연결 확인 중'}</span></header>
+      </header>
+      <main id="main-content" className="content">
         {error !== undefined && <div className="page-error" role="alert">{error}</div>}
         {boardError !== undefined && <div className="page-error" role="alert"><p>{boardError}</p><button type="button" onClick={() => { void loadBoard(actorId); }}>보드 다시 시도</button></div>}
         {selectedSrId !== undefined ? (
           <SRDetailShell actorId={actorId} projectId={__PLANREPO_PROJECT_ID__} detail={detail} loading={loadingDetail} {...(initialTab === undefined ? {} : { initialTab })} {...(detailError === undefined ? {} : { error: detailError })} members={workspace?.actors ?? []} policies={workspace?.policies ?? []} actorName={actorName} onBack={() => chooseScreen('board')} onRetry={() => { void loadDetail(actorId, selectedSrId); }} onRefresh={() => { void loadDetail(actorId, selectedSrId); void loadBoard(actorId); void loadWorkspace(actorId); }} />
         ) : registering ? (
-          <SRRegistrationForm key={actorId} actorId={actorId} projectId={__PLANREPO_PROJECT_ID__} owners={workspace?.actors ?? []} onCancel={() => setRegistering(false)} onSaved={(srId) => { setRegistering(false); void loadBoard(actorId); openSr(srId, 'documents'); }} />
+          <SRRegistrationForm key={actorId} actorId={actorId} projectId={__PLANREPO_PROJECT_ID__} owners={workspace?.actors ?? []} onBusyChange={setRegistrationInFlight} onCancel={() => { setRegistrationInFlight(false); setRegistering(false); }} onSaved={(srId) => { setRegistrationInFlight(false); setRegistering(false); void loadBoard(actorId); openSr(srId, 'documents'); }} />
         ) : screen === 'board' ? (
           <TeamBoard actorId={actorId} projectId={__PLANREPO_PROJECT_ID__} board={board} loading={loadingBoard} actorName={actorName} onOpen={openSr} onRegister={() => setRegistering(true)} />
         ) : screen === 'list' ? (

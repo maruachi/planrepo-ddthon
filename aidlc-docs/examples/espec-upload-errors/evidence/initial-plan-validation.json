@@ -1,0 +1,200 @@
+{
+  "kind": "ready",
+  "value": {
+    "schemaVersion": 1,
+    "overview": {
+      "headline": "eSPEC 첨부파일 업로드 오류 조회·재처리",
+      "summary": "USE_YN=Y이면서 FILE_UPLOAD_DTTM이 없는 오류 첨부를 문서 단위로 조회하고 파일 1건 단위로 재처리하는 Inception 계획",
+      "evidence": {
+        "sectionId": "요구사항",
+        "quote": "오류 판정: `ESPEC_ATTACH_FILE.USE_YN = 'Y' AND FILE_UPLOAD_DTTM IS NULL`"
+      }
+    },
+    "changes": {
+      "before": [],
+      "after": [
+        "Portal에서 오류 문서를 조회하고 파일 1건 단위로 재처리 결과를 확인"
+      ],
+      "evidence": {
+        "sectionId": "진행 계획",
+        "quote": "파일 1건 단위 재처리 API를 구성한다"
+      }
+    },
+    "nodes": [
+      {
+        "id": "node-1",
+        "kind": "action",
+        "title": "오류 문서 검색",
+        "detail": "문서번호 / 기간 / 문서구분으로 오류 파일이 1건 이상인 문서를 조회",
+        "evidence": {
+          "sectionId": "사용자 시나리오",
+          "quote": "검색영역에 문서번호 / 기간 / 문서구분(PRC/INS)을 입력한다"
+        }
+      },
+      {
+        "id": "node-2",
+        "kind": "condition",
+        "title": "재처리 전 상태 재확인",
+        "detail": "이미 정상 처리된 건은 Skip 하고 동시 요청 중복 처리를 방지",
+        "evidence": {
+          "sectionId": "사용자 시나리오",
+          "quote": "이미 정상 처리된 건은 Skip"
+        }
+      },
+      {
+        "id": "node-3",
+        "kind": "result",
+        "title": "재처리 성공",
+        "detail": "FILE_UPLOAD_DTTM이 갱신되어 해당 Row가 재조회됨",
+        "evidence": {
+          "sectionId": "사용자 시나리오",
+          "quote": "성공 시 `FILE_UPLOAD_DTTM`이 갱신되어 해당 Row가 재조회된다"
+        }
+      },
+      {
+        "id": "node-4",
+        "kind": "result",
+        "title": "재처리 실패",
+        "detail": "원본 부재 시 실패 사유만 반환",
+        "evidence": {
+          "sectionId": "사용자 시나리오",
+          "quote": "이번 범위에서는 실패 사유만 반환한다"
+        }
+      }
+    ],
+    "edges": [
+      {
+        "from": "node-1",
+        "to": "node-2",
+        "label": "오류 파일 선택 후 재처리 요청",
+        "evidence": {
+          "sectionId": "주요 구조",
+          "quote": "재처리 API → 기존 파일 업로드 Service: 로직 재사용"
+        }
+      },
+      {
+        "from": "node-2",
+        "to": "node-3",
+        "label": "상태 정상이고 원본 접근 가능",
+        "evidence": {
+          "sectionId": "주요 구조",
+          "quote": "재처리 성공 → ESPEC_ATTACH_FILE.FILE_UPLOAD_DTTM: 업로드 시각 갱신"
+        }
+      },
+      {
+        "from": "node-2",
+        "to": "node-4",
+        "label": "원본 부재·접근 불가",
+        "evidence": {
+          "sectionId": "사용자 시나리오",
+          "quote": "원본 파일이 이미 삭제되었거나 접근 불가한 경우 재처리는 불가능"
+        }
+      }
+    ],
+    "scenarios": [
+      {
+        "id": "scenario-1",
+        "label": "오류 조회와 성공 재처리",
+        "description": "조건 검색으로 오류 문서를 조회하고 파일 1건을 재처리해 성공",
+        "nodeIds": [
+          "node-1",
+          "node-3"
+        ],
+        "outcome": "FILE_UPLOAD_DTTM 갱신 후 Row 재조회",
+        "evidence": {
+          "sectionId": "사용자 시나리오",
+          "quote": "오류 파일이 1건 이상인 문서가 목록에 노출되고"
+        },
+        "screen": {
+          "title": "오류 목록",
+          "body": "Grid에 문서번호, 오류 파일 수, 파일명, 상태, 재처리 버튼을 표시한다.",
+          "primaryAction": "재처리",
+          "evidence": {
+            "sectionId": "사용자 시나리오",
+            "quote": "Grid에 문서번호, 오류 파일 수, 파일명, 상태, 재처리 버튼을 표시한다"
+          }
+        }
+      },
+      {
+        "id": "scenario-2",
+        "label": "이미 처리된 파일 Skip",
+        "description": "재처리 직전 상태 재확인으로 이미 처리된 파일은 Skip",
+        "nodeIds": [
+          "node-2"
+        ],
+        "outcome": "중복 업로드되지 않음",
+        "evidence": {
+          "sectionId": "사용자 시나리오",
+          "quote": "이미 처리된 파일에 재요청 시 중복 업로드되지 않아야 한다"
+        }
+      },
+      {
+        "id": "scenario-3",
+        "label": "원본 소실 실패",
+        "description": "원본이 삭제·접근 불가하면 실패 사유만 반환",
+        "nodeIds": [
+          "node-4"
+        ],
+        "outcome": "실패 사유 반환, 별도 조치 없음",
+        "evidence": {
+          "sectionId": "사용자 시나리오",
+          "quote": "이번 범위에서는 실패 사유만 반환한다"
+        },
+        "screen": {
+          "title": "실패 안내",
+          "body": "실패 시 서버 오류 메시지를 표시한다.",
+          "status": "실패",
+          "evidence": {
+            "sectionId": "사용자 시나리오",
+            "quote": "실패 시 서버 오류 메시지를 표시한다"
+          }
+        }
+      },
+      {
+        "id": "scenario-4",
+        "label": "동시 요청·부분 실패",
+        "description": "동시 요청은 상태 재검증으로 막고, 부분 실패는 rollback만으로 취소된다고 단정하지 않음",
+        "nodeIds": [
+          "node-2"
+        ],
+        "outcome": "중복 처리 방지, 부분 실패는 검증 과제로 남김",
+        "evidence": {
+          "sectionId": "사용자 시나리오",
+          "quote": "DB rollback만으로 외부 파일 저장이 취소된다고 단정하지 않는다"
+        }
+      }
+    ],
+    "rules": [
+      {
+        "id": "rule-1",
+        "title": "오류 판정 조건",
+        "detail": "USE_YN='Y' AND FILE_UPLOAD_DTTM IS NULL 인 파일만 오류로 판정",
+        "category": "requirement",
+        "evidence": {
+          "sectionId": "요구사항",
+          "quote": "`USE_YN = 'N'` 파일과 정상(업로드 시각이 있는) 파일은 오류 판정에서 제외한다"
+        }
+      },
+      {
+        "id": "rule-2",
+        "title": "재처리 성공 기준",
+        "detail": "재처리 성공 시 FILE_UPLOAD_DTTM이 생성되어야 함",
+        "category": "success",
+        "evidence": {
+          "sectionId": "요구사항",
+          "quote": "재처리 성공 시 `FILE_UPLOAD_DTTM`이 생성되어야 함"
+        }
+      },
+      {
+        "id": "rule-3",
+        "title": "중복 업로드 방지",
+        "detail": "이미 처리된 파일에 재요청 시 중복 업로드되지 않아야 함",
+        "category": "exception",
+        "evidence": {
+          "sectionId": "요구사항",
+          "quote": "이미 처리된 파일에 재요청 시 중복 업로드되지 않아야 함"
+        }
+      }
+    ]
+  }
+}

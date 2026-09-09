@@ -33,8 +33,8 @@ export function StructureMap({ markdown, onOpen }: { markdown: string; onOpen():
     </> : <p>{markdown ? excerpt(markdown, 280) : '주요 구조를 정리하면 이곳에 구성 요소와 연결을 보여줍니다.'}</p>}
   </section>;
 }
-export function PlanOverview({ detail, actorName, onOpenDocument, onDiscuss, onReview }: {
-  detail: SRDetailView; actorName(id: string): string; onOpenDocument(id: InceptionDocumentId): void; onDiscuss(): void; onReview(): void;
+export function PlanOverview({ detail, actorName, onOpenDocument, onDiscuss, onReview, readOnly = false }: {
+  detail: SRDetailView; actorName(id: string): string; onOpenDocument(id: InceptionDocumentId): void; onDiscuss(): void; onReview(): void; readOnly?: boolean;
 }) {
   const artifact = currentPlan(detail);
   const [visualDocument, setVisualDocument] = useState<InceptionDocumentId>('structure');
@@ -48,7 +48,7 @@ export function PlanOverview({ detail, actorName, onOpenDocument, onDiscuss, onR
   const config = detail.reviewConfigurations.find(c => c.gate === 'G1');
   return <div className="plan-overview">
     {visualization.kind === 'ready' && artifact ? <PlanExperience artifact={artifact} onOpenDocument={onOpenDocument} onReview={onReview} approved={planState(detail) === 'approved'} />
-      : <section className="plan-intent"><p className="eyebrow">문서 요약</p><h2>{detail.sr.title}</h2><p>{excerpt(artifact?.markdown ?? detail.currentDescription.description, 480)}</p><div className="plan-intent-actions"><button className="primary-button" onClick={() => onOpenDocument('requirements')}>문서 읽기</button><button onClick={onDiscuss}>AI로 요약·시각화 제안받기</button><button onClick={onReview}>공유·리뷰</button></div><p className="quiet">요약과 시각화는 선택 사항입니다. 올린 문서 그대로 수정하고 리뷰를 요청할 수 있습니다.</p>{visualization.kind === 'invalid' && <p className="quiet">이 버전의 시각화는 다시 정리가 필요합니다. 문서는 그대로 읽고 리뷰할 수 있습니다.</p>}</section>}
+      : <section className="plan-intent"><p className="eyebrow">문서 요약</p><h2>{detail.sr.title}</h2><p>{excerpt(artifact?.markdown ?? detail.currentDescription.description, 480)}</p><div className="plan-intent-actions"><button className="primary-button" onClick={() => onOpenDocument('requirements')}>문서 읽기</button>{!readOnly && <button onClick={onDiscuss}>AI로 요약·시각화 제안받기</button>}<button onClick={onReview}>공유·리뷰</button></div><p className="quiet">{readOnly ? '승인된 문서에 별도 시각화가 포함되지 않았습니다. 현재 승인 범위는 문서 내용입니다.' : '필요한 요약과 시각화는 결재 전에 문서와 함께 확인합니다. 문서만으로도 리뷰를 요청할 수 있습니다.'}</p>{visualization.kind === 'invalid' && <p className="quiet">이 버전의 시각화는 다시 정리가 필요합니다. 문서는 그대로 읽고 리뷰할 수 있습니다.</p>}</section>}
     <div className="plan-metrics"><div><span>현재 상태</span><strong>{planStateLabel(detail)}</strong></div><div><span>문서 버전</span><strong>{plan ? 'v' + artifact!.versionRef.version : '초안 등록 전'}</strong></div><div><span>함께 검토할 사람</span><strong>{config?.assignment?.reviewerIds.map(actorName).join(', ') || '검토 요청할 때 선택합니다'}</strong></div></div>
     {presentDocuments.length > 0 && <section className="plan-summary-card"><header><div><h3>문서에 담긴 내용</h3><p className="quiet">현재 문서의 내용을 모아 보여줍니다.</p></div></header><div className="plan-document-map">{presentDocuments.map(d => {
       const body = section(d.id);
@@ -59,6 +59,6 @@ export function PlanOverview({ detail, actorName, onOpenDocument, onDiscuss, onR
       {selectedDocument.id === 'structure' ? <StructureMap markdown={structure} onOpen={() => onOpenDocument('structure')} />
         : artifact ? <PlanDocumentVisual artifact={artifact} documentId={selectedDocument.id} onRead={() => onOpenDocument(selectedDocument.id)} /> : null}
     </section>}
-    {suggestions.length > 0 && <details className="plan-summary-card"><summary>AI가 추천한 확인할 내용 · 선택 사항</summary><p className="quiet">문서를 다듬을 때 참고하세요. 별도의 답변이나 확인 기록을 모두 작성할 필요는 없습니다.</p><ul>{suggestions.map(q => <li key={q.questionId}>{q.text}</li>)}</ul><button onClick={onDiscuss}>AI와 문서 보완</button></details>}
+    {!readOnly && suggestions.length > 0 && <details className="plan-summary-card"><summary>AI가 추천한 확인할 내용 · 선택 사항</summary><p className="quiet">문서를 다듬을 때 참고하세요. 별도의 답변이나 확인 기록을 모두 작성할 필요는 없습니다.</p><ul>{suggestions.map(q => <li key={q.questionId}>{q.text}</li>)}</ul><button onClick={onDiscuss}>AI와 문서 보완</button></details>}
   </div>;
 }

@@ -19,14 +19,22 @@ function sameBundle(left: BundleRef | undefined, right: BundleRef | undefined): 
     left.gate === right.gate && left.bundleId === right.bundleId && left.version === right.version;
 }
 
-export function PlanApproval({ actorId, projectId, detail, actorName, onResolveIssue, onSaved }: {
+export function PlanApproval({ actorId, projectId, detail, actorName, onResolveIssue, onReadDocument, onViewVisualization, onRequestAi, onSaved }: {
   readonly actorId: string;
   readonly projectId: string;
   readonly detail: SRDetailView;
   readonly actorName: (id: string) => string;
   readonly onResolveIssue?: (issue: PlanReadinessIssue) => void;
+  onReadDocument?(): void;
+  onViewVisualization?(): void;
+  onRequestAi?(context: string): void;
   onSaved(): void;
 }) {
+  const navigation = {
+    ...(onReadDocument === undefined ? {} : { onReadDocument }),
+    ...(onViewVisualization === undefined ? {} : { onViewVisualization }),
+    ...(onRequestAi === undefined ? {} : { onRequestAi }),
+  };
   const plan = currentPlan(detail);
   const inceptionPlan = isInceptionPlan(plan);
   const state = planState(detail);
@@ -50,7 +58,7 @@ export function PlanApproval({ actorId, projectId, detail, actorName, onResolveI
       <div className="entity-panel"><p className="eyebrow">기존 요구사항 문서</p><h2>요구사항 검토</h2>
         <p>문서 v{plan.versionRef.version}은 기존 요구사항 문서입니다. 이 문서의 승인은 Inception Plan 전체 결재와 구분해 기록합니다.</p></div>
       <p className="quiet">기존 요구사항 검토 상태: {configuration?.validity === 'valid' ? '검토 통과' : '검토 전 또는 재검토 필요'}. 문서에서 본문을 확인하고 현재 버전을 함께 검토할 수 있습니다.</p>
-      <ReviewSummary actorId={actorId} projectId={projectId} detail={detail} actorName={actorName} gate="G1" displayLabel="요구사항" showReadiness {...(onResolveIssue === undefined ? {} : { onResolveIssue })} onSaved={onSaved} />
+      <ReviewSummary {...navigation} actorId={actorId} projectId={projectId} detail={detail} actorName={actorName} gate="G1" displayLabel="요구사항" showReadiness {...(onResolveIssue === undefined ? {} : { onResolveIssue })} onSaved={onSaved} />
     </section>;
   }
 
@@ -69,7 +77,7 @@ export function PlanApproval({ actorId, projectId, detail, actorName, onResolveI
   return <section className="plan-approval" aria-label="Plan 검토와 결재">
     <div className="entity-panel"><p className="eyebrow">Inception Plan</p><h2>Plan 검토와 결재</h2>
       <p>Plan 문서 v{plan.versionRef.version} · {visibleState}</p>
-      <p>지정 검토자가 같은 Plan 버전을 확인하고 모두 승인하면 담당자가 결재를 완료합니다.</p></div>
-    <ReviewSummary actorId={actorId} projectId={projectId} detail={detail} actorName={actorName} gate="G1" displayLabel="문서" planMode {...(onResolveIssue === undefined ? {} : { onResolveIssue })} onSaved={onSaved} />
+      <p>문서에 반영한 질문 답변과 보완안이 있으면 그 내용을 함께 확인합니다. AI 보완과 시각화는 선택 사항입니다. 지정 검토자 전원이 같은 문서를 승인하면 담당자가 최종 결재합니다.</p></div>
+    <ReviewSummary {...navigation} actorId={actorId} projectId={projectId} detail={detail} actorName={actorName} gate="G1" displayLabel="문서" planMode {...(onResolveIssue === undefined ? {} : { onResolveIssue })} onSaved={onSaved} />
   </section>;
 }

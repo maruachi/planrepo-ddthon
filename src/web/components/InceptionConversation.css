@@ -9,6 +9,8 @@
 .inception-conversation__history { padding: 18px; border: 1px solid #dbe1dc; border-radius: 9px; background: #fff; }
 .inception-conversation__composer { display: grid; gap: 12px; background: #f8faf8; }
 .inception-conversation__actions { display: flex; flex-wrap: wrap; gap: 9px; }
+.inception-conversation__question-entry { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 16px 18px; border: 1px solid #cbd9cf; border-radius: 10px; background: #eff6f1; }
+.inception-conversation__question-entry p { margin: 5px 0 0; color: #536158; }
 .inception-conversation__notice,
 .inception-conversation__status,
 .inception-conversation__error,
@@ -37,4 +39,14 @@
 .inception-conversation__answer { display: grid; gap: 11px; margin-top: 14px; padding-top: 14px; border-top: 1px solid #dbe1dc; }
 .inception-conversation__answer fieldset { display: grid; gap: 7px; margin: 0; padding: 12px; border: 1px solid #d5ddd7; border-radius: 7px; }
 .inception-conversation__answer fieldset label { display: flex; align-items: center; gap: 7px; }
-@media (max-width: 640px) { .inception-conversation > header { flex-direction: column; }.inception-conversation__actions > button { width: 100%; } }
+.inception-conversation__answer-candidates { display:grid; gap:8px; margin:10px 0; }
+.inception-conversation__answer-candidates > div { display:flex; flex-wrap:wrap; gap:7px; }
+.inception-conversation__answer-candidates button { padding:7px 10px; background:#fff; color:#315b43; text-align:left; }
+.inception-conversation__answer-candidates small { color:#5f6d63; }
+.inception-conversation__past-suggestions { padding:16px 18px; border:1px solid #dbe1dc; border-radius:9px; background:#fff; }
+.inception-conversation__past-suggestions > div { display:grid; gap:9px; margin-top:14px; }
+.inception-conversation__past-suggestions article { display:grid; grid-template-columns:minmax(0,1fr) auto auto; gap:12px; align-items:center; padding:12px; border:1px solid #e0e6e1; border-radius:7px; }
+.inception-conversation__past-suggestions article > div { display:grid; gap:4px; }
+.inception-conversation__past-suggestions article small,.inception-conversation__past-suggestions article > span { color:#657169; font-size:12px; }
+@media (max-width: 640px) { .inception-conversation > header { flex-direction: column; }.inception-conversation__actions > button { width: 100%; }.inception-conversation__question-entry { align-items: stretch; flex-direction: column; }.inception-conversation__question-entry button { width: 100%; } }
+@media (max-width: 640px) { .inception-conversation__past-suggestions article { grid-template-columns:1fr; }.inception-conversation__past-suggestions article button { width:100%; } }

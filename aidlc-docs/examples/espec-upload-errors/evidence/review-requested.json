@@ -1,0 +1,1936 @@
+{
+  "sr": {
+    "scope": {
+      "kind": "sr",
+      "projectId": "demo-project",
+      "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471"
+    },
+    "key": "SR-ESPEC-ORACLE-AI",
+    "title": "[시연] eSPEC 첨부파일 업로드 오류 조회·재처리",
+    "ownerId": "persona-p01-owner",
+    "originalDescriptionRef": {
+      "kind": "sr_description",
+      "projectId": "demo-project",
+      "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+      "entityId": "description-ee4964b4-919f-43a0-89d8-117c88ef6e88",
+      "version": 1
+    },
+    "currentDescriptionRef": {
+      "kind": "sr_description",
+      "projectId": "demo-project",
+      "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+      "entityId": "description-ee4964b4-919f-43a0-89d8-117c88ef6e88",
+      "version": 2
+    },
+    "progressStage": "sr_received",
+    "revision": 12,
+    "gates": [
+      {
+        "gate": "G1",
+        "validity": "not_passed",
+        "reviewEpoch": 12,
+        "blockers": []
+      },
+      {
+        "gate": "G2",
+        "validity": "not_passed",
+        "reviewEpoch": 12,
+        "blockers": []
+      }
+    ]
+  },
+  "originalDescription": {
+    "versionRef": {
+      "kind": "sr_description",
+      "projectId": "demo-project",
+      "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+      "entityId": "description-ee4964b4-919f-43a0-89d8-117c88ef6e88",
+      "version": 1
+    },
+    "title": "그소리가 아니라, espec, oracle등은 플랜을 제시해주는거겠지. 이에 대해 모르니깐  ai로 초안 작성을",
+    "purpose": "그소리가 아니라, espec, oracle등은 플랜을 제시해주는거겠지. 이에 대해 모르니깐  ai로 초안 작성을의 목적과 완료 기준을 구체화합니다.",
+    "description": "# PLAN — eSPEC 첨부파일 업로드 오류 조회/재처리 기능\n\n## 1. 목적\n\neSPEC 문서(PRC/INS) 첨부파일 중 `USE_YN = 'Y'` 이지만 `FILE_UPLOAD_DTTM`이 없는 비정상 건을 운영자가 직접 조회하고 재처리할 수 있도록 기능을 추가한다.\\\n현재는 DB 조회 및 수동 확인이 필요하므로, Portal에서 대상 문서와 첨부파일 상태를 확인하고 재처리 결과까지 추적 가능하도록 개선한다.\n\n## 2. 변경 범위\n\n- **Frontend**: `dks-espec-portal` / Vue.js\n- **Backend**: `dks-espec-endpoint` / Spring Boot\n- **DB**: Oracle (`RPT_DOC`, `ESPEC_ATTACH_FILE`)\n- **제외 범위**: 파일 저장소 구조 변경, 기존 정상 첨부파일 이관, 인증/권한 체계 변경\n\n## 3. 사용자 흐름\n\n`문서번호/기간 검색` → `업로드 오류 첨부파일 조회` → `대상 선택` → `재처리 요청` → `성공/실패 결과 표시`\n\n- 조회 조건: `RPT_DOC_ID`, 등록일자, 문서구분(PRC/INS)\n- 오류 판정: `ESPEC_ATTACH_FILE.USE_YN = 'Y' AND FILE_UPLOAD_DTTM IS NULL`\n- 문서별 첨부파일이 여러 건인 경우 **1건이라도 오류이면 문서 단위로 노출**\n- 재처리 성공 후 목록에서 즉시 상태 갱신\n\n## 4. Backend / API\n\n### GET `/api/attachments/upload-errors`\n\n**입력**\n\n- `rptDocId?`\n- `fromDate?`\n- `toDate?`\n- `docType?` (`PRC` / `INS`)\n\n**처리**\n\n1. `RPT_DOC` 대상 문서 조회\n2. `ESPEC_ATTACH_FILE` 조인\n3. 활성 첨부파일 중 `FILE_UPLOAD_DTTM IS NULL` 존재 여부 확인\n4. 문서번호 기준으로 오류 파일 수와 상세 반환\n\n**응답 예시**\n```json\n{\n  \"rptDocId\": \"INS00649-019\",\n  \"errorFileCount\": 2,\n  \"files\": [\n    { \"fileId\": \"12345\", \"fileName\": \"spec.xlsx\", \"uploadDttm\": null }\n  ]\n}\n```\n\n### POST `/api/attachments/{fileId}/retry`\n\n- 기존 파일 업로드 Service 로직 재사용\n- 성공 시 `FILE_UPLOAD_DTTM` 갱신\n- 실패 시 원인 로그 기록 및 오류 메시지 반환\n- 중복 요청 방지를 위해 현재 상태 재확인 후 처리\n\n## 5. DB / Query\n```sql\nSELECT\n    R.RPT_DOC_ID,\n    COUNT(*) AS ERROR_FILE_COUNT\nFROM RPT_DOC R\nJOIN ESPEC_ATTACH_FILE A\n  ON A.MAPPING_1ST_KEY_ID = R.RPT_DOC_ID\nWHERE A.USE_YN = 'Y'\n  AND A.FILE_UPLOAD_DTTM IS NULL\n  AND (R.RPT_DOC_ID LIKE 'PRC%' OR R.RPT_DOC_ID LIKE 'INS%')\nGROUP BY R.RPT_DOC_ID;\n```\n\n- 신규 테이블 생성 없음\n- 기존 인덱스 확인: `ESPEC_ATTACH_FILE(MAPPING_1ST_KEY_ID)`\n- 조회 성능 문제 시 `USE_YN`, `FILE_UPLOAD_DTTM` 조건 포함 인덱스 검토\n\n## 6. Frontend\n\n- 운영 메뉴에 **첨부파일 업로드 오류** 화면 추가\n- 검색영역: 문서번호 / 기간 / 문서구분\n- Grid: 문서번호, 오류 파일 수, 파일명, 상태, 재처리 버튼\n- 재처리 전 Confirm 표시\n- 처리 중 버튼 비활성화\n- 성공: 해당 Row 재조회\n- 실패: 서버 오류 메시지 표시\n\n## 7. Risk / 대응방안\n\n| Risk영향대응방안                           |                       |                                                           |\n| ------------------------------------ | --------------------- | --------------------------------------------------------- |\n| 동일 파일 재처리로 인한 **중복 업로드**             | 파일 중복 저장 또는 상태 불일치    | 재처리 직전 `FILE_UPLOAD_DTTM` 재확인, 이미 정상 처리된 건은 Skip          |\n| 재처리 중 일부 단계만 성공하는 **부분 실패**          | 파일 저장소와 DB 상태 불일치     | 기존 업로드 Service의 트랜잭션 경계 확인, 실패 시 DB 상태를 정상적으로 Rollback/보정 |\n| 오류 건 대량 조회 시 **Oracle 부하 증가**        | 운영 DB 응답 지연           | 조회 기간 제한, Pagination 적용, 실행계획 및 인덱스 확인                    |\n| 원본 파일이 이미 삭제되었거나 접근 불가               | 재처리 자체가 불가능           | 재처리 전 원본 존재 여부 확인 후 사용자에게 명확한 실패 사유 반환                    |\n| 운영자 외 사용자의 재처리 API 호출                | 비정상 데이터 변경 가능         | 기존 eSPEC 권한 체계를 사용하여 운영 권한 사용자만 재처리 허용                    |\n| 기존 첨부파일 업로드 로직 변경에 따른 **Regression** | 정상 PRC/INS 첨부파일 처리 영향 | 신규 로직 구현보다 기존 Service 재사용 우선, 기존 등록/업로드 시나리오 회귀 테스트 수행    |\n| 동일 파일에 대한 동시 재처리 요청                  | Race condition, 중복 처리 | 처리 전 상태 재검증 및 필요 시 DB Lock/처리 상태값 적용 검토                   |\n\n**주요 확인 필요사항**\n\n- 기존 파일 업로드 Service가 재호출 가능한 구조인지 확인\n- 실제 원본 파일의 보관 위치 및 재처리 시 접근 가능 여부 확인\n- `ESPEC_ATTACH_FILE` 대량 데이터 기준 실행계획 확인\n\n## 8. 테스트\n\n- 정상 파일만 존재하는 문서는 조회되지 않아야 함\n- 동일 `RPT_DOC_ID`에 정상/오류 파일이 섞여 있으면 문서는 조회되어야 함\n- `USE_YN = 'N'` 파일은 오류 판정에서 제외\n- 재처리 성공 시 `FILE_UPLOAD_DTTM`이 생성되어야 함\n- 이미 처리된 파일에 재요청 시 중복 업로드되지 않아야 함\n- PRC / INS 각각 조회 검증\n- 대량 조회 시 응답시간 및 Oracle 실행계획 확인\n\n## 9. 예상 변경 파일\n```bash\ndks-espec-portal\n└─ src/views/.../AttachmentUploadError.vue\n└─ src/api/attachment.ts\n\ndks-espec-endpoint\n└─ controller/AttachmentController.java\n└─ service/AttachmentService.java\n└─ repository/AttachmentRepository.java\n└─ dto/AttachmentUploadErrorDto.java\n\nOracle\n└─ 기존 RPT_DOC / ESPEC_ATTACH_FILE 조회\n```\n\n",
+    "authorId": "persona-p01-owner",
+    "createdAt": "2026-09-09T07:14:43.722Z"
+  },
+  "currentDescription": {
+    "versionRef": {
+      "kind": "sr_description",
+      "projectId": "demo-project",
+      "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+      "entityId": "description-ee4964b4-919f-43a0-89d8-117c88ef6e88",
+      "version": 2
+    },
+    "title": "[시연] eSPEC 첨부파일 업로드 오류 조회·재처리",
+    "purpose": "eSPEC PRC/INS 첨부파일 업로드 오류를 운영자가 조회하고 재처리하는 기능의 Inception Plan을 작성합니다.",
+    "description": "# PLAN — eSPEC 첨부파일 업로드 오류 조회/재처리 기능\n\n## 1. 목적\n\neSPEC 문서(PRC/INS) 첨부파일 중 `USE_YN = 'Y'` 이지만 `FILE_UPLOAD_DTTM`이 없는 비정상 건을 운영자가 직접 조회하고 재처리할 수 있도록 기능을 추가한다.\\\n현재는 DB 조회 및 수동 확인이 필요하므로, Portal에서 대상 문서와 첨부파일 상태를 확인하고 재처리 결과까지 추적 가능하도록 개선한다.\n\n## 2. 변경 범위\n\n- **Frontend**: `dks-espec-portal` / Vue.js\n- **Backend**: `dks-espec-endpoint` / Spring Boot\n- **DB**: Oracle (`RPT_DOC`, `ESPEC_ATTACH_FILE`)\n- **제외 범위**: 파일 저장소 구조 변경, 기존 정상 첨부파일 이관, 인증/권한 체계 변경\n\n## 3. 사용자 흐름\n\n`문서번호/기간 검색` → `업로드 오류 첨부파일 조회` → `대상 선택` → `재처리 요청` → `성공/실패 결과 표시`\n\n- 조회 조건: `RPT_DOC_ID`, 등록일자, 문서구분(PRC/INS)\n- 오류 판정: `ESPEC_ATTACH_FILE.USE_YN = 'Y' AND FILE_UPLOAD_DTTM IS NULL`\n- 문서별 첨부파일이 여러 건인 경우 **1건이라도 오류이면 문서 단위로 노출**\n- 재처리 성공 후 목록에서 즉시 상태 갱신\n\n## 4. Backend / API\n\n### GET `/api/attachments/upload-errors`\n\n**입력**\n\n- `rptDocId?`\n- `fromDate?`\n- `toDate?`\n- `docType?` (`PRC` / `INS`)\n\n**처리**\n\n1. `RPT_DOC` 대상 문서 조회\n2. `ESPEC_ATTACH_FILE` 조인\n3. 활성 첨부파일 중 `FILE_UPLOAD_DTTM IS NULL` 존재 여부 확인\n4. 문서번호 기준으로 오류 파일 수와 상세 반환\n\n**응답 예시**\n```json\n{\n  \"rptDocId\": \"INS00649-019\",\n  \"errorFileCount\": 2,\n  \"files\": [\n    { \"fileId\": \"12345\", \"fileName\": \"spec.xlsx\", \"uploadDttm\": null }\n  ]\n}\n```\n\n### POST `/api/attachments/{fileId}/retry`\n\n- 기존 파일 업로드 Service 로직 재사용\n- 성공 시 `FILE_UPLOAD_DTTM` 갱신\n- 실패 시 원인 로그 기록 및 오류 메시지 반환\n- 중복 요청 방지를 위해 현재 상태 재확인 후 처리\n\n## 5. DB / Query\n```sql\nSELECT\n    R.RPT_DOC_ID,\n    COUNT(*) AS ERROR_FILE_COUNT\nFROM RPT_DOC R\nJOIN ESPEC_ATTACH_FILE A\n  ON A.MAPPING_1ST_KEY_ID = R.RPT_DOC_ID\nWHERE A.USE_YN = 'Y'\n  AND A.FILE_UPLOAD_DTTM IS NULL\n  AND (R.RPT_DOC_ID LIKE 'PRC%' OR R.RPT_DOC_ID LIKE 'INS%')\nGROUP BY R.RPT_DOC_ID;\n```\n\n- 신규 테이블 생성 없음\n- 기존 인덱스 확인: `ESPEC_ATTACH_FILE(MAPPING_1ST_KEY_ID)`\n- 조회 성능 문제 시 `USE_YN`, `FILE_UPLOAD_DTTM` 조건 포함 인덱스 검토\n\n## 6. Frontend\n\n- 운영 메뉴에 **첨부파일 업로드 오류** 화면 추가\n- 검색영역: 문서번호 / 기간 / 문서구분\n- Grid: 문서번호, 오류 파일 수, 파일명, 상태, 재처리 버튼\n- 재처리 전 Confirm 표시\n- 처리 중 버튼 비활성화\n- 성공: 해당 Row 재조회\n- 실패: 서버 오류 메시지 표시\n\n## 7. Risk / 대응방안\n\n| Risk영향대응방안                           |                       |                                                           |\n| ------------------------------------ | --------------------- | --------------------------------------------------------- |\n| 동일 파일 재처리로 인한 **중복 업로드**             | 파일 중복 저장 또는 상태 불일치    | 재처리 직전 `FILE_UPLOAD_DTTM` 재확인, 이미 정상 처리된 건은 Skip          |\n| 재처리 중 일부 단계만 성공하는 **부분 실패**          | 파일 저장소와 DB 상태 불일치     | 기존 업로드 Service의 트랜잭션 경계 확인, 실패 시 DB 상태를 정상적으로 Rollback/보정 |\n| 오류 건 대량 조회 시 **Oracle 부하 증가**        | 운영 DB 응답 지연           | 조회 기간 제한, Pagination 적용, 실행계획 및 인덱스 확인                    |\n| 원본 파일이 이미 삭제되었거나 접근 불가               | 재처리 자체가 불가능           | 재처리 전 원본 존재 여부 확인 후 사용자에게 명확한 실패 사유 반환                    |\n| 운영자 외 사용자의 재처리 API 호출                | 비정상 데이터 변경 가능         | 기존 eSPEC 권한 체계를 사용하여 운영 권한 사용자만 재처리 허용                    |\n| 기존 첨부파일 업로드 로직 변경에 따른 **Regression** | 정상 PRC/INS 첨부파일 처리 영향 | 신규 로직 구현보다 기존 Service 재사용 우선, 기존 등록/업로드 시나리오 회귀 테스트 수행    |\n| 동일 파일에 대한 동시 재처리 요청                  | Race condition, 중복 처리 | 처리 전 상태 재검증 및 필요 시 DB Lock/처리 상태값 적용 검토                   |\n\n**주요 확인 필요사항**\n\n- 기존 파일 업로드 Service가 재호출 가능한 구조인지 확인\n- 실제 원본 파일의 보관 위치 및 재처리 시 접근 가능 여부 확인\n- `ESPEC_ATTACH_FILE` 대량 데이터 기준 실행계획 확인\n\n## 8. 테스트\n\n- 정상 파일만 존재하는 문서는 조회되지 않아야 함\n- 동일 `RPT_DOC_ID`에 정상/오류 파일이 섞여 있으면 문서는 조회되어야 함\n- `USE_YN = 'N'` 파일은 오류 판정에서 제외\n- 재처리 성공 시 `FILE_UPLOAD_DTTM`이 생성되어야 함\n- 이미 처리된 파일에 재요청 시 중복 업로드되지 않아야 함\n- PRC / INS 각각 조회 검증\n- 대량 조회 시 응답시간 및 Oracle 실행계획 확인\n\n## 9. 예상 변경 파일\n```bash\ndks-espec-portal\n└─ src/views/.../AttachmentUploadError.vue\n└─ src/api/attachment.ts\n\ndks-espec-endpoint\n└─ controller/AttachmentController.java\n└─ service/AttachmentService.java\n└─ repository/AttachmentRepository.java\n└─ dto/AttachmentUploadErrorDto.java\n\nOracle\n└─ 기존 RPT_DOC / ESPEC_ATTACH_FILE 조회\n```\n\n",
+    "authorId": "persona-p01-owner",
+    "createdAt": "2026-09-09T07:15:16.450Z",
+    "changeReason": "시연 문서의 제목과 목적을 eSPEC 초안에 맞게 정리합니다."
+  },
+  "sources": [
+    {
+      "scope": {
+        "kind": "sr",
+        "projectId": "demo-project",
+        "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471"
+      },
+      "sourceId": "source-64ce5841-23d3-43c6-8308-09ae95818e22",
+      "currentVersionRef": {
+        "kind": "context_source",
+        "projectId": "demo-project",
+        "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+        "entityId": "source-64ce5841-23d3-43c6-8308-09ae95818e22",
+        "version": 1
+      },
+      "revision": 1,
+      "createdBy": "persona-p01-owner",
+      "createdAt": "2026-09-09T07:14:43.737Z",
+      "displayName": "그소리가 아니라, espec, oracle등은 플랜을 제시해주는거겠지. 이에 대해 모르니깐  ai로 초안 작성을  시작 초안",
+      "provenance": "사용자가 등록할 때 제공한 초안",
+      "versionCreatedBy": "persona-p01-owner",
+      "versionCreatedAt": "2026-09-09T07:14:43.737Z",
+      "kind": "markdown",
+      "content": "# PLAN — eSPEC 첨부파일 업로드 오류 조회/재처리 기능\n\n## 1. 목적\n\neSPEC 문서(PRC/INS) 첨부파일 중 `USE_YN = 'Y'` 이지만 `FILE_UPLOAD_DTTM`이 없는 비정상 건을 운영자가 직접 조회하고 재처리할 수 있도록 기능을 추가한다.\\\n현재는 DB 조회 및 수동 확인이 필요하므로, Portal에서 대상 문서와 첨부파일 상태를 확인하고 재처리 결과까지 추적 가능하도록 개선한다.\n\n## 2. 변경 범위\n\n- **Frontend**: `dks-espec-portal` / Vue.js\n- **Backend**: `dks-espec-endpoint` / Spring Boot\n- **DB**: Oracle (`RPT_DOC`, `ESPEC_ATTACH_FILE`)\n- **제외 범위**: 파일 저장소 구조 변경, 기존 정상 첨부파일 이관, 인증/권한 체계 변경\n\n## 3. 사용자 흐름\n\n`문서번호/기간 검색` → `업로드 오류 첨부파일 조회` → `대상 선택` → `재처리 요청` → `성공/실패 결과 표시`\n\n- 조회 조건: `RPT_DOC_ID`, 등록일자, 문서구분(PRC/INS)\n- 오류 판정: `ESPEC_ATTACH_FILE.USE_YN = 'Y' AND FILE_UPLOAD_DTTM IS NULL`\n- 문서별 첨부파일이 여러 건인 경우 **1건이라도 오류이면 문서 단위로 노출**\n- 재처리 성공 후 목록에서 즉시 상태 갱신\n\n## 4. Backend / API\n\n### GET `/api/attachments/upload-errors`\n\n**입력**\n\n- `rptDocId?`\n- `fromDate?`\n- `toDate?`\n- `docType?` (`PRC` / `INS`)\n\n**처리**\n\n1. `RPT_DOC` 대상 문서 조회\n2. `ESPEC_ATTACH_FILE` 조인\n3. 활성 첨부파일 중 `FILE_UPLOAD_DTTM IS NULL` 존재 여부 확인\n4. 문서번호 기준으로 오류 파일 수와 상세 반환\n\n**응답 예시**\n```json\n{\n  \"rptDocId\": \"INS00649-019\",\n  \"errorFileCount\": 2,\n  \"files\": [\n    { \"fileId\": \"12345\", \"fileName\": \"spec.xlsx\", \"uploadDttm\": null }\n  ]\n}\n```\n\n### POST `/api/attachments/{fileId}/retry`\n\n- 기존 파일 업로드 Service 로직 재사용\n- 성공 시 `FILE_UPLOAD_DTTM` 갱신\n- 실패 시 원인 로그 기록 및 오류 메시지 반환\n- 중복 요청 방지를 위해 현재 상태 재확인 후 처리\n\n## 5. DB / Query\n```sql\nSELECT\n    R.RPT_DOC_ID,\n    COUNT(*) AS ERROR_FILE_COUNT\nFROM RPT_DOC R\nJOIN ESPEC_ATTACH_FILE A\n  ON A.MAPPING_1ST_KEY_ID = R.RPT_DOC_ID\nWHERE A.USE_YN = 'Y'\n  AND A.FILE_UPLOAD_DTTM IS NULL\n  AND (R.RPT_DOC_ID LIKE 'PRC%' OR R.RPT_DOC_ID LIKE 'INS%')\nGROUP BY R.RPT_DOC_ID;\n```\n\n- 신규 테이블 생성 없음\n- 기존 인덱스 확인: `ESPEC_ATTACH_FILE(MAPPING_1ST_KEY_ID)`\n- 조회 성능 문제 시 `USE_YN`, `FILE_UPLOAD_DTTM` 조건 포함 인덱스 검토\n\n## 6. Frontend\n\n- 운영 메뉴에 **첨부파일 업로드 오류** 화면 추가\n- 검색영역: 문서번호 / 기간 / 문서구분\n- Grid: 문서번호, 오류 파일 수, 파일명, 상태, 재처리 버튼\n- 재처리 전 Confirm 표시\n- 처리 중 버튼 비활성화\n- 성공: 해당 Row 재조회\n- 실패: 서버 오류 메시지 표시\n\n## 7. Risk / 대응방안\n\n| Risk영향대응방안                           |                       |                                                           |\n| ------------------------------------ | --------------------- | --------------------------------------------------------- |\n| 동일 파일 재처리로 인한 **중복 업로드**             | 파일 중복 저장 또는 상태 불일치    | 재처리 직전 `FILE_UPLOAD_DTTM` 재확인, 이미 정상 처리된 건은 Skip          |\n| 재처리 중 일부 단계만 성공하는 **부분 실패**          | 파일 저장소와 DB 상태 불일치     | 기존 업로드 Service의 트랜잭션 경계 확인, 실패 시 DB 상태를 정상적으로 Rollback/보정 |\n| 오류 건 대량 조회 시 **Oracle 부하 증가**        | 운영 DB 응답 지연           | 조회 기간 제한, Pagination 적용, 실행계획 및 인덱스 확인                    |\n| 원본 파일이 이미 삭제되었거나 접근 불가               | 재처리 자체가 불가능           | 재처리 전 원본 존재 여부 확인 후 사용자에게 명확한 실패 사유 반환                    |\n| 운영자 외 사용자의 재처리 API 호출                | 비정상 데이터 변경 가능         | 기존 eSPEC 권한 체계를 사용하여 운영 권한 사용자만 재처리 허용                    |\n| 기존 첨부파일 업로드 로직 변경에 따른 **Regression** | 정상 PRC/INS 첨부파일 처리 영향 | 신규 로직 구현보다 기존 Service 재사용 우선, 기존 등록/업로드 시나리오 회귀 테스트 수행    |\n| 동일 파일에 대한 동시 재처리 요청                  | Race condition, 중복 처리 | 처리 전 상태 재검증 및 필요 시 DB Lock/처리 상태값 적용 검토                   |\n\n**주요 확인 필요사항**\n\n- 기존 파일 업로드 Service가 재호출 가능한 구조인지 확인\n- 실제 원본 파일의 보관 위치 및 재처리 시 접근 가능 여부 확인\n- `ESPEC_ATTACH_FILE` 대량 데이터 기준 실행계획 확인\n\n## 8. 테스트\n\n- 정상 파일만 존재하는 문서는 조회되지 않아야 함\n- 동일 `RPT_DOC_ID`에 정상/오류 파일이 섞여 있으면 문서는 조회되어야 함\n- `USE_YN = 'N'` 파일은 오류 판정에서 제외\n- 재처리 성공 시 `FILE_UPLOAD_DTTM`이 생성되어야 함\n- 이미 처리된 파일에 재요청 시 중복 업로드되지 않아야 함\n- PRC / INS 각각 조회 검증\n- 대량 조회 시 응답시간 및 Oracle 실행계획 확인\n\n## 9. 예상 변경 파일\n```bash\ndks-espec-portal\n└─ src/views/.../AttachmentUploadError.vue\n└─ src/api/attachment.ts\n\ndks-espec-endpoint\n└─ controller/AttachmentController.java\n└─ service/AttachmentService.java\n└─ repository/AttachmentRepository.java\n└─ dto/AttachmentUploadErrorDto.java\n\nOracle\n└─ 기존 RPT_DOC / ESPEC_ATTACH_FILE 조회\n```\n\n",
+      "confirmation": "unconfirmed",
+      "reviewImpact": {
+        "affectedGates": [],
+        "needsNewReview": false,
+        "carriedBlockingRequestIds": [],
+        "currentHandoffValid": true
+      }
+    }
+  ],
+  "artifacts": [
+    {
+      "scope": {
+        "kind": "sr",
+        "projectId": "demo-project",
+        "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471"
+      },
+      "artifactId": "artifact-c958ade3-a6c6-43c7-b6c3-fe91c8e0735e",
+      "kind": "requirements",
+      "versionRef": {
+        "kind": "artifact",
+        "projectId": "demo-project",
+        "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+        "entityId": "artifact-c958ade3-a6c6-43c7-b6c3-fe91c8e0735e",
+        "version": 2
+      },
+      "markdown": "# Inception Plan: [시연] eSPEC 첨부파일 업로드 오류 조회·재처리\n\n> 본 문서는 제공된 초안을 근거로 한 로컬 시연용 정리이며, 실제 eSPEC 담당자의 승인이나 운영 검증이 아닙니다. 사람이 답한 항목은 '확인됨'으로, AI가 보완한 항목은 '미확인'으로 표시합니다.\n\n## 요구사항\n\n### 목적 (확인됨 — 초안 근거)\n- eSPEC 문서(PRC/INS) 첨부파일 중 `USE_YN = 'Y'` 이지만 `FILE_UPLOAD_DTTM`이 없는 비정상 건을 운영자가 직접 조회하고 재처리할 수 있도록 기능을 추가한다.\n- 현재는 DB 조회 및 수동 확인이 필요하므로, Portal에서 대상 문서와 첨부파일 상태를 확인하고 재처리 결과까지 추적 가능하도록 개선한다.\n\n### 오류 판정 규칙 (확인됨)\n- 오류 판정: `ESPEC_ATTACH_FILE.USE_YN = 'Y' AND FILE_UPLOAD_DTTM IS NULL`.\n- `USE_YN = 'N'` 파일과 정상(업로드 시각이 있는) 파일은 오류 판정에서 제외한다.\n- 조회 단위: 오류 파일이 1건 이상인 문서(RPT_DOC_ID) 단위로 노출한다.\n- 재처리 단위: 파일 1건 단위로 개별 실행한다(사람 답변으로 확정).\n\n### 변경 범위 (확인됨)\n- **Frontend**: `dks-espec-portal` / Vue.js\n- **Backend**: `dks-espec-endpoint` / Spring Boot\n- **DB**: Oracle (`RPT_DOC`, `ESPEC_ATTACH_FILE`)\n\n### 제외 범위 (확인됨)\n- 신규 테이블 생성, 파일 저장소 구조 변경, 기존 정상 첨부파일 이관, 인증/권한 체계 변경은 이번 범위에서 제외한다.\n\n### 미확인 사항 (조사·검증 필요)\n- 기존 업로드 Service의 재호출 가능 구조 여부 — 사람 답변: 미확인 — 조사 필요.\n- 원본 파일 보관 위치·접근 권한, 트랜잭션 경계, 동시 재처리 제어 방식 — 미확인.\n- 운영 권한 판정 코드·역할 — 미확인(기존 eSPEC 운영 권한 재사용 전제).\n- 등록일 기준 컬럼, 조회 기간 필수 여부·기본값·최대 범위, 페이지 크기, 성능 수치 — 미확인.\n- 재처리 결과 추적 방식과 이력 보존 기간 — 미확인.\n- 응답 계약 불일치(예시 JSON의 `errorFileCount: 2`인데 `files` 배열이 1개) — 확인 과제.\n\n### 원문 테스트 기준 (보존)\n- 정상 파일만 존재하는 문서는 조회되지 않아야 함.\n- 동일 `RPT_DOC_ID`에 정상/오류 파일이 섞여 있으면 문서는 조회되어야 함.\n- `USE_YN = 'N'` 파일은 오류 판정에서 제외.\n- 재처리 성공 시 `FILE_UPLOAD_DTTM`이 생성되어야 함.\n- 이미 처리된 파일에 재요청 시 중복 업로드되지 않아야 함.\n- PRC / INS 각각 조회 검증.\n- 대량 조회 시 응답시간 및 Oracle 실행계획 확인.\n\n## 사용자 시나리오\n\n운영자는 `문서번호/기간 검색` → `업로드 오류 첨부파일 조회` → `대상 선택` → `재처리 요청` → `성공/실패 결과 표시` 흐름을 따른다.\n\n아래 화면 구성은 초안 근거로 정리한 **제안**이며, 실제 eSPEC 화면이나 실행 결과가 아니다.\n\n- **제안** 검색 화면: 검색영역에 문서번호 / 기간 / 문서구분(PRC/INS)을 입력한다.\n- **제안** 오류 목록 화면: Grid에 문서번호, 오류 파일 수, 파일명, 상태, 재처리 버튼을 표시한다.\n- **제안** 처리 중 화면: 재처리 전 Confirm을 표시하고 처리 중에는 버튼을 비활성화한다.\n- **제안** 성공 안내 화면: 성공 시 해당 Row를 재조회하여 상태를 갱신한다.\n- **제안** 실패 안내 화면: 실패 시 서버 오류 메시지를 표시한다.\n\n### 상황 1 — 오류 조회와 성공 재처리\n운영자가 조건으로 검색하면 오류 파일이 1건 이상인 문서가 목록에 노출되고, 파일 1건을 재처리하면 성공 시 `FILE_UPLOAD_DTTM`이 갱신되어 해당 Row가 재조회된다.\n\n### 상황 2 — 이미 처리된 파일 Skip\n재처리 직전 현재 상태를 재확인하여 이미 정상 처리된 건은 Skip 한다. 이미 처리된 파일에 재요청 시 중복 업로드되지 않아야 한다.\n\n### 상황 3 — 원본 소실 실패\n원본 파일이 이미 삭제되었거나 접근 불가한 경우 재처리는 불가능하며, 이번 범위에서는 실패 사유만 반환한다(사람 답변으로 확정). 별도 데이터 정리·알림은 이번 범위에서 제외한다.\n\n### 상황 4 — 동시 요청·부분 실패\n동일 파일에 대한 동시 재처리 요청은 처리 전 상태 재검증으로 중복 처리를 막는다. 파일 저장 후 DB 갱신 실패 등 부분 실패 시 파일 저장소와 DB 상태가 불일치할 수 있으며, DB rollback만으로 외부 파일 저장이 취소된다고 단정하지 않는다(검증 과제).\n\n## 진행 계획\n\n1. **구현 전 조사**: 기존 업로드 Service 재호출 가능 구조, 원본 파일 보관 위치·접근 권한, 트랜잭션 경계, 동시 재처리 제어, 운영 권한 코드, 등록일 기준 컬럼을 확인한다.\n2. **응답 계약 확정**: 조회 API 응답 스키마와 `errorFileCount`·`files` 정합성을 확정한다.\n3. **Backend 구현**: 조회 API와 파일 1건 단위 재처리 API를 구성한다.\n4. **Frontend 구현**: 검색·목록·재처리 화면을 구성한다.\n5. **회귀·성능 검증**: 기존 등록/업로드 회귀 테스트와 Oracle 실행계획·응답시간을 확인한다.\n\n- 조회 기간 제한과 Pagination은 초안대로 포함한다. 기간 필수 여부·기본값·최대 범위·페이지 크기는 Oracle 실행계획·데이터 규모 확인 후 담당자가 결정할 항목으로 남긴다(미확인).\n\n## 주요 구조\n\n근거가 있는 관계만 아래에 정리한다. 모르는 관계는 미확인으로 남긴다.\n\n- dks-espec-portal(Vue.js) → dks-espec-endpoint(Spring Boot): 오류 조회·재처리 API 호출\n- dks-espec-endpoint → RPT_DOC: 대상 문서 조회\n- dks-espec-endpoint → ESPEC_ATTACH_FILE: `MAPPING_1ST_KEY_ID = RPT_DOC_ID` 조인으로 활성 첨부파일 확인\n- 재처리 API → 기존 파일 업로드 Service: 로직 재사용(재호출 가능 여부 미확인)\n- 재처리 성공 → ESPEC_ATTACH_FILE.FILE_UPLOAD_DTTM: 업로드 시각 갱신\n\n### API 개요 (초안 근거, 상세 설계 아님)\n- GET `/api/attachments/upload-errors` — 입력 `rptDocId?`, `fromDate?`, `toDate?`, `docType?`(PRC/INS). 처리: RPT_DOC 조회 → ESPEC_ATTACH_FILE 조인 → `FILE_UPLOAD_DTTM IS NULL` 존재 확인 → 문서번호 기준 오류 파일 수/상세 반환.\n- POST `/api/attachments/{fileId}/retry` — 기존 업로드 Service 재사용, 성공 시 `FILE_UPLOAD_DTTM` 갱신, 실패 시 원인 로그·오류 메시지 반환, 중복 요청 방지를 위해 현재 상태 재확인.\n\n### 조회 쿼리 (초안 근거)\n```sql\nSELECT\n    R.RPT_DOC_ID,\n    COUNT(*) AS ERROR_FILE_COUNT\nFROM RPT_DOC R\nJOIN ESPEC_ATTACH_FILE A\n  ON A.MAPPING_1ST_KEY_ID = R.RPT_DOC_ID\nWHERE A.USE_YN = 'Y'\n  AND A.FILE_UPLOAD_DTTM IS NULL\n  AND (R.RPT_DOC_ID LIKE 'PRC%' OR R.RPT_DOC_ID LIKE 'INS%')\nGROUP BY R.RPT_DOC_ID;\n```\n- 신규 테이블 생성 없음. 기존 인덱스 `ESPEC_ATTACH_FILE(MAPPING_1ST_KEY_ID)` 확인. 성능 문제 시 `USE_YN`, `FILE_UPLOAD_DTTM` 조건 포함 인덱스 검토(미확인).\n\n## 주요 결정\n\n- **재처리 단위 = 파일 1건 개별 재처리** (확인됨, 사람 답변). 문서 단위 일괄 재처리는 이번 범위 아님.\n- **원본 부재 시 = 실패 사유만 반환** (확인됨, 사람 답변). 데이터 정리·알림 제외.\n- **운영 권한 = 기존 eSPEC 운영 권한 재사용** (확인됨). 실제 역할·권한 코드는 미확인(구현 전 담당자 확인). 새 인증·권한 체계 제외.\n- **조회 기간 제한·Pagination = 초안대로 포함** (확인됨). 필수 여부·기본값·최대 범위·페이지 크기는 미확인(담당자 결정).\n- **재호출 가능 구조 = 미확인 — 조사 필요** (사람 답변). 재호출 불가 시 재처리 방식 재설계 필요.\n- **부분 실패 보정 방식 = 미확인**. DB rollback만으로 외부 파일 저장이 취소된다고 단정하지 않음(검증 과제).\n- **응답 계약 정합성 = 확인 과제**. 예시 JSON의 `errorFileCount: 2`와 `files` 1개 불일치를 API 계약 확정 시 정리.\n\n### 위험 / 영향 / 대응 (원문 보존, 머리글 정리)\n\n| 위험 | 영향 | 대응 |\n| --- | --- | --- |\n| 동일 파일 재처리로 인한 중복 업로드 | 파일 중복 저장 또는 상태 불일치 | 재처리 직전 `FILE_UPLOAD_DTTM` 재확인, 이미 정상 처리된 건은 Skip |\n| 재처리 중 일부 단계만 성공하는 부분 실패 | 파일 저장소와 DB 상태 불일치 | 기존 업로드 Service의 트랜잭션 경계 확인, 실패 시 DB 상태를 정상적으로 Rollback/보정(단정 금지, 검증 필요) |\n| 오류 건 대량 조회 시 Oracle 부하 증가 | 운영 DB 응답 지연 | 조회 기간 제한, Pagination 적용, 실행계획 및 인덱스 확인 |\n| 원본 파일이 이미 삭제되었거나 접근 불가 | 재처리 자체가 불가능 | 재처리 전 원본 존재 여부 확인 후 사용자에게 명확한 실패 사유 반환 |\n| 운영자 외 사용자의 재처리 API 호출 | 비정상 데이터 변경 가능 | 기존 eSPEC 권한 체계를 사용하여 운영 권한 사용자만 재처리 허용 |\n| 기존 업로드 로직 변경에 따른 Regression | 정상 PRC/INS 첨부파일 처리 영향 | 신규 로직보다 기존 Service 재사용 우선, 기존 등록/업로드 회귀 테스트 수행 |\n| 동일 파일에 대한 동시 재처리 요청 | Race condition, 중복 처리 | 처리 전 상태 재검증 및 필요 시 DB Lock/처리 상태값 적용 검토 |\n\n## 작업 단위\n\n### T1. 구현 전 조사 (선행)\n- 기존 업로드 Service 재호출 가능 구조, 원본 파일 보관 위치·접근 권한, 트랜잭션 경계, 동시 재처리 제어 방식, 운영 권한 코드, 등록일 기준 컬럼을 확인한다.\n- 담당: SR 담당자.\n- 완료 기준: 각 미확인 항목에 대해 확인 결과(가능/불가/조건)와 근거가 문서에 기록된다.\n\n### T2. 응답 계약 확정\n- 조회 API 응답 스키마와 `errorFileCount`·`files` 정합성 불일치를 정리한다.\n- 완료 기준: 확정된 응답 계약과 필드 정의가 합의된다.\n\n### T3. Backend\n- 오류 조회 API와 파일 1건 단위 재처리 API를 구성한다(기존 Service 재사용 전제).\n- 재처리 직전 상태 재확인, 성공 시 `FILE_UPLOAD_DTTM` 갱신, 실패 시 원인 로그·오류 메시지 반환을 포함한다.\n- 완료 기준: 조회/재처리 API가 원문 테스트 기준(정상 제외, 혼재 노출, USE_YN=N 제외, Skip, 중복 방지)을 충족한다.\n\n### T4. Frontend\n- 운영 메뉴에 첨부파일 업로드 오류 화면을 추가한다(검색·목록·Confirm·처리 중·성공/실패 안내).\n- 완료 기준: 검색→조회→재처리→결과 표시 흐름이 동작하고 성공 시 해당 Row가 재조회된다.\n\n### T5. 회귀·성능 검증\n- 기존 등록/업로드 회귀 테스트, PRC/INS 각각 조회 검증, 대량 조회 응답시간·Oracle 실행계획을 확인한다.\n- 완료 기준: 회귀 이상 없음이 확인되고 실행계획·응답시간 결과가 기록된다.\n\n### 예상 변경 파일 (초안 근거)\n```bash\ndks-espec-portal\n└─ src/views/.../AttachmentUploadError.vue\n└─ src/api/attachment.ts\n\ndks-espec-endpoint\n└─ controller/AttachmentController.java\n└─ service/AttachmentService.java\n└─ repository/AttachmentRepository.java\n└─ dto/AttachmentUploadErrorDto.java\n\nOracle\n└─ 기존 RPT_DOC / ESPEC_ATTACH_FILE 조회\n```\n\n<!-- planrepo-visualization\n{\n  \"schemaVersion\": 1,\n  \"overview\": {\n    \"headline\": \"eSPEC 첨부파일 업로드 오류 조회·재처리\",\n    \"summary\": \"USE_YN=Y이면서 FILE_UPLOAD_DTTM이 없는 오류 첨부를 문서 단위로 조회하고 파일 1건 단위로 재처리하는 Inception 계획\",\n    \"evidence\": { \"sectionId\": \"요구사항\", \"quote\": \"오류 판정: `ESPEC_ATTACH_FILE.USE_YN = 'Y' AND FILE_UPLOAD_DTTM IS NULL`\" }\n  },\n  \"changes\": {\n    \"before\": [],\n    \"after\": [\"Portal에서 오류 문서를 조회하고 파일 1건 단위로 재처리 결과를 확인\"],\n    \"evidence\": { \"sectionId\": \"진행 계획\", \"quote\": \"파일 1건 단위 재처리 API를 구성한다\" }\n  },\n  \"nodes\": [\n    {\n      \"id\": \"node-1\",\n      \"kind\": \"action\",\n      \"title\": \"오류 문서 검색\",\n      \"detail\": \"문서번호 / 기간 / 문서구분으로 오류 파일이 1건 이상인 문서를 조회\",\n      \"evidence\": { \"sectionId\": \"사용자 시나리오\", \"quote\": \"검색영역에 문서번호 / 기간 / 문서구분(PRC/INS)을 입력한다\" }\n    },\n    {\n      \"id\": \"node-2\",\n      \"kind\": \"condition\",\n      \"title\": \"재처리 전 상태 재확인\",\n      \"detail\": \"이미 정상 처리된 건은 Skip 하고 동시 요청 중복 처리를 방지\",\n      \"evidence\": { \"sectionId\": \"사용자 시나리오\", \"quote\": \"이미 정상 처리된 건은 Skip\" }\n    },\n    {\n      \"id\": \"node-3\",\n      \"kind\": \"result\",\n      \"title\": \"재처리 성공\",\n      \"detail\": \"FILE_UPLOAD_DTTM이 갱신되어 해당 Row가 재조회됨\",\n      \"evidence\": { \"sectionId\": \"사용자 시나리오\", \"quote\": \"성공 시 `FILE_UPLOAD_DTTM`이 갱신되어 해당 Row가 재조회된다\" }\n    },\n    {\n      \"id\": \"node-4\",\n      \"kind\": \"result\",\n      \"title\": \"재처리 실패\",\n      \"detail\": \"원본 부재 시 실패 사유만 반환\",\n      \"evidence\": { \"sectionId\": \"사용자 시나리오\", \"quote\": \"이번 범위에서는 실패 사유만 반환한다\" }\n    }\n  ],\n  \"edges\": [\n    {\n      \"from\": \"node-1\",\n      \"to\": \"node-2\",\n      \"label\": \"오류 파일 선택 후 재처리 요청\",\n      \"evidence\": { \"sectionId\": \"주요 구조\", \"quote\": \"재처리 API → 기존 파일 업로드 Service: 로직 재사용\" }\n    },\n    {\n      \"from\": \"node-2\",\n      \"to\": \"node-3\",\n      \"label\": \"상태 정상이고 원본 접근 가능\",\n      \"evidence\": { \"sectionId\": \"주요 구조\", \"quote\": \"재처리 성공 → ESPEC_ATTACH_FILE.FILE_UPLOAD_DTTM: 업로드 시각 갱신\" }\n    },\n    {\n      \"from\": \"node-2\",\n      \"to\": \"node-4\",\n      \"label\": \"원본 부재·접근 불가\",\n      \"evidence\": { \"sectionId\": \"사용자 시나리오\", \"quote\": \"원본 파일이 이미 삭제되었거나 접근 불가한 경우 재처리는 불가능\" }\n    }\n  ],\n  \"scenarios\": [\n    {\n      \"id\": \"scenario-1\",\n      \"label\": \"오류 조회와 성공 재처리\",\n      \"description\": \"조건 검색으로 오류 문서를 조회하고 파일 1건을 재처리해 성공\",\n      \"nodeIds\": [\"node-1\", \"node-3\"],\n      \"outcome\": \"FILE_UPLOAD_DTTM 갱신 후 Row 재조회\",\n      \"screen\": {\n        \"title\": \"오류 목록\",\n        \"body\": \"Grid에 문서번호, 오류 파일 수, 파일명, 상태, 재처리 버튼을 표시한다.\",\n        \"primaryAction\": \"재처리\",\n        \"evidence\": { \"sectionId\": \"사용자 시나리오\", \"quote\": \"Grid에 문서번호, 오류 파일 수, 파일명, 상태, 재처리 버튼을 표시한다\" }\n      },\n      \"evidence\": { \"sectionId\": \"사용자 시나리오\", \"quote\": \"오류 파일이 1건 이상인 문서가 목록에 노출되고\" }\n    },\n    {\n      \"id\": \"scenario-2\",\n      \"label\": \"이미 처리된 파일 Skip\",\n      \"description\": \"재처리 직전 상태 재확인으로 이미 처리된 파일은 Skip\",\n      \"nodeIds\": [\"node-2\"],\n      \"outcome\": \"중복 업로드되지 않음\",\n      \"evidence\": { \"sectionId\": \"사용자 시나리오\", \"quote\": \"이미 처리된 파일에 재요청 시 중복 업로드되지 않아야 한다\" }\n    },\n    {\n      \"id\": \"scenario-3\",\n      \"label\": \"원본 소실 실패\",\n      \"description\": \"원본이 삭제·접근 불가하면 실패 사유만 반환\",\n      \"nodeIds\": [\"node-4\"],\n      \"outcome\": \"실패 사유 반환, 별도 조치 없음\",\n      \"screen\": {\n        \"title\": \"실패 안내\",\n        \"body\": \"실패 시 서버 오류 메시지를 표시한다.\",\n        \"status\": \"실패\",\n        \"evidence\": { \"sectionId\": \"사용자 시나리오\", \"quote\": \"실패 시 서버 오류 메시지를 표시한다\" }\n      },\n      \"evidence\": { \"sectionId\": \"사용자 시나리오\", \"quote\": \"이번 범위에서는 실패 사유만 반환한다\" }\n    },\n    {\n      \"id\": \"scenario-4\",\n      \"label\": \"동시 요청·부분 실패\",\n      \"description\": \"동시 요청은 상태 재검증으로 막고, 부분 실패는 rollback만으로 취소된다고 단정하지 않음\",\n      \"nodeIds\": [\"node-2\"],\n      \"outcome\": \"중복 처리 방지, 부분 실패는 검증 과제로 남김\",\n      \"evidence\": { \"sectionId\": \"사용자 시나리오\", \"quote\": \"DB rollback만으로 외부 파일 저장이 취소된다고 단정하지 않는다\" }\n    }\n  ],\n  \"rules\": [\n    {\n      \"id\": \"rule-1\",\n      \"title\": \"오류 판정 조건\",\n      \"detail\": \"USE_YN='Y' AND FILE_UPLOAD_DTTM IS NULL 인 파일만 오류로 판정\",\n      \"category\": \"requirement\",\n      \"evidence\": { \"sectionId\": \"요구사항\", \"quote\": \"`USE_YN = 'N'` 파일과 정상(업로드 시각이 있는) 파일은 오류 판정에서 제외한다\" }\n    },\n    {\n      \"id\": \"rule-2\",\n      \"title\": \"재처리 성공 기준\",\n      \"detail\": \"재처리 성공 시 FILE_UPLOAD_DTTM이 생성되어야 함\",\n      \"category\": \"success\",\n      \"evidence\": { \"sectionId\": \"요구사항\", \"quote\": \"재처리 성공 시 `FILE_UPLOAD_DTTM`이 생성되어야 함\" }\n    },\n    {\n      \"id\": \"rule-3\",\n      \"title\": \"중복 업로드 방지\",\n      \"detail\": \"이미 처리된 파일에 재요청 시 중복 업로드되지 않아야 함\",\n      \"category\": \"exception\",\n      \"evidence\": { \"sectionId\": \"요구사항\", \"quote\": \"이미 처리된 파일에 재요청 시 중복 업로드되지 않아야 함\" }\n    }\n  ]\n}\n-->\n",
+      "sectionIndex": [
+        {
+          "sectionId": "요구사항",
+          "title": "요구사항",
+          "startOffset": 164,
+          "endOffset": 1461
+        },
+        {
+          "sectionId": "사용자 시나리오",
+          "title": "사용자 시나리오",
+          "startOffset": 1461,
+          "endOffset": 2406
+        },
+        {
+          "sectionId": "진행 계획",
+          "title": "진행 계획",
+          "startOffset": 2406,
+          "endOffset": 2854
+        },
+        {
+          "sectionId": "주요 구조",
+          "title": "주요 구조",
+          "startOffset": 2854,
+          "endOffset": 4025
+        },
+        {
+          "sectionId": "주요 결정",
+          "title": "주요 결정",
+          "startOffset": 4025,
+          "endOffset": 5280
+        },
+        {
+          "sectionId": "작업 단위",
+          "title": "작업 단위",
+          "startOffset": 5280,
+          "endOffset": 10829
+        }
+      ],
+      "requirementLinks": [
+        {
+          "requirementId": "요구사항",
+          "sectionIds": [
+            "요구사항"
+          ],
+          "acceptanceCriteria": [
+            "요구사항 내용을 사람이 읽고 현재 Inception Plan에 포함할지 확인합니다."
+          ]
+        },
+        {
+          "requirementId": "사용자 시나리오",
+          "sectionIds": [
+            "사용자 시나리오"
+          ],
+          "acceptanceCriteria": [
+            "사용자 시나리오 내용을 사람이 읽고 현재 Inception Plan에 포함할지 확인합니다."
+          ]
+        },
+        {
+          "requirementId": "진행 계획",
+          "sectionIds": [
+            "진행 계획"
+          ],
+          "acceptanceCriteria": [
+            "진행 계획 내용을 사람이 읽고 현재 Inception Plan에 포함할지 확인합니다."
+          ]
+        },
+        {
+          "requirementId": "주요 구조",
+          "sectionIds": [
+            "주요 구조"
+          ],
+          "acceptanceCriteria": [
+            "주요 구조 내용을 사람이 읽고 현재 Inception Plan에 포함할지 확인합니다."
+          ]
+        },
+        {
+          "requirementId": "주요 결정",
+          "sectionIds": [
+            "주요 결정"
+          ],
+          "acceptanceCriteria": [
+            "주요 결정 내용을 사람이 읽고 현재 Inception Plan에 포함할지 확인합니다."
+          ]
+        },
+        {
+          "requirementId": "작업 단위",
+          "sectionIds": [
+            "작업 단위"
+          ],
+          "acceptanceCriteria": [
+            "작업 단위 내용을 사람이 읽고 현재 Inception Plan에 포함할지 확인합니다."
+          ]
+        }
+      ],
+      "authorOrigin": "ai_applied",
+      "authorId": "persona-p01-owner",
+      "createdAt": "2026-09-09T07:21:34.965Z",
+      "changeSummary": "초안 아티팩트를 지정된 6개 H2 구조의 Inception Plan으로 개정했습니다. 사람이 답한 5개 항목(파일 단위 재처리, 실패 사유만 반환, 운영 권한 재사용, 조회 기간·Pagination, 재호출 구조 미확인)을 확인/미확인으로 구분해 반영하고, 원문 테스트 기준과 위험 표(위험/영향/대응 머리글)를 보존했습니다. 응답 계약 불일치(errorFileCount=2 vs files 1개), 부분 실패 rollback 단정 금지, 이력 보존 기간 미확인을 명시하고 구현 전 조사·Backend·Frontend·회귀/성능 검증 작업 단위와 완료 기준, 네 상황 시각화를 추가했습니다.",
+      "previousVersionRef": {
+        "kind": "artifact",
+        "projectId": "demo-project",
+        "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+        "entityId": "artifact-c958ade3-a6c6-43c7-b6c3-fe91c8e0735e",
+        "version": 1
+      },
+      "draftApplicationId": "application-12e8c4ae-b205-4376-b60e-f9351221a5e9",
+      "inputSnapshotId": "snapshot-feeeb5d2-e03f-4d4b-bd55-7ee0e2f953bc",
+      "decisionRefs": [],
+      "sourceRefs": [],
+      "questionResultRefs": [
+        {
+          "kind": "question_result",
+          "projectId": "demo-project",
+          "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+          "entityId": "question-13fc65f6-2fd8-4543-bac9-63adf59462e6",
+          "version": 2
+        },
+        {
+          "kind": "question_result",
+          "projectId": "demo-project",
+          "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+          "entityId": "question-276f030c-085a-43fa-bc63-f77906129074",
+          "version": 2
+        },
+        {
+          "kind": "question_result",
+          "projectId": "demo-project",
+          "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+          "entityId": "question-469d36e3-1db1-49e3-b9e4-7548bd30a590",
+          "version": 2
+        },
+        {
+          "kind": "question_result",
+          "projectId": "demo-project",
+          "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+          "entityId": "question-6205e5cb-6570-44c6-bf3f-4fc2d8b0386c",
+          "version": 2
+        },
+        {
+          "kind": "question_result",
+          "projectId": "demo-project",
+          "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+          "entityId": "question-c8db08ee-9108-4573-84ae-2da6ed461285",
+          "version": 2
+        }
+      ],
+      "revision": 2,
+      "reviewImpact": {
+        "affectedGates": [],
+        "needsNewReview": false,
+        "carriedBlockingRequestIds": [],
+        "currentHandoffValid": true
+      }
+    }
+  ],
+  "questions": [
+    {
+      "scope": {
+        "kind": "sr",
+        "projectId": "demo-project",
+        "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471"
+      },
+      "questionId": "question-13fc65f6-2fd8-4543-bac9-63adf59462e6",
+      "status": "answered",
+      "text": "기존 파일 업로드 Service가 원본 파일을 다시 읽어 FILE_UPLOAD_DTTM을 갱신하는 형태로 재호출 가능한 구조인지 확인되었나요?",
+      "reason": "이 계획은 신규 업로드 로직 대신 기존 Service 재사용을 전제로 합니다. 재호출이 불가능하거나 원본 접근이 안 되면 재처리 방식 자체를 다시 설계해야 하므로 작업 단위와 리스크 대응이 크게 달라집니다.",
+      "assigneeId": "persona-p01-owner",
+      "answerMode": "free_text",
+      "options": [],
+      "requiredGate": "G1",
+      "classificationRef": {
+        "kind": "scope_classification",
+        "projectId": "demo-project",
+        "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+        "entityId": "classification-deed6fda-40eb-4d7f-9d6b-20f68ce9994c",
+        "version": 1
+      },
+      "currentClassification": {
+        "ref": {
+          "kind": "scope_classification",
+          "projectId": "demo-project",
+          "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+          "entityId": "classification-deed6fda-40eb-4d7f-9d6b-20f68ce9994c",
+          "version": 1
+        },
+        "targetRef": {
+          "kind": "question",
+          "projectId": "demo-project",
+          "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+          "entityId": "question-13fc65f6-2fd8-4543-bac9-63adf59462e6"
+        },
+        "reason": "이 계획은 신규 업로드 로직 대신 기존 Service 재사용을 전제로 합니다. 재호출이 불가능하거나 원본 접근이 안 되면 재처리 방식 자체를 다시 설계해야 하므로 작업 단위와 리스크 대응이 크게 달라집니다.",
+        "classifiedBy": "persona-p01-owner",
+        "classifiedAt": "2026-09-09T07:16:45.120Z",
+        "basisRefs": [],
+        "scope": "current",
+        "requiredGate": "G1"
+      },
+      "candidateAnswers": [
+        "재호출 가능 확인됨",
+        "일부 수정 필요",
+        "미확인 — 조사 필요"
+      ],
+      "relatedArtifactRefs": [],
+      "sourceRefs": [
+        {
+          "kind": "sr_description",
+          "projectId": "demo-project",
+          "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+          "entityId": "description-ee4964b4-919f-43a0-89d8-117c88ef6e88",
+          "version": 2
+        }
+      ],
+      "sourceDraft": {
+        "draftId": "draft-9f39c89a-75fe-413b-a34d-6f93a5eca95e",
+        "temporaryId": "q3-reuse-upload-service"
+      },
+      "createdAt": "2026-09-09T07:16:45.120Z",
+      "currentResult": {
+        "ref": {
+          "kind": "question_result",
+          "projectId": "demo-project",
+          "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+          "entityId": "question-13fc65f6-2fd8-4543-bac9-63adf59462e6",
+          "version": 2
+        },
+        "capturedAt": "2026-09-09T07:17:00.719Z",
+        "evidenceRefs": [
+          {
+            "kind": "sr_description",
+            "projectId": "demo-project",
+            "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+            "entityId": "description-ee4964b4-919f-43a0-89d8-117c88ef6e88",
+            "version": 2
+          }
+        ],
+        "selectedAnswer": {
+          "ref": {
+            "kind": "question_answer",
+            "projectId": "demo-project",
+            "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+            "entityId": "answer-49d7255f-3b8d-4ece-a5f4-c40774f592d7",
+            "version": 1
+          },
+          "answeredQuestionSnapshotRef": {
+            "kind": "question_result",
+            "projectId": "demo-project",
+            "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+            "entityId": "question-13fc65f6-2fd8-4543-bac9-63adf59462e6",
+            "version": 1
+          },
+          "answer": {
+            "kind": "free_text",
+            "text": "미확인 — 조사 필요"
+          },
+          "evidence": {
+            "text": "미확인 — 조사 필요"
+          },
+          "answeredBy": "persona-p01-owner",
+          "answeredAt": "2026-09-09T07:17:00.719Z"
+        }
+      },
+      "revision": 2,
+      "allowedActions": [],
+      "reviewImpact": {
+        "affectedGates": [],
+        "needsNewReview": false,
+        "carriedBlockingRequestIds": [],
+        "currentHandoffValid": true
+      }
+    },
+    {
+      "scope": {
+        "kind": "sr",
+        "projectId": "demo-project",
+        "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471"
+      },
+      "questionId": "question-276f030c-085a-43fa-bc63-f77906129074",
+      "status": "answered",
+      "text": "원본 파일이 이미 삭제되었거나 접근 불가한 경우, 재처리 실패 처리 외에 별도 조치(예: 해당 건 USE_YN 정리, 알림)가 필요한가요?",
+      "reason": "원본 부재는 재처리가 원천적으로 불가능한 케이스입니다. 실패 메시지만 반환할지, 데이터 정리/후속 조치까지 이 SR 범위에 포함할지에 따라 작업 범위와 테스트 시나리오가 달라집니다.",
+      "assigneeId": "persona-p01-owner",
+      "answerMode": "free_text",
+      "options": [],
+      "requiredGate": "G1",
+      "classificationRef": {
+        "kind": "scope_classification",
+        "projectId": "demo-project",
+        "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+        "entityId": "classification-ebb9a477-7fa3-44c6-88ef-4bf3cf434b76",
+        "version": 1
+      },
+      "currentClassification": {
+        "ref": {
+          "kind": "scope_classification",
+          "projectId": "demo-project",
+          "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+          "entityId": "classification-ebb9a477-7fa3-44c6-88ef-4bf3cf434b76",
+          "version": 1
+        },
+        "targetRef": {
+          "kind": "question",
+          "projectId": "demo-project",
+          "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+          "entityId": "question-276f030c-085a-43fa-bc63-f77906129074"
+        },
+        "reason": "원본 부재는 재처리가 원천적으로 불가능한 케이스입니다. 실패 메시지만 반환할지, 데이터 정리/후속 조치까지 이 SR 범위에 포함할지에 따라 작업 범위와 테스트 시나리오가 달라집니다.",
+        "classifiedBy": "persona-p01-owner",
+        "classifiedAt": "2026-09-09T07:16:45.120Z",
+        "basisRefs": [],
+        "scope": "current",
+        "requiredGate": "G1"
+      },
+      "candidateAnswers": [
+        "실패 사유만 반환(이번 범위 한정)",
+        "실패 반환 + 데이터 정리 포함",
+        "실패 반환 + 담당자 알림 포함"
+      ],
+      "relatedArtifactRefs": [],
+      "sourceRefs": [
+        {
+          "kind": "sr_description",
+          "projectId": "demo-project",
+          "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+          "entityId": "description-ee4964b4-919f-43a0-89d8-117c88ef6e88",
+          "version": 2
+        }
+      ],
+      "sourceDraft": {
+        "draftId": "draft-9f39c89a-75fe-413b-a34d-6f93a5eca95e",
+        "temporaryId": "q5-original-file-missing"
+      },
+      "createdAt": "2026-09-09T07:16:45.120Z",
+      "currentResult": {
+        "ref": {
+          "kind": "question_result",
+          "projectId": "demo-project",
+          "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+          "entityId": "question-276f030c-085a-43fa-bc63-f77906129074",
+          "version": 2
+        },
+        "capturedAt": "2026-09-09T07:17:14.745Z",
+        "evidenceRefs": [
+          {
+            "kind": "sr_description",
+            "projectId": "demo-project",
+            "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+            "entityId": "description-ee4964b4-919f-43a0-89d8-117c88ef6e88",
+            "version": 2
+          }
+        ],
+        "selectedAnswer": {
+          "ref": {
+            "kind": "question_answer",
+            "projectId": "demo-project",
+            "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+            "entityId": "answer-005b5080-7304-463d-bdaf-84c45eef62a5",
+            "version": 1
+          },
+          "answeredQuestionSnapshotRef": {
+            "kind": "question_result",
+            "projectId": "demo-project",
+            "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+            "entityId": "question-276f030c-085a-43fa-bc63-f77906129074",
+            "version": 1
+          },
+          "answer": {
+            "kind": "free_text",
+            "text": "실패 사유만 반환(이번 범위 한정)"
+          },
+          "evidence": {
+            "text": "실패 사유만 반환(이번 범위 한정)"
+          },
+          "answeredBy": "persona-p01-owner",
+          "answeredAt": "2026-09-09T07:17:14.745Z"
+        }
+      },
+      "revision": 2,
+      "allowedActions": [],
+      "reviewImpact": {
+        "affectedGates": [],
+        "needsNewReview": false,
+        "carriedBlockingRequestIds": [],
+        "currentHandoffValid": true
+      }
+    },
+    {
+      "scope": {
+        "kind": "sr",
+        "projectId": "demo-project",
+        "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471"
+      },
+      "questionId": "question-469d36e3-1db1-49e3-b9e4-7548bd30a590",
+      "status": "answered",
+      "text": "대량 조회 부하를 막기 위해 조회 기간(fromDate~toDate)을 필수로 하거나 최대 조회 범위(예: 3개월)를 제한할까요?",
+      "reason": "운영 DB 부하가 주요 리스크로 지목되었습니다. 기간을 필수/제한할지에 따라 조회 조건 유효성 검사와 Pagination 정책, 사용자 화면 안내 문구가 달라집니다.",
+      "assigneeId": "persona-p01-owner",
+      "answerMode": "free_text",
+      "options": [],
+      "requiredGate": "G1",
+      "classificationRef": {
+        "kind": "scope_classification",
+        "projectId": "demo-project",
+        "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+        "entityId": "classification-1dbfd16f-df14-4829-ac05-a23c0147b4e4",
+        "version": 1
+      },
+      "currentClassification": {
+        "ref": {
+          "kind": "scope_classification",
+          "projectId": "demo-project",
+          "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+          "entityId": "classification-1dbfd16f-df14-4829-ac05-a23c0147b4e4",
+          "version": 1
+        },
+        "targetRef": {
+          "kind": "question",
+          "projectId": "demo-project",
+          "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+          "entityId": "question-469d36e3-1db1-49e3-b9e4-7548bd30a590"
+        },
+        "reason": "운영 DB 부하가 주요 리스크로 지목되었습니다. 기간을 필수/제한할지에 따라 조회 조건 유효성 검사와 Pagination 정책, 사용자 화면 안내 문구가 달라집니다.",
+        "classifiedBy": "persona-p01-owner",
+        "classifiedAt": "2026-09-09T07:16:45.120Z",
+        "basisRefs": [],
+        "scope": "current",
+        "requiredGate": "G1"
+      },
+      "candidateAnswers": [
+        "기간을 필수 입력으로 강제",
+        "기간 미입력 허용하되 최대 범위 제한",
+        "제한 없음(Pagination만 적용)"
+      ],
+      "relatedArtifactRefs": [],
+      "sourceRefs": [
+        {
+          "kind": "sr_description",
+          "projectId": "demo-project",
+          "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+          "entityId": "description-ee4964b4-919f-43a0-89d8-117c88ef6e88",
+          "version": 2
+        }
+      ],
+      "sourceDraft": {
+        "draftId": "draft-9f39c89a-75fe-413b-a34d-6f93a5eca95e",
+        "temporaryId": "q4-date-range-limit"
+      },
+      "createdAt": "2026-09-09T07:16:45.120Z",
+      "currentResult": {
+        "ref": {
+          "kind": "question_result",
+          "projectId": "demo-project",
+          "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+          "entityId": "question-469d36e3-1db1-49e3-b9e4-7548bd30a590",
+          "version": 2
+        },
+        "capturedAt": "2026-09-09T07:17:26.720Z",
+        "evidenceRefs": [
+          {
+            "kind": "sr_description",
+            "projectId": "demo-project",
+            "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+            "entityId": "description-ee4964b4-919f-43a0-89d8-117c88ef6e88",
+            "version": 2
+          }
+        ],
+        "selectedAnswer": {
+          "ref": {
+            "kind": "question_answer",
+            "projectId": "demo-project",
+            "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+            "entityId": "answer-a1f39a20-3b20-4df9-9aab-734dd34a555b",
+            "version": 1
+          },
+          "answeredQuestionSnapshotRef": {
+            "kind": "question_result",
+            "projectId": "demo-project",
+            "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+            "entityId": "question-469d36e3-1db1-49e3-b9e4-7548bd30a590",
+            "version": 1
+          },
+          "answer": {
+            "kind": "free_text",
+            "text": "조회 기간 제한과 Pagination은 초안대로 포함합니다. 기간 필수 여부, 기본값·최대 범위, 페이지 크기는 미확인입니다. Oracle 실행계획·데이터 규모 확인 후 담당자가 결정할 항목으로 Plan에 남깁니다."
+          },
+          "evidence": {
+            "text": "조회 기간 제한과 Pagination은 초안대로 포함합니다. 기간 필수 여부, 기본값·최대 범위, 페이지 크기는 미확인입니다. Oracle 실행계획·데이터 규모 확인 후 담당자가 결정할 항목으로 Plan에 남깁니다."
+          },
+          "answeredBy": "persona-p01-owner",
+          "answeredAt": "2026-09-09T07:17:26.720Z"
+        }
+      },
+      "revision": 2,
+      "allowedActions": [],
+      "reviewImpact": {
+        "affectedGates": [],
+        "needsNewReview": false,
+        "carriedBlockingRequestIds": [],
+        "currentHandoffValid": true
+      }
+    },
+    {
+      "scope": {
+        "kind": "sr",
+        "projectId": "demo-project",
+        "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471"
+      },
+      "questionId": "question-6205e5cb-6570-44c6-bf3f-4fc2d8b0386c",
+      "status": "answered",
+      "text": "재처리를 파일 1건씩 개별로 실행하나요, 아니면 문서(RPT_DOC_ID) 단위로 오류 파일을 한 번에 일괄 재처리하나요?",
+      "reason": "현재 조회는 문서 단위로 노출하지만 재처리 API는 fileId 단위(POST /api/attachments/{fileId}/retry)로만 정의되어 있습니다. 답에 따라 화면의 재처리 버튼 위치(문서 행 vs 파일 행)와 API 설계, 진행 상태 표시 방식이 달라집니다.",
+      "assigneeId": "persona-p01-owner",
+      "answerMode": "free_text",
+      "options": [],
+      "requiredGate": "G1",
+      "classificationRef": {
+        "kind": "scope_classification",
+        "projectId": "demo-project",
+        "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+        "entityId": "classification-d7a4be99-3b9d-46c8-9c0f-d4484b5b08d5",
+        "version": 1
+      },
+      "currentClassification": {
+        "ref": {
+          "kind": "scope_classification",
+          "projectId": "demo-project",
+          "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+          "entityId": "classification-d7a4be99-3b9d-46c8-9c0f-d4484b5b08d5",
+          "version": 1
+        },
+        "targetRef": {
+          "kind": "question",
+          "projectId": "demo-project",
+          "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+          "entityId": "question-6205e5cb-6570-44c6-bf3f-4fc2d8b0386c"
+        },
+        "reason": "현재 조회는 문서 단위로 노출하지만 재처리 API는 fileId 단위(POST /api/attachments/{fileId}/retry)로만 정의되어 있습니다. 답에 따라 화면의 재처리 버튼 위치(문서 행 vs 파일 행)와 API 설계, 진행 상태 표시 방식이 달라집니다.",
+        "classifiedBy": "persona-p01-owner",
+        "classifiedAt": "2026-09-09T07:16:45.120Z",
+        "basisRefs": [],
+        "scope": "current",
+        "requiredGate": "G1"
+      },
+      "candidateAnswers": [
+        "파일 1건씩 개별 재처리",
+        "문서 단위로 오류 파일 일괄 재처리",
+        "둘 다 지원(개별 + 일괄)"
+      ],
+      "relatedArtifactRefs": [],
+      "sourceRefs": [
+        {
+          "kind": "sr_description",
+          "projectId": "demo-project",
+          "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+          "entityId": "description-ee4964b4-919f-43a0-89d8-117c88ef6e88",
+          "version": 2
+        }
+      ],
+      "sourceDraft": {
+        "draftId": "draft-9f39c89a-75fe-413b-a34d-6f93a5eca95e",
+        "temporaryId": "q1-retry-scope"
+      },
+      "createdAt": "2026-09-09T07:16:45.120Z",
+      "currentResult": {
+        "ref": {
+          "kind": "question_result",
+          "projectId": "demo-project",
+          "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+          "entityId": "question-6205e5cb-6570-44c6-bf3f-4fc2d8b0386c",
+          "version": 2
+        },
+        "capturedAt": "2026-09-09T07:17:34.655Z",
+        "evidenceRefs": [
+          {
+            "kind": "sr_description",
+            "projectId": "demo-project",
+            "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+            "entityId": "description-ee4964b4-919f-43a0-89d8-117c88ef6e88",
+            "version": 2
+          }
+        ],
+        "selectedAnswer": {
+          "ref": {
+            "kind": "question_answer",
+            "projectId": "demo-project",
+            "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+            "entityId": "answer-29e1856f-8d8d-45eb-94c3-bf972fa9cf6e",
+            "version": 1
+          },
+          "answeredQuestionSnapshotRef": {
+            "kind": "question_result",
+            "projectId": "demo-project",
+            "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+            "entityId": "question-6205e5cb-6570-44c6-bf3f-4fc2d8b0386c",
+            "version": 1
+          },
+          "answer": {
+            "kind": "free_text",
+            "text": "파일 1건씩 개별 재처리"
+          },
+          "evidence": {
+            "text": "파일 1건씩 개별 재처리"
+          },
+          "answeredBy": "persona-p01-owner",
+          "answeredAt": "2026-09-09T07:17:34.655Z"
+        }
+      },
+      "revision": 2,
+      "allowedActions": [],
+      "reviewImpact": {
+        "affectedGates": [],
+        "needsNewReview": false,
+        "carriedBlockingRequestIds": [],
+        "currentHandoffValid": true
+      }
+    },
+    {
+      "scope": {
+        "kind": "sr",
+        "projectId": "demo-project",
+        "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471"
+      },
+      "questionId": "question-c8db08ee-9108-4573-84ae-2da6ed461285",
+      "status": "answered",
+      "text": "재처리를 허용할 '운영 권한 사용자'는 기존 eSPEC 권한 체계의 어떤 역할/권한으로 판정하나요?",
+      "reason": "변경 범위에서 인증/권한 체계 변경은 제외했지만 '운영 권한 사용자만 재처리 허용'이 요구됩니다. 어떤 기존 권한 코드/역할을 기준으로 할지 확정되어야 백엔드 권한 체크와 화면 메뉴 노출 조건을 구현할 수 있습니다.",
+      "assigneeId": "persona-p01-owner",
+      "answerMode": "free_text",
+      "options": [],
+      "requiredGate": "G1",
+      "classificationRef": {
+        "kind": "scope_classification",
+        "projectId": "demo-project",
+        "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+        "entityId": "classification-495cc95b-2580-4430-b2dd-c402e29eae74",
+        "version": 1
+      },
+      "currentClassification": {
+        "ref": {
+          "kind": "scope_classification",
+          "projectId": "demo-project",
+          "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+          "entityId": "classification-495cc95b-2580-4430-b2dd-c402e29eae74",
+          "version": 1
+        },
+        "targetRef": {
+          "kind": "question",
+          "projectId": "demo-project",
+          "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+          "entityId": "question-c8db08ee-9108-4573-84ae-2da6ed461285"
+        },
+        "reason": "변경 범위에서 인증/권한 체계 변경은 제외했지만 '운영 권한 사용자만 재처리 허용'이 요구됩니다. 어떤 기존 권한 코드/역할을 기준으로 할지 확정되어야 백엔드 권한 체크와 화면 메뉴 노출 조건을 구현할 수 있습니다.",
+        "classifiedBy": "persona-p01-owner",
+        "classifiedAt": "2026-09-09T07:16:45.120Z",
+        "basisRefs": [],
+        "scope": "current",
+        "requiredGate": "G1"
+      },
+      "candidateAnswers": [
+        "기존 운영자 역할 코드로 판정(코드 확인 필요)",
+        "특정 메뉴 접근 권한 보유 여부로 판정",
+        "별도 확인 후 회신"
+      ],
+      "relatedArtifactRefs": [],
+      "sourceRefs": [
+        {
+          "kind": "sr_description",
+          "projectId": "demo-project",
+          "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+          "entityId": "description-ee4964b4-919f-43a0-89d8-117c88ef6e88",
+          "version": 2
+        }
+      ],
+      "sourceDraft": {
+        "draftId": "draft-9f39c89a-75fe-413b-a34d-6f93a5eca95e",
+        "temporaryId": "q2-operator-permission"
+      },
+      "createdAt": "2026-09-09T07:16:45.120Z",
+      "currentResult": {
+        "ref": {
+          "kind": "question_result",
+          "projectId": "demo-project",
+          "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+          "entityId": "question-c8db08ee-9108-4573-84ae-2da6ed461285",
+          "version": 2
+        },
+        "capturedAt": "2026-09-09T07:17:44.214Z",
+        "evidenceRefs": [
+          {
+            "kind": "sr_description",
+            "projectId": "demo-project",
+            "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+            "entityId": "description-ee4964b4-919f-43a0-89d8-117c88ef6e88",
+            "version": 2
+          }
+        ],
+        "selectedAnswer": {
+          "ref": {
+            "kind": "question_answer",
+            "projectId": "demo-project",
+            "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+            "entityId": "answer-56770093-3090-45c0-98de-2b36ee4fd714",
+            "version": 1
+          },
+          "answeredQuestionSnapshotRef": {
+            "kind": "question_result",
+            "projectId": "demo-project",
+            "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+            "entityId": "question-c8db08ee-9108-4573-84ae-2da6ed461285",
+            "version": 1
+          },
+          "answer": {
+            "kind": "free_text",
+            "text": "기존 eSPEC 운영 권한을 재사용합니다. 실제 역할·권한 코드는 미확인이므로 구현 전 담당자가 확인합니다. 새 인증·권한 체계는 이번 범위에서 제외합니다."
+          },
+          "evidence": {
+            "text": "기존 eSPEC 운영 권한을 재사용합니다. 실제 역할·권한 코드는 미확인이므로 구현 전 담당자가 확인합니다. 새 인증·권한 체계는 이번 범위에서 제외합니다."
+          },
+          "answeredBy": "persona-p01-owner",
+          "answeredAt": "2026-09-09T07:17:44.214Z"
+        }
+      },
+      "revision": 2,
+      "allowedActions": [],
+      "reviewImpact": {
+        "affectedGates": [],
+        "needsNewReview": false,
+        "carriedBlockingRequestIds": [],
+        "currentHandoffValid": true
+      }
+    }
+  ],
+  "decisions": [],
+  "bundles": [],
+  "reviewRequests": [],
+  "approvals": [],
+  "gateAssessments": [
+    {
+      "gate": "G1",
+      "assessedRevision": 12,
+      "reviewEpoch": 12,
+      "conditions": [
+        {
+          "conditionId": "GP-01",
+          "passed": false,
+          "reason": "검토할 자료를 준비한 뒤 검토를 요청해 주세요.",
+          "assigneeIds": [
+            "persona-p01-owner"
+          ],
+          "targetRefs": [
+            {
+              "kind": "review_gate_state",
+              "projectId": "demo-project",
+              "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+              "entityId": "G1"
+            }
+          ]
+        },
+        {
+          "conditionId": "GP-02",
+          "passed": false,
+          "reason": "검토 요청에 요구사항 문서를 포함해 주세요. 비어 있지 않은 요구사항 문서를 준비해 주세요.",
+          "assigneeIds": [
+            "persona-p01-owner"
+          ],
+          "targetRefs": []
+        },
+        {
+          "conditionId": "GP-03",
+          "passed": true,
+          "reason": "미해결 질문 5개는 참고용 기록이며 문서 검토와 분리합니다.",
+          "assigneeIds": [],
+          "targetRefs": [
+            {
+              "kind": "question",
+              "projectId": "demo-project",
+              "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+              "entityId": "question-13fc65f6-2fd8-4543-bac9-63adf59462e6"
+            },
+            {
+              "kind": "question",
+              "projectId": "demo-project",
+              "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+              "entityId": "question-276f030c-085a-43fa-bc63-f77906129074"
+            },
+            {
+              "kind": "question",
+              "projectId": "demo-project",
+              "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+              "entityId": "question-469d36e3-1db1-49e3-b9e4-7548bd30a590"
+            },
+            {
+              "kind": "question",
+              "projectId": "demo-project",
+              "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+              "entityId": "question-6205e5cb-6570-44c6-bf3f-4fc2d8b0386c"
+            },
+            {
+              "kind": "question",
+              "projectId": "demo-project",
+              "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+              "entityId": "question-c8db08ee-9108-4573-84ae-2da6ed461285"
+            }
+          ]
+        },
+        {
+          "conditionId": "GP-04",
+          "passed": true,
+          "reason": "미확정 결정 0개는 참고용 기록이며 문서 검토와 분리합니다.",
+          "assigneeIds": [],
+          "targetRefs": []
+        },
+        {
+          "conditionId": "GP-05",
+          "passed": true,
+          "reason": "먼저 해결해야 할 수정 요청이 없습니다.",
+          "assigneeIds": [],
+          "targetRefs": []
+        },
+        {
+          "conditionId": "GP-06",
+          "passed": true,
+          "reason": "담당자 외 동료 검토자가 있습니다.",
+          "assigneeIds": [
+            "persona-p01-owner"
+          ],
+          "targetRefs": []
+        },
+        {
+          "conditionId": "GP-07",
+          "passed": false,
+          "reason": "아직 승인하지 않은 검토자가 있습니다.",
+          "assigneeIds": [
+            "persona-p03-reviewer"
+          ],
+          "targetRefs": [
+            {
+              "kind": "review_bundle",
+              "projectId": "demo-project",
+              "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+              "entityId": "G1"
+            }
+          ]
+        },
+        {
+          "conditionId": "GP-08",
+          "passed": false,
+          "reason": "아직 체크리스트 확인이 끝나지 않았습니다.",
+          "assigneeIds": [
+            "persona-p03-reviewer"
+          ],
+          "targetRefs": []
+        },
+        {
+          "conditionId": "GP-09",
+          "passed": true,
+          "reason": "요구사항 검토는 먼저 완료해야 할 다른 검토가 없습니다.",
+          "assigneeIds": [
+            "persona-p01-owner"
+          ],
+          "targetRefs": [
+            {
+              "kind": "review_gate_state",
+              "projectId": "demo-project",
+              "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+              "entityId": "G1"
+            }
+          ]
+        }
+      ],
+      "reviewState": "작성 중",
+      "canTransition": false
+    },
+    {
+      "gate": "G2",
+      "assessedRevision": 12,
+      "reviewEpoch": 12,
+      "conditions": [
+        {
+          "conditionId": "GP-01",
+          "passed": false,
+          "reason": "검토할 자료를 준비한 뒤 검토를 요청해 주세요.",
+          "assigneeIds": [
+            "persona-p01-owner"
+          ],
+          "targetRefs": [
+            {
+              "kind": "review_gate_state",
+              "projectId": "demo-project",
+              "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+              "entityId": "G2"
+            }
+          ]
+        },
+        {
+          "conditionId": "GP-02",
+          "passed": false,
+          "reason": "검토 요청에 요구사항, 진행 계획, 설계, 구현 계획 문서를 포함해 주세요.",
+          "assigneeIds": [
+            "persona-p01-owner"
+          ],
+          "targetRefs": []
+        },
+        {
+          "conditionId": "GP-03",
+          "passed": false,
+          "reason": "현재 필수 질문의 해결이 필요합니다.",
+          "assigneeIds": [
+            "persona-p01-owner"
+          ],
+          "targetRefs": [
+            {
+              "kind": "question",
+              "projectId": "demo-project",
+              "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+              "entityId": "question-13fc65f6-2fd8-4543-bac9-63adf59462e6"
+            },
+            {
+              "kind": "question",
+              "projectId": "demo-project",
+              "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+              "entityId": "question-276f030c-085a-43fa-bc63-f77906129074"
+            },
+            {
+              "kind": "question",
+              "projectId": "demo-project",
+              "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+              "entityId": "question-469d36e3-1db1-49e3-b9e4-7548bd30a590"
+            },
+            {
+              "kind": "question",
+              "projectId": "demo-project",
+              "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+              "entityId": "question-6205e5cb-6570-44c6-bf3f-4fc2d8b0386c"
+            },
+            {
+              "kind": "question",
+              "projectId": "demo-project",
+              "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+              "entityId": "question-c8db08ee-9108-4573-84ae-2da6ed461285"
+            }
+          ]
+        },
+        {
+          "conditionId": "GP-04",
+          "passed": true,
+          "reason": "필수 결정이 확정됐습니다.",
+          "assigneeIds": [],
+          "targetRefs": []
+        },
+        {
+          "conditionId": "GP-05",
+          "passed": true,
+          "reason": "먼저 해결해야 할 수정 요청이 없습니다.",
+          "assigneeIds": [],
+          "targetRefs": []
+        },
+        {
+          "conditionId": "GP-06",
+          "passed": false,
+          "reason": "검토자를 한 명 이상 배정하고 SR 담당자 외 동료 검토자를 포함해 주세요.",
+          "assigneeIds": [
+            "persona-p01-owner"
+          ],
+          "targetRefs": []
+        },
+        {
+          "conditionId": "GP-07",
+          "passed": false,
+          "reason": "검토자를 먼저 배정해 주세요.",
+          "assigneeIds": [],
+          "targetRefs": [
+            {
+              "kind": "review_bundle",
+              "projectId": "demo-project",
+              "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+              "entityId": "G2"
+            }
+          ]
+        },
+        {
+          "conditionId": "GP-08",
+          "passed": false,
+          "reason": "정책 기준을 충족할 검토자를 먼저 배정해 주세요.",
+          "assigneeIds": [],
+          "targetRefs": []
+        },
+        {
+          "conditionId": "GP-09",
+          "passed": false,
+          "reason": "요구사항 검토를 먼저 완료해 주세요.",
+          "assigneeIds": [
+            "persona-p01-owner"
+          ],
+          "targetRefs": [
+            {
+              "kind": "review_gate_state",
+              "projectId": "demo-project",
+              "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+              "entityId": "G1"
+            }
+          ]
+        }
+      ],
+      "reviewState": "작성 중",
+      "canTransition": false
+    }
+  ],
+  "reviewConfigurations": [
+    {
+      "gate": "G1",
+      "reviewEpoch": 12,
+      "revision": 12,
+      "needsNewBundle": true,
+      "validity": "not_passed",
+      "policy": {
+        "policyRef": {
+          "kind": "review_policy",
+          "projectId": "demo-project",
+          "entityId": "policy-demo-review",
+          "version": 1
+        },
+        "description": "DEMO-4 기본 동료 검토 정책",
+        "gates": {
+          "G1": {
+            "requiredRoles": [
+              "reviewer"
+            ],
+            "checklist": [
+              {
+                "itemId": "g1-requirements",
+                "label": "요구사항과 완료 기준을 확인했습니다."
+              },
+              {
+                "itemId": "g1-evidence",
+                "label": "질문·결정과 근거를 확인했습니다."
+              }
+            ]
+          },
+          "G2": {
+            "requiredRoles": [
+              "reviewer"
+            ],
+            "checklist": [
+              {
+                "itemId": "g2-plan",
+                "label": "진행 계획·설계·구현 계획을 확인했습니다."
+              },
+              {
+                "itemId": "g2-verification",
+                "label": "작업과 검증 연결을 확인했습니다."
+              }
+            ]
+          }
+        }
+      },
+      "assignment": {
+        "assignmentRef": {
+          "kind": "review_assignment",
+          "projectId": "demo-project",
+          "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+          "entityId": "assignment-d7e36e2d-814e-41cd-aa30-707fb3028c46",
+          "version": 1
+        },
+        "gate": "G1",
+        "reviewerIds": [
+          "persona-p03-reviewer"
+        ],
+        "ready": true
+      }
+    },
+    {
+      "gate": "G2",
+      "reviewEpoch": 12,
+      "revision": 12,
+      "needsNewBundle": true,
+      "validity": "not_passed",
+      "policy": {
+        "policyRef": {
+          "kind": "review_policy",
+          "projectId": "demo-project",
+          "entityId": "policy-demo-review",
+          "version": 1
+        },
+        "description": "DEMO-4 기본 동료 검토 정책",
+        "gates": {
+          "G1": {
+            "requiredRoles": [
+              "reviewer"
+            ],
+            "checklist": [
+              {
+                "itemId": "g1-requirements",
+                "label": "요구사항과 완료 기준을 확인했습니다."
+              },
+              {
+                "itemId": "g1-evidence",
+                "label": "질문·결정과 근거를 확인했습니다."
+              }
+            ]
+          },
+          "G2": {
+            "requiredRoles": [
+              "reviewer"
+            ],
+            "checklist": [
+              {
+                "itemId": "g2-plan",
+                "label": "진행 계획·설계·구현 계획을 확인했습니다."
+              },
+              {
+                "itemId": "g2-verification",
+                "label": "작업과 검증 연결을 확인했습니다."
+              }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "reviewPreparations": [
+    {
+      "kind": "Ready",
+      "gate": "G1",
+      "gateRevision": 12,
+      "input": {
+        "gate": "G1",
+        "artifactVersionRefs": [
+          {
+            "kind": "artifact",
+            "projectId": "demo-project",
+            "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+            "entityId": "artifact-c958ade3-a6c6-43c7-b6c3-fe91c8e0735e",
+            "version": 2
+          }
+        ],
+        "decisionVersionRefs": [],
+        "unconfirmedDecisionSnapshots": [],
+        "questionResultRefs": [
+          {
+            "kind": "question_result",
+            "projectId": "demo-project",
+            "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+            "entityId": "question-13fc65f6-2fd8-4543-bac9-63adf59462e6",
+            "version": 2
+          },
+          {
+            "kind": "question_result",
+            "projectId": "demo-project",
+            "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+            "entityId": "question-276f030c-085a-43fa-bc63-f77906129074",
+            "version": 2
+          },
+          {
+            "kind": "question_result",
+            "projectId": "demo-project",
+            "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+            "entityId": "question-469d36e3-1db1-49e3-b9e4-7548bd30a590",
+            "version": 2
+          },
+          {
+            "kind": "question_result",
+            "projectId": "demo-project",
+            "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+            "entityId": "question-6205e5cb-6570-44c6-bf3f-4fc2d8b0386c",
+            "version": 2
+          },
+          {
+            "kind": "question_result",
+            "projectId": "demo-project",
+            "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+            "entityId": "question-c8db08ee-9108-4573-84ae-2da6ed461285",
+            "version": 2
+          }
+        ],
+        "classificationRefs": [
+          {
+            "kind": "scope_classification",
+            "projectId": "demo-project",
+            "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+            "entityId": "classification-deed6fda-40eb-4d7f-9d6b-20f68ce9994c",
+            "version": 1
+          },
+          {
+            "kind": "scope_classification",
+            "projectId": "demo-project",
+            "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+            "entityId": "classification-ebb9a477-7fa3-44c6-88ef-4bf3cf434b76",
+            "version": 1
+          },
+          {
+            "kind": "scope_classification",
+            "projectId": "demo-project",
+            "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+            "entityId": "classification-1dbfd16f-df14-4829-ac05-a23c0147b4e4",
+            "version": 1
+          },
+          {
+            "kind": "scope_classification",
+            "projectId": "demo-project",
+            "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+            "entityId": "classification-d7a4be99-3b9d-46c8-9c0f-d4484b5b08d5",
+            "version": 1
+          },
+          {
+            "kind": "scope_classification",
+            "projectId": "demo-project",
+            "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+            "entityId": "classification-495cc95b-2580-4430-b2dd-c402e29eae74",
+            "version": 1
+          }
+        ],
+        "contextSourceVersionRefs": [
+          {
+            "kind": "context_source",
+            "projectId": "demo-project",
+            "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+            "entityId": "source-64ce5841-23d3-43c6-8308-09ae95818e22",
+            "version": 1
+          }
+        ],
+        "assignmentRef": {
+          "kind": "review_assignment",
+          "projectId": "demo-project",
+          "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+          "entityId": "assignment-d7e36e2d-814e-41cd-aa30-707fb3028c46",
+          "version": 1
+        },
+        "reviewerIds": [
+          "persona-p03-reviewer"
+        ],
+        "policyRef": {
+          "kind": "review_policy",
+          "projectId": "demo-project",
+          "entityId": "policy-demo-review",
+          "version": 1
+        }
+      },
+      "checklistSnapshot": [
+        {
+          "itemId": "g1-requirements",
+          "label": "요구사항과 완료 기준을 확인했습니다."
+        },
+        {
+          "itemId": "g1-evidence",
+          "label": "질문·결정과 근거를 확인했습니다."
+        }
+      ]
+    },
+    {
+      "kind": "NeedsInputs",
+      "gate": "G2",
+      "gateRevision": 12,
+      "missing": [
+        "G2 검토자 배정이 필요합니다."
+      ],
+      "assigneeIds": [
+        "persona-p01-owner"
+      ]
+    }
+  ],
+  "comments": [
+    {
+      "commentId": "comment-6958330d-4d36-4910-8bfb-2128d9fd3b68",
+      "artifactVersionRef": {
+        "kind": "artifact",
+        "projectId": "demo-project",
+        "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+        "entityId": "artifact-c958ade3-a6c6-43c7-b6c3-fe91c8e0735e",
+        "version": 2
+      },
+      "sectionId": "사용자 시나리오",
+      "body": "[로컬 시연 검토] 동시 요청은 단순 상태 재확인만으로 중복 업로드를 방지할 수 없습니다. 중복 방지를 요구사항으로 명시하고, 동일 파일의 원자적 처리권 확보 또는 DB Lock 등 제어 방식은 구현 전 조사·검증할 미확인 과제로 남겨 주세요. 시각화의 상태 정상이고 원본 접근 가능이라는 성공 연결은 이미 업로드된 파일의 Skip과 충돌합니다. 업로드 미완료·처리권 확보·원본 접근 가능 조건에서만 기존 Service를 호출하고, 이미 완료된 파일은 업로드 없이 Skip하는 별도 결과로 표현해 주세요. 부분 실패는 정상 성공으로 표시하지 말고 실패/정합성 확인으로 분리해 주세요. 기존 테스트 기준·미확인 항목·네 상황·제안 화면과 시연 한정 문구는 보존해 주세요.",
+      "authorId": "persona-p01-owner",
+      "createdAt": "2026-09-09T07:22:18.080Z"
+    }
+  ],
+  "changeRequests": [],
+  "generationRuns": [
+    {
+      "scope": {
+        "kind": "sr",
+        "projectId": "demo-project",
+        "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471"
+      },
+      "runId": "run-6cee6f90-a294-4c40-bbc0-23ecb8137793",
+      "taskKind": "QUESTION_PROPOSALS",
+      "inputSnapshotId": "snapshot-5b0d3bea-8473-4107-8173-a212b11d5072",
+      "revision": 3,
+      "requestedBy": "persona-p01-owner",
+      "requestedAt": "2026-09-09T07:15:18.287Z",
+      "requestedSelection": {
+        "providerId": "claude-cli",
+        "modelChoice": {
+          "kind": "explicit",
+          "modelId": "global.anthropic.claude-opus-4-8"
+        }
+      },
+      "actualModelId": "global.anthropic.claude-opus-4-8",
+      "cliVersion": "2.1.265",
+      "freshness": "stale",
+      "termination": "confirmed",
+      "application": {
+        "kind": "applied",
+        "applicationId": "application-d33c7e89-3be0-4e53-88e7-64ce53cdb85f",
+        "result": {
+          "kind": "questions",
+          "mappings": [
+            {
+              "temporaryId": "q1-retry-scope",
+              "ref": {
+                "kind": "question",
+                "projectId": "demo-project",
+                "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+                "entityId": "question-6205e5cb-6570-44c6-bf3f-4fc2d8b0386c"
+              }
+            },
+            {
+              "temporaryId": "q2-operator-permission",
+              "ref": {
+                "kind": "question",
+                "projectId": "demo-project",
+                "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+                "entityId": "question-c8db08ee-9108-4573-84ae-2da6ed461285"
+              }
+            },
+            {
+              "temporaryId": "q3-reuse-upload-service",
+              "ref": {
+                "kind": "question",
+                "projectId": "demo-project",
+                "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+                "entityId": "question-13fc65f6-2fd8-4543-bac9-63adf59462e6"
+              }
+            },
+            {
+              "temporaryId": "q4-date-range-limit",
+              "ref": {
+                "kind": "question",
+                "projectId": "demo-project",
+                "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+                "entityId": "question-469d36e3-1db1-49e3-b9e4-7548bd30a590"
+              }
+            },
+            {
+              "temporaryId": "q5-original-file-missing",
+              "ref": {
+                "kind": "question",
+                "projectId": "demo-project",
+                "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+                "entityId": "question-276f030c-085a-43fa-bc63-f77906129074"
+              }
+            }
+          ]
+        }
+      },
+      "status": "succeeded",
+      "draft": {
+        "draftId": "draft-9f39c89a-75fe-413b-a34d-6f93a5eca95e",
+        "schemaVersion": 1,
+        "taskKind": "QUESTION_PROPOSALS",
+        "body": {
+          "schemaVersion": 1,
+          "kind": "question_proposals",
+          "proposals": [
+            {
+              "temporaryId": "q1-retry-scope",
+              "text": "재처리를 파일 1건씩 개별로 실행하나요, 아니면 문서(RPT_DOC_ID) 단위로 오류 파일을 한 번에 일괄 재처리하나요?",
+              "reason": "현재 조회는 문서 단위로 노출하지만 재처리 API는 fileId 단위(POST /api/attachments/{fileId}/retry)로만 정의되어 있습니다. 답에 따라 화면의 재처리 버튼 위치(문서 행 vs 파일 행)와 API 설계, 진행 상태 표시 방식이 달라집니다.",
+              "suggestedAssigneeId": "persona-p01-owner",
+              "requiredGate": "G1",
+              "sourceRefs": [
+                {
+                  "kind": "sr_description",
+                  "projectId": "demo-project",
+                  "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+                  "entityId": "description-ee4964b4-919f-43a0-89d8-117c88ef6e88",
+                  "version": 2
+                }
+              ],
+              "candidateAnswers": [
+                "파일 1건씩 개별 재처리",
+                "문서 단위로 오류 파일 일괄 재처리",
+                "둘 다 지원(개별 + 일괄)"
+              ]
+            },
+            {
+              "temporaryId": "q2-operator-permission",
+              "text": "재처리를 허용할 '운영 권한 사용자'는 기존 eSPEC 권한 체계의 어떤 역할/권한으로 판정하나요?",
+              "reason": "변경 범위에서 인증/권한 체계 변경은 제외했지만 '운영 권한 사용자만 재처리 허용'이 요구됩니다. 어떤 기존 권한 코드/역할을 기준으로 할지 확정되어야 백엔드 권한 체크와 화면 메뉴 노출 조건을 구현할 수 있습니다.",
+              "suggestedAssigneeId": "persona-p01-owner",
+              "requiredGate": "G1",
+              "sourceRefs": [
+                {
+                  "kind": "sr_description",
+                  "projectId": "demo-project",
+                  "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+                  "entityId": "description-ee4964b4-919f-43a0-89d8-117c88ef6e88",
+                  "version": 2
+                }
+              ],
+              "candidateAnswers": [
+                "기존 운영자 역할 코드로 판정(코드 확인 필요)",
+                "특정 메뉴 접근 권한 보유 여부로 판정",
+                "별도 확인 후 회신"
+              ]
+            },
+            {
+              "temporaryId": "q3-reuse-upload-service",
+              "text": "기존 파일 업로드 Service가 원본 파일을 다시 읽어 FILE_UPLOAD_DTTM을 갱신하는 형태로 재호출 가능한 구조인지 확인되었나요?",
+              "reason": "이 계획은 신규 업로드 로직 대신 기존 Service 재사용을 전제로 합니다. 재호출이 불가능하거나 원본 접근이 안 되면 재처리 방식 자체를 다시 설계해야 하므로 작업 단위와 리스크 대응이 크게 달라집니다.",
+              "suggestedAssigneeId": "persona-p01-owner",
+              "requiredGate": "G1",
+              "sourceRefs": [
+                {
+                  "kind": "sr_description",
+                  "projectId": "demo-project",
+                  "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+                  "entityId": "description-ee4964b4-919f-43a0-89d8-117c88ef6e88",
+                  "version": 2
+                }
+              ],
+              "candidateAnswers": [
+                "재호출 가능 확인됨",
+                "일부 수정 필요",
+                "미확인 — 조사 필요"
+              ]
+            },
+            {
+              "temporaryId": "q4-date-range-limit",
+              "text": "대량 조회 부하를 막기 위해 조회 기간(fromDate~toDate)을 필수로 하거나 최대 조회 범위(예: 3개월)를 제한할까요?",
+              "reason": "운영 DB 부하가 주요 리스크로 지목되었습니다. 기간을 필수/제한할지에 따라 조회 조건 유효성 검사와 Pagination 정책, 사용자 화면 안내 문구가 달라집니다.",
+              "suggestedAssigneeId": "persona-p01-owner",
+              "requiredGate": "G1",
+              "sourceRefs": [
+                {
+                  "kind": "sr_description",
+                  "projectId": "demo-project",
+                  "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+                  "entityId": "description-ee4964b4-919f-43a0-89d8-117c88ef6e88",
+                  "version": 2
+                }
+              ],
+              "candidateAnswers": [
+                "기간을 필수 입력으로 강제",
+                "기간 미입력 허용하되 최대 범위 제한",
+                "제한 없음(Pagination만 적용)"
+              ]
+            },
+            {
+              "temporaryId": "q5-original-file-missing",
+              "text": "원본 파일이 이미 삭제되었거나 접근 불가한 경우, 재처리 실패 처리 외에 별도 조치(예: 해당 건 USE_YN 정리, 알림)가 필요한가요?",
+              "reason": "원본 부재는 재처리가 원천적으로 불가능한 케이스입니다. 실패 메시지만 반환할지, 데이터 정리/후속 조치까지 이 SR 범위에 포함할지에 따라 작업 범위와 테스트 시나리오가 달라집니다.",
+              "suggestedAssigneeId": "persona-p01-owner",
+              "requiredGate": "G1",
+              "sourceRefs": [
+                {
+                  "kind": "sr_description",
+                  "projectId": "demo-project",
+                  "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+                  "entityId": "description-ee4964b4-919f-43a0-89d8-117c88ef6e88",
+                  "version": 2
+                }
+              ],
+              "candidateAnswers": [
+                "실패 사유만 반환(이번 범위 한정)",
+                "실패 반환 + 데이터 정리 포함",
+                "실패 반환 + 담당자 알림 포함"
+              ]
+            }
+          ]
+        },
+        "basisInputSnapshotRef": "snapshot-5b0d3bea-8473-4107-8173-a212b11d5072",
+        "basisFingerprint": "sha256:669bdd56638bc88d6deca0b7129ff321b5e52d9465dbfbb3454d62a79bb3d16f",
+        "provenance": {
+          "kind": "provider",
+          "sourceRunId": "run-6cee6f90-a294-4c40-bbc0-23ecb8137793"
+        },
+        "freshness": "stale",
+        "staleReason": "현재 생성 입력 지문과 다릅니다.",
+        "application": {
+          "kind": "applied",
+          "applicationId": "application-d33c7e89-3be0-4e53-88e7-64ce53cdb85f",
+          "result": {
+            "kind": "questions",
+            "mappings": [
+              {
+                "temporaryId": "q1-retry-scope",
+                "ref": {
+                  "kind": "question",
+                  "projectId": "demo-project",
+                  "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+                  "entityId": "question-6205e5cb-6570-44c6-bf3f-4fc2d8b0386c"
+                }
+              },
+              {
+                "temporaryId": "q2-operator-permission",
+                "ref": {
+                  "kind": "question",
+                  "projectId": "demo-project",
+                  "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+                  "entityId": "question-c8db08ee-9108-4573-84ae-2da6ed461285"
+                }
+              },
+              {
+                "temporaryId": "q3-reuse-upload-service",
+                "ref": {
+                  "kind": "question",
+                  "projectId": "demo-project",
+                  "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+                  "entityId": "question-13fc65f6-2fd8-4543-bac9-63adf59462e6"
+                }
+              },
+              {
+                "temporaryId": "q4-date-range-limit",
+                "ref": {
+                  "kind": "question",
+                  "projectId": "demo-project",
+                  "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+                  "entityId": "question-469d36e3-1db1-49e3-b9e4-7548bd30a590"
+                }
+              },
+              {
+                "temporaryId": "q5-original-file-missing",
+                "ref": {
+                  "kind": "question",
+                  "projectId": "demo-project",
+                  "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+                  "entityId": "question-276f030c-085a-43fa-bc63-f77906129074"
+                }
+              }
+            ]
+          }
+        }
+      },
+      "finishedAt": "2026-09-09T07:15:52.868Z"
+    },
+    {
+      "scope": {
+        "kind": "sr",
+        "projectId": "demo-project",
+        "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471"
+      },
+      "runId": "run-84f5f05f-7c81-46e5-baab-27fa314d2ffe",
+      "taskKind": "ARTIFACT_REVISION",
+      "inputSnapshotId": "snapshot-feeeb5d2-e03f-4d4b-bd55-7ee0e2f953bc",
+      "revision": 3,
+      "requestedBy": "persona-p01-owner",
+      "requestedAt": "2026-09-09T07:18:06.330Z",
+      "requestedSelection": {
+        "providerId": "claude-cli",
+        "modelChoice": {
+          "kind": "explicit",
+          "modelId": "global.anthropic.claude-opus-4-8"
+        }
+      },
+      "actualModelId": "global.anthropic.claude-opus-4-8",
+      "cliVersion": "2.1.265",
+      "freshness": "stale",
+      "termination": "confirmed",
+      "application": {
+        "kind": "applied",
+        "applicationId": "application-12e8c4ae-b205-4376-b60e-f9351221a5e9",
+        "result": {
+          "kind": "artifact",
+          "artifactVersionRef": {
+            "kind": "artifact",
+            "projectId": "demo-project",
+            "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+            "entityId": "artifact-c958ade3-a6c6-43c7-b6c3-fe91c8e0735e",
+            "version": 2
+          }
+        }
+      },
+      "status": "succeeded",
+      "draft": {
+        "draftId": "draft-d892c2cc-56f0-4dee-a5fa-1d1b32aba046",
+        "schemaVersion": 1,
+        "taskKind": "ARTIFACT_REVISION",
+        "body": {
+          "schemaVersion": 1,
+          "kind": "artifact",
+          "documentKind": "requirements",
+          "markdown": "# Inception Plan: [시연] eSPEC 첨부파일 업로드 오류 조회·재처리\n\n> 본 문서는 제공된 초안을 근거로 한 로컬 시연용 정리이며, 실제 eSPEC 담당자의 승인이나 운영 검증이 아닙니다. 사람이 답한 항목은 '확인됨'으로, AI가 보완한 항목은 '미확인'으로 표시합니다.\n\n## 요구사항\n\n### 목적 (확인됨 — 초안 근거)\n- eSPEC 문서(PRC/INS) 첨부파일 중 `USE_YN = 'Y'` 이지만 `FILE_UPLOAD_DTTM`이 없는 비정상 건을 운영자가 직접 조회하고 재처리할 수 있도록 기능을 추가한다.\n- 현재는 DB 조회 및 수동 확인이 필요하므로, Portal에서 대상 문서와 첨부파일 상태를 확인하고 재처리 결과까지 추적 가능하도록 개선한다.\n\n### 오류 판정 규칙 (확인됨)\n- 오류 판정: `ESPEC_ATTACH_FILE.USE_YN = 'Y' AND FILE_UPLOAD_DTTM IS NULL`.\n- `USE_YN = 'N'` 파일과 정상(업로드 시각이 있는) 파일은 오류 판정에서 제외한다.\n- 조회 단위: 오류 파일이 1건 이상인 문서(RPT_DOC_ID) 단위로 노출한다.\n- 재처리 단위: 파일 1건 단위로 개별 실행한다(사람 답변으로 확정).\n\n### 변경 범위 (확인됨)\n- **Frontend**: `dks-espec-portal` / Vue.js\n- **Backend**: `dks-espec-endpoint` / Spring Boot\n- **DB**: Oracle (`RPT_DOC`, `ESPEC_ATTACH_FILE`)\n\n### 제외 범위 (확인됨)\n- 신규 테이블 생성, 파일 저장소 구조 변경, 기존 정상 첨부파일 이관, 인증/권한 체계 변경은 이번 범위에서 제외한다.\n\n### 미확인 사항 (조사·검증 필요)\n- 기존 업로드 Service의 재호출 가능 구조 여부 — 사람 답변: 미확인 — 조사 필요.\n- 원본 파일 보관 위치·접근 권한, 트랜잭션 경계, 동시 재처리 제어 방식 — 미확인.\n- 운영 권한 판정 코드·역할 — 미확인(기존 eSPEC 운영 권한 재사용 전제).\n- 등록일 기준 컬럼, 조회 기간 필수 여부·기본값·최대 범위, 페이지 크기, 성능 수치 — 미확인.\n- 재처리 결과 추적 방식과 이력 보존 기간 — 미확인.\n- 응답 계약 불일치(예시 JSON의 `errorFileCount: 2`인데 `files` 배열이 1개) — 확인 과제.\n\n### 원문 테스트 기준 (보존)\n- 정상 파일만 존재하는 문서는 조회되지 않아야 함.\n- 동일 `RPT_DOC_ID`에 정상/오류 파일이 섞여 있으면 문서는 조회되어야 함.\n- `USE_YN = 'N'` 파일은 오류 판정에서 제외.\n- 재처리 성공 시 `FILE_UPLOAD_DTTM`이 생성되어야 함.\n- 이미 처리된 파일에 재요청 시 중복 업로드되지 않아야 함.\n- PRC / INS 각각 조회 검증.\n- 대량 조회 시 응답시간 및 Oracle 실행계획 확인.\n\n## 사용자 시나리오\n\n운영자는 `문서번호/기간 검색` → `업로드 오류 첨부파일 조회` → `대상 선택` → `재처리 요청` → `성공/실패 결과 표시` 흐름을 따른다.\n\n아래 화면 구성은 초안 근거로 정리한 **제안**이며, 실제 eSPEC 화면이나 실행 결과가 아니다.\n\n- **제안** 검색 화면: 검색영역에 문서번호 / 기간 / 문서구분(PRC/INS)을 입력한다.\n- **제안** 오류 목록 화면: Grid에 문서번호, 오류 파일 수, 파일명, 상태, 재처리 버튼을 표시한다.\n- **제안** 처리 중 화면: 재처리 전 Confirm을 표시하고 처리 중에는 버튼을 비활성화한다.\n- **제안** 성공 안내 화면: 성공 시 해당 Row를 재조회하여 상태를 갱신한다.\n- **제안** 실패 안내 화면: 실패 시 서버 오류 메시지를 표시한다.\n\n### 상황 1 — 오류 조회와 성공 재처리\n운영자가 조건으로 검색하면 오류 파일이 1건 이상인 문서가 목록에 노출되고, 파일 1건을 재처리하면 성공 시 `FILE_UPLOAD_DTTM`이 갱신되어 해당 Row가 재조회된다.\n\n### 상황 2 — 이미 처리된 파일 Skip\n재처리 직전 현재 상태를 재확인하여 이미 정상 처리된 건은 Skip 한다. 이미 처리된 파일에 재요청 시 중복 업로드되지 않아야 한다.\n\n### 상황 3 — 원본 소실 실패\n원본 파일이 이미 삭제되었거나 접근 불가한 경우 재처리는 불가능하며, 이번 범위에서는 실패 사유만 반환한다(사람 답변으로 확정). 별도 데이터 정리·알림은 이번 범위에서 제외한다.\n\n### 상황 4 — 동시 요청·부분 실패\n동일 파일에 대한 동시 재처리 요청은 처리 전 상태 재검증으로 중복 처리를 막는다. 파일 저장 후 DB 갱신 실패 등 부분 실패 시 파일 저장소와 DB 상태가 불일치할 수 있으며, DB rollback만으로 외부 파일 저장이 취소된다고 단정하지 않는다(검증 과제).\n\n## 진행 계획\n\n1. **구현 전 조사**: 기존 업로드 Service 재호출 가능 구조, 원본 파일 보관 위치·접근 권한, 트랜잭션 경계, 동시 재처리 제어, 운영 권한 코드, 등록일 기준 컬럼을 확인한다.\n2. **응답 계약 확정**: 조회 API 응답 스키마와 `errorFileCount`·`files` 정합성을 확정한다.\n3. **Backend 구현**: 조회 API와 파일 1건 단위 재처리 API를 구성한다.\n4. **Frontend 구현**: 검색·목록·재처리 화면을 구성한다.\n5. **회귀·성능 검증**: 기존 등록/업로드 회귀 테스트와 Oracle 실행계획·응답시간을 확인한다.\n\n- 조회 기간 제한과 Pagination은 초안대로 포함한다. 기간 필수 여부·기본값·최대 범위·페이지 크기는 Oracle 실행계획·데이터 규모 확인 후 담당자가 결정할 항목으로 남긴다(미확인).\n\n## 주요 구조\n\n근거가 있는 관계만 아래에 정리한다. 모르는 관계는 미확인으로 남긴다.\n\n- dks-espec-portal(Vue.js) → dks-espec-endpoint(Spring Boot): 오류 조회·재처리 API 호출\n- dks-espec-endpoint → RPT_DOC: 대상 문서 조회\n- dks-espec-endpoint → ESPEC_ATTACH_FILE: `MAPPING_1ST_KEY_ID = RPT_DOC_ID` 조인으로 활성 첨부파일 확인\n- 재처리 API → 기존 파일 업로드 Service: 로직 재사용(재호출 가능 여부 미확인)\n- 재처리 성공 → ESPEC_ATTACH_FILE.FILE_UPLOAD_DTTM: 업로드 시각 갱신\n\n### API 개요 (초안 근거, 상세 설계 아님)\n- GET `/api/attachments/upload-errors` — 입력 `rptDocId?`, `fromDate?`, `toDate?`, `docType?`(PRC/INS). 처리: RPT_DOC 조회 → ESPEC_ATTACH_FILE 조인 → `FILE_UPLOAD_DTTM IS NULL` 존재 확인 → 문서번호 기준 오류 파일 수/상세 반환.\n- POST `/api/attachments/{fileId}/retry` — 기존 업로드 Service 재사용, 성공 시 `FILE_UPLOAD_DTTM` 갱신, 실패 시 원인 로그·오류 메시지 반환, 중복 요청 방지를 위해 현재 상태 재확인.\n\n### 조회 쿼리 (초안 근거)\n```sql\nSELECT\n    R.RPT_DOC_ID,\n    COUNT(*) AS ERROR_FILE_COUNT\nFROM RPT_DOC R\nJOIN ESPEC_ATTACH_FILE A\n  ON A.MAPPING_1ST_KEY_ID = R.RPT_DOC_ID\nWHERE A.USE_YN = 'Y'\n  AND A.FILE_UPLOAD_DTTM IS NULL\n  AND (R.RPT_DOC_ID LIKE 'PRC%' OR R.RPT_DOC_ID LIKE 'INS%')\nGROUP BY R.RPT_DOC_ID;\n```\n- 신규 테이블 생성 없음. 기존 인덱스 `ESPEC_ATTACH_FILE(MAPPING_1ST_KEY_ID)` 확인. 성능 문제 시 `USE_YN`, `FILE_UPLOAD_DTTM` 조건 포함 인덱스 검토(미확인).\n\n## 주요 결정\n\n- **재처리 단위 = 파일 1건 개별 재처리** (확인됨, 사람 답변). 문서 단위 일괄 재처리는 이번 범위 아님.\n- **원본 부재 시 = 실패 사유만 반환** (확인됨, 사람 답변). 데이터 정리·알림 제외.\n- **운영 권한 = 기존 eSPEC 운영 권한 재사용** (확인됨). 실제 역할·권한 코드는 미확인(구현 전 담당자 확인). 새 인증·권한 체계 제외.\n- **조회 기간 제한·Pagination = 초안대로 포함** (확인됨). 필수 여부·기본값·최대 범위·페이지 크기는 미확인(담당자 결정).\n- **재호출 가능 구조 = 미확인 — 조사 필요** (사람 답변). 재호출 불가 시 재처리 방식 재설계 필요.\n- **부분 실패 보정 방식 = 미확인**. DB rollback만으로 외부 파일 저장이 취소된다고 단정하지 않음(검증 과제).\n- **응답 계약 정합성 = 확인 과제**. 예시 JSON의 `errorFileCount: 2`와 `files` 1개 불일치를 API 계약 확정 시 정리.\n\n### 위험 / 영향 / 대응 (원문 보존, 머리글 정리)\n\n| 위험 | 영향 | 대응 |\n| --- | --- | --- |\n| 동일 파일 재처리로 인한 중복 업로드 | 파일 중복 저장 또는 상태 불일치 | 재처리 직전 `FILE_UPLOAD_DTTM` 재확인, 이미 정상 처리된 건은 Skip |\n| 재처리 중 일부 단계만 성공하는 부분 실패 | 파일 저장소와 DB 상태 불일치 | 기존 업로드 Service의 트랜잭션 경계 확인, 실패 시 DB 상태를 정상적으로 Rollback/보정(단정 금지, 검증 필요) |\n| 오류 건 대량 조회 시 Oracle 부하 증가 | 운영 DB 응답 지연 | 조회 기간 제한, Pagination 적용, 실행계획 및 인덱스 확인 |\n| 원본 파일이 이미 삭제되었거나 접근 불가 | 재처리 자체가 불가능 | 재처리 전 원본 존재 여부 확인 후 사용자에게 명확한 실패 사유 반환 |\n| 운영자 외 사용자의 재처리 API 호출 | 비정상 데이터 변경 가능 | 기존 eSPEC 권한 체계를 사용하여 운영 권한 사용자만 재처리 허용 |\n| 기존 업로드 로직 변경에 따른 Regression | 정상 PRC/INS 첨부파일 처리 영향 | 신규 로직보다 기존 Service 재사용 우선, 기존 등록/업로드 회귀 테스트 수행 |\n| 동일 파일에 대한 동시 재처리 요청 | Race condition, 중복 처리 | 처리 전 상태 재검증 및 필요 시 DB Lock/처리 상태값 적용 검토 |\n\n## 작업 단위\n\n### T1. 구현 전 조사 (선행)\n- 기존 업로드 Service 재호출 가능 구조, 원본 파일 보관 위치·접근 권한, 트랜잭션 경계, 동시 재처리 제어 방식, 운영 권한 코드, 등록일 기준 컬럼을 확인한다.\n- 담당: SR 담당자.\n- 완료 기준: 각 미확인 항목에 대해 확인 결과(가능/불가/조건)와 근거가 문서에 기록된다.\n\n### T2. 응답 계약 확정\n- 조회 API 응답 스키마와 `errorFileCount`·`files` 정합성 불일치를 정리한다.\n- 완료 기준: 확정된 응답 계약과 필드 정의가 합의된다.\n\n### T3. Backend\n- 오류 조회 API와 파일 1건 단위 재처리 API를 구성한다(기존 Service 재사용 전제).\n- 재처리 직전 상태 재확인, 성공 시 `FILE_UPLOAD_DTTM` 갱신, 실패 시 원인 로그·오류 메시지 반환을 포함한다.\n- 완료 기준: 조회/재처리 API가 원문 테스트 기준(정상 제외, 혼재 노출, USE_YN=N 제외, Skip, 중복 방지)을 충족한다.\n\n### T4. Frontend\n- 운영 메뉴에 첨부파일 업로드 오류 화면을 추가한다(검색·목록·Confirm·처리 중·성공/실패 안내).\n- 완료 기준: 검색→조회→재처리→결과 표시 흐름이 동작하고 성공 시 해당 Row가 재조회된다.\n\n### T5. 회귀·성능 검증\n- 기존 등록/업로드 회귀 테스트, PRC/INS 각각 조회 검증, 대량 조회 응답시간·Oracle 실행계획을 확인한다.\n- 완료 기준: 회귀 이상 없음이 확인되고 실행계획·응답시간 결과가 기록된다.\n\n### 예상 변경 파일 (초안 근거)\n```bash\ndks-espec-portal\n└─ src/views/.../AttachmentUploadError.vue\n└─ src/api/attachment.ts\n\ndks-espec-endpoint\n└─ controller/AttachmentController.java\n└─ service/AttachmentService.java\n└─ repository/AttachmentRepository.java\n└─ dto/AttachmentUploadErrorDto.java\n\nOracle\n└─ 기존 RPT_DOC / ESPEC_ATTACH_FILE 조회\n```\n\n<!-- planrepo-visualization\n{\n  \"schemaVersion\": 1,\n  \"overview\": {\n    \"headline\": \"eSPEC 첨부파일 업로드 오류 조회·재처리\",\n    \"summary\": \"USE_YN=Y이면서 FILE_UPLOAD_DTTM이 없는 오류 첨부를 문서 단위로 조회하고 파일 1건 단위로 재처리하는 Inception 계획\",\n    \"evidence\": { \"sectionId\": \"요구사항\", \"quote\": \"오류 판정: `ESPEC_ATTACH_FILE.USE_YN = 'Y' AND FILE_UPLOAD_DTTM IS NULL`\" }\n  },\n  \"changes\": {\n    \"before\": [],\n    \"after\": [\"Portal에서 오류 문서를 조회하고 파일 1건 단위로 재처리 결과를 확인\"],\n    \"evidence\": { \"sectionId\": \"진행 계획\", \"quote\": \"파일 1건 단위 재처리 API를 구성한다\" }\n  },\n  \"nodes\": [\n    {\n      \"id\": \"node-1\",\n      \"kind\": \"action\",\n      \"title\": \"오류 문서 검색\",\n      \"detail\": \"문서번호 / 기간 / 문서구분으로 오류 파일이 1건 이상인 문서를 조회\",\n      \"evidence\": { \"sectionId\": \"사용자 시나리오\", \"quote\": \"검색영역에 문서번호 / 기간 / 문서구분(PRC/INS)을 입력한다\" }\n    },\n    {\n      \"id\": \"node-2\",\n      \"kind\": \"condition\",\n      \"title\": \"재처리 전 상태 재확인\",\n      \"detail\": \"이미 정상 처리된 건은 Skip 하고 동시 요청 중복 처리를 방지\",\n      \"evidence\": { \"sectionId\": \"사용자 시나리오\", \"quote\": \"이미 정상 처리된 건은 Skip\" }\n    },\n    {\n      \"id\": \"node-3\",\n      \"kind\": \"result\",\n      \"title\": \"재처리 성공\",\n      \"detail\": \"FILE_UPLOAD_DTTM이 갱신되어 해당 Row가 재조회됨\",\n      \"evidence\": { \"sectionId\": \"사용자 시나리오\", \"quote\": \"성공 시 `FILE_UPLOAD_DTTM`이 갱신되어 해당 Row가 재조회된다\" }\n    },\n    {\n      \"id\": \"node-4\",\n      \"kind\": \"result\",\n      \"title\": \"재처리 실패\",\n      \"detail\": \"원본 부재 시 실패 사유만 반환\",\n      \"evidence\": { \"sectionId\": \"사용자 시나리오\", \"quote\": \"이번 범위에서는 실패 사유만 반환한다\" }\n    }\n  ],\n  \"edges\": [\n    {\n      \"from\": \"node-1\",\n      \"to\": \"node-2\",\n      \"label\": \"오류 파일 선택 후 재처리 요청\",\n      \"evidence\": { \"sectionId\": \"주요 구조\", \"quote\": \"재처리 API → 기존 파일 업로드 Service: 로직 재사용\" }\n    },\n    {\n      \"from\": \"node-2\",\n      \"to\": \"node-3\",\n      \"label\": \"상태 정상이고 원본 접근 가능\",\n      \"evidence\": { \"sectionId\": \"주요 구조\", \"quote\": \"재처리 성공 → ESPEC_ATTACH_FILE.FILE_UPLOAD_DTTM: 업로드 시각 갱신\" }\n    },\n    {\n      \"from\": \"node-2\",\n      \"to\": \"node-4\",\n      \"label\": \"원본 부재·접근 불가\",\n      \"evidence\": { \"sectionId\": \"사용자 시나리오\", \"quote\": \"원본 파일이 이미 삭제되었거나 접근 불가한 경우 재처리는 불가능\" }\n    }\n  ],\n  \"scenarios\": [\n    {\n      \"id\": \"scenario-1\",\n      \"label\": \"오류 조회와 성공 재처리\",\n      \"description\": \"조건 검색으로 오류 문서를 조회하고 파일 1건을 재처리해 성공\",\n      \"nodeIds\": [\"node-1\", \"node-3\"],\n      \"outcome\": \"FILE_UPLOAD_DTTM 갱신 후 Row 재조회\",\n      \"screen\": {\n        \"title\": \"오류 목록\",\n        \"body\": \"Grid에 문서번호, 오류 파일 수, 파일명, 상태, 재처리 버튼을 표시한다.\",\n        \"primaryAction\": \"재처리\",\n        \"evidence\": { \"sectionId\": \"사용자 시나리오\", \"quote\": \"Grid에 문서번호, 오류 파일 수, 파일명, 상태, 재처리 버튼을 표시한다\" }\n      },\n      \"evidence\": { \"sectionId\": \"사용자 시나리오\", \"quote\": \"오류 파일이 1건 이상인 문서가 목록에 노출되고\" }\n    },\n    {\n      \"id\": \"scenario-2\",\n      \"label\": \"이미 처리된 파일 Skip\",\n      \"description\": \"재처리 직전 상태 재확인으로 이미 처리된 파일은 Skip\",\n      \"nodeIds\": [\"node-2\"],\n      \"outcome\": \"중복 업로드되지 않음\",\n      \"evidence\": { \"sectionId\": \"사용자 시나리오\", \"quote\": \"이미 처리된 파일에 재요청 시 중복 업로드되지 않아야 한다\" }\n    },\n    {\n      \"id\": \"scenario-3\",\n      \"label\": \"원본 소실 실패\",\n      \"description\": \"원본이 삭제·접근 불가하면 실패 사유만 반환\",\n      \"nodeIds\": [\"node-4\"],\n      \"outcome\": \"실패 사유 반환, 별도 조치 없음\",\n      \"screen\": {\n        \"title\": \"실패 안내\",\n        \"body\": \"실패 시 서버 오류 메시지를 표시한다.\",\n        \"status\": \"실패\",\n        \"evidence\": { \"sectionId\": \"사용자 시나리오\", \"quote\": \"실패 시 서버 오류 메시지를 표시한다\" }\n      },\n      \"evidence\": { \"sectionId\": \"사용자 시나리오\", \"quote\": \"이번 범위에서는 실패 사유만 반환한다\" }\n    },\n    {\n      \"id\": \"scenario-4\",\n      \"label\": \"동시 요청·부분 실패\",\n      \"description\": \"동시 요청은 상태 재검증으로 막고, 부분 실패는 rollback만으로 취소된다고 단정하지 않음\",\n      \"nodeIds\": [\"node-2\"],\n      \"outcome\": \"중복 처리 방지, 부분 실패는 검증 과제로 남김\",\n      \"evidence\": { \"sectionId\": \"사용자 시나리오\", \"quote\": \"DB rollback만으로 외부 파일 저장이 취소된다고 단정하지 않는다\" }\n    }\n  ],\n  \"rules\": [\n    {\n      \"id\": \"rule-1\",\n      \"title\": \"오류 판정 조건\",\n      \"detail\": \"USE_YN='Y' AND FILE_UPLOAD_DTTM IS NULL 인 파일만 오류로 판정\",\n      \"category\": \"requirement\",\n      \"evidence\": { \"sectionId\": \"요구사항\", \"quote\": \"`USE_YN = 'N'` 파일과 정상(업로드 시각이 있는) 파일은 오류 판정에서 제외한다\" }\n    },\n    {\n      \"id\": \"rule-2\",\n      \"title\": \"재처리 성공 기준\",\n      \"detail\": \"재처리 성공 시 FILE_UPLOAD_DTTM이 생성되어야 함\",\n      \"category\": \"success\",\n      \"evidence\": { \"sectionId\": \"요구사항\", \"quote\": \"재처리 성공 시 `FILE_UPLOAD_DTTM`이 생성되어야 함\" }\n    },\n    {\n      \"id\": \"rule-3\",\n      \"title\": \"중복 업로드 방지\",\n      \"detail\": \"이미 처리된 파일에 재요청 시 중복 업로드되지 않아야 함\",\n      \"category\": \"exception\",\n      \"evidence\": { \"sectionId\": \"요구사항\", \"quote\": \"이미 처리된 파일에 재요청 시 중복 업로드되지 않아야 함\" }\n    }\n  ]\n}\n-->\n",
+          "requirementRefs": [
+            "요구사항",
+            "사용자 시나리오",
+            "진행 계획",
+            "주요 구조",
+            "주요 결정",
+            "작업 단위"
+          ],
+          "changeSummary": "초안 아티팩트를 지정된 6개 H2 구조의 Inception Plan으로 개정했습니다. 사람이 답한 5개 항목(파일 단위 재처리, 실패 사유만 반환, 운영 권한 재사용, 조회 기간·Pagination, 재호출 구조 미확인)을 확인/미확인으로 구분해 반영하고, 원문 테스트 기준과 위험 표(위험/영향/대응 머리글)를 보존했습니다. 응답 계약 불일치(errorFileCount=2 vs files 1개), 부분 실패 rollback 단정 금지, 이력 보존 기간 미확인을 명시하고 구현 전 조사·Backend·Frontend·회귀/성능 검증 작업 단위와 완료 기준, 네 상황 시각화를 추가했습니다."
+        },
+        "basisInputSnapshotRef": "snapshot-feeeb5d2-e03f-4d4b-bd55-7ee0e2f953bc",
+        "basisFingerprint": "sha256:02620e91bc92e979e160a28861a41183c7a56f673064721f4516bdfde570bf22",
+        "provenance": {
+          "kind": "provider",
+          "sourceRunId": "run-84f5f05f-7c81-46e5-baab-27fa314d2ffe"
+        },
+        "freshness": "stale",
+        "staleReason": "현재 생성 입력 지문과 다릅니다.",
+        "application": {
+          "kind": "applied",
+          "applicationId": "application-12e8c4ae-b205-4376-b60e-f9351221a5e9",
+          "result": {
+            "kind": "artifact",
+            "artifactVersionRef": {
+              "kind": "artifact",
+              "projectId": "demo-project",
+              "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+              "entityId": "artifact-c958ade3-a6c6-43c7-b6c3-fe91c8e0735e",
+              "version": 2
+            }
+          }
+        }
+      },
+      "finishedAt": "2026-09-09T07:19:48.026Z"
+    },
+    {
+      "scope": {
+        "kind": "sr",
+        "projectId": "demo-project",
+        "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471"
+      },
+      "runId": "run-6e734df9-f3d1-4006-a014-f6d5d236b382",
+      "taskKind": "ARTIFACT_REVISION",
+      "inputSnapshotId": "snapshot-778edc0f-d16b-4346-90d7-07b65ba15866",
+      "revision": 3,
+      "requestedBy": "persona-p01-owner",
+      "requestedAt": "2026-09-09T07:19:54.619Z",
+      "requestedSelection": {
+        "providerId": "claude-cli",
+        "modelChoice": {
+          "kind": "explicit",
+          "modelId": "global.anthropic.claude-opus-4-8"
+        }
+      },
+      "actualModelId": "global.anthropic.claude-opus-4-8",
+      "cliVersion": "2.1.265",
+      "freshness": "stale",
+      "termination": "confirmed",
+      "application": {
+        "kind": "not_applied"
+      },
+      "status": "succeeded",
+      "draft": {
+        "draftId": "draft-1179838c-3c1c-4c79-9560-14dd904a3049",
+        "schemaVersion": 1,
+        "taskKind": "ARTIFACT_REVISION",
+        "body": {
+          "schemaVersion": 1,
+          "kind": "artifact",
+          "documentKind": "requirements",
+          "markdown": "# Inception Plan: [시연] eSPEC 첨부파일 업로드 오류 조회·재처리\n\n## 요구사항\n\neSPEC 문서(PRC/INS) 첨부파일 중 `USE_YN = 'Y'` 이지만 `FILE_UPLOAD_DTTM`이 없는 비정상 건을 운영자가 Portal에서 직접 조회하고 재처리할 수 있도록 기능을 추가한다. 현재는 DB 조회 및 수동 확인이 필요하므로, 대상 문서와 첨부파일 상태를 확인하고 재처리 결과까지 추적 가능하도록 개선한다.\n\n**목적 (확인됨)**\n\n- 업로드 오류 첨부파일을 운영자가 조회하고 재처리하는 기능 제공\n- 재처리 결과(성공/실패)를 화면에서 추적 가능하도록 개선\n\n**변경 범위 (확인됨)**\n\n- Frontend: `dks-espec-portal` / Vue.js\n- Backend: `dks-espec-endpoint` / Spring Boot\n- DB: Oracle (`RPT_DOC`, `ESPEC_ATTACH_FILE`)\n- 제외 범위: 파일 저장소 구조 변경, 기존 정상 첨부파일 이관, 인증/권한 체계 변경\n\n**오류 판정 기준 (확인됨)**\n\n- `ESPEC_ATTACH_FILE.USE_YN = 'Y' AND FILE_UPLOAD_DTTM IS NULL`\n- 문서별 첨부파일이 여러 건인 경우 1건이라도 오류이면 문서 단위로 노출\n- `USE_YN = 'N'` 파일은 오류 판정에서 제외\n\n**재처리 단위 (확인됨)**\n\n- 파일 1건씩 개별 재처리한다. (담당자 답변: \"파일 1건씩 개별 재처리\")\n- 재처리 API는 `POST /api/attachments/{fileId}/retry` 형태로 fileId 단위로 동작한다.\n\n**원본 부재 시 처리 (확인됨)**\n\n- 원본 파일이 이미 삭제되었거나 접근 불가한 경우 실패 사유만 반환한다. (담당자 답변: \"실패 사유만 반환(이번 범위 한정)\")\n- USE_YN 정리, 담당자 알림 등 별도 후속 조치는 이번 범위에서 제외한다.\n\n**권한 (확인됨 + 미확인)**\n\n- 기존 eSPEC 운영 권한을 재사용하여 운영 권한 사용자만 재처리를 허용한다. (확인됨)\n- 실제 판정 기준이 되는 역할·권한 코드는 미확인이며 구현 전 담당자가 확인한다. (미확인)\n- 새 인증·권한 체계는 이번 범위에서 제외한다. (확인됨)\n\n**대량 조회 제어 (확인됨 + 미확인)**\n\n- 조회 기간 제한과 Pagination은 초안대로 포함한다. (확인됨)\n- 기간 필수 여부, 기본값·최대 범위, 페이지 크기는 미확인이며 Oracle 실행계획·데이터 규모 확인 후 담당자가 결정한다. (미확인)\n\n**기존 Service 재사용 전제 (미확인)**\n\n- 기존 파일 업로드 Service가 원본 파일을 다시 읽어 `FILE_UPLOAD_DTTM`을 갱신하는 형태로 재호출 가능한 구조인지 여부는 미확인이며 조사가 필요하다. (담당자 답변: \"미확인 — 조사 필요\")\n\n## 사용자 시나리오\n\n기본 흐름: `문서번호/기간 검색` → `업로드 오류 첨부파일 조회` → `대상 선택` → `재처리 요청` → `성공/실패 결과 표시`\n\n- 운영자는 운영 메뉴의 **첨부파일 업로드 오류** 화면에서 문서번호 / 기간 / 문서구분(PRC·INS)으로 검색한다.\n- Grid에 문서번호, 오류 파일 수, 파일명, 상태, 재처리 버튼이 표시된다.\n- 운영자는 오류 파일 1건을 선택하고 재처리 전 Confirm을 확인한다.\n- 처리 중에는 버튼이 비활성화된다.\n- 재처리 성공 시 해당 Row를 재조회하여 상태를 즉시 갱신한다.\n- 재처리 실패 시 서버 오류 메시지를 표시한다. 원본 파일이 없거나 접근 불가한 경우에는 실패 사유만 반환한다. (확인됨)\n\n예외 상황\n\n- 정상 파일만 존재하는 문서는 조회되지 않는다.\n- 동일 `RPT_DOC_ID`에 정상/오류 파일이 섞여 있으면 문서는 조회된다.\n- 이미 처리된 파일에 재요청 시 중복 업로드되지 않아야 한다.\n\n## 진행 계획\n\n- 기존 파일 업로드 Service의 재호출 가능 여부를 먼저 조사한다. (미확인 항목이므로 설계·구현 착수 전 필수 확인)\n- 실제 원본 파일 보관 위치 및 재처리 시 접근 가능 여부를 확인한다. (미확인)\n- `ESPEC_ATTACH_FILE` 대량 데이터 기준 Oracle 실행계획을 확인하고, 기간 필수 여부·기본값·최대 범위·페이지 크기를 담당자가 결정한다. (미확인)\n- 운영 권한 역할·권한 코드를 확인한다. (미확인)\n- 조회 API(`GET /api/attachments/upload-errors`)와 재처리 API(`POST /api/attachments/{fileId}/retry`)를 기존 Service 재사용 우선으로 구현한다.\n- Frontend 운영 메뉴에 조회·재처리 화면을 추가한다.\n- 회귀 테스트(기존 등록/업로드 시나리오)와 신규 시나리오 테스트를 수행한다.\n\n이 계획의 확정은 사람의 검토·승인을 전제로 하며, 미확인 항목은 확인 결과에 따라 재조정될 수 있다.\n\n## 주요 구조\n\n- RPT_DOC → ESPEC_ATTACH_FILE: `A.MAPPING_1ST_KEY_ID = R.RPT_DOC_ID`로 조인하여 문서별 첨부파일을 연결한다.\n- ESPEC_ATTACH_FILE → 오류 판정: `USE_YN = 'Y' AND FILE_UPLOAD_DTTM IS NULL`인 활성 첨부파일을 오류로 판정한다.\n- AttachmentController → AttachmentService: 조회·재처리 요청을 Service로 위임한다. (예상 변경 파일 기준)\n- AttachmentService → 기존 업로드 Service: 재처리 시 기존 파일 업로드 Service 로직을 재사용한다. (재호출 가능 여부 미확인)\n- 재처리 성공 → FILE_UPLOAD_DTTM 갱신: 성공 시 `FILE_UPLOAD_DTTM`을 갱신한다.\n\n대량 데이터 인덱스, Service 재호출 구조 등 확인되지 않은 관계는 미확인으로 남긴다.\n\n## 주요 결정\n\n- 재처리 단위: 파일 1건씩 개별 재처리로 결정 (확인됨).\n- 원본 부재 시 처리: 실패 사유만 반환하고 별도 데이터 정리·알림은 이번 범위 제외로 결정 (확인됨).\n- 권한: 기존 eSPEC 운영 권한 재사용, 새 권한 체계 미도입으로 결정 (확인됨). 단, 실제 역할·권한 코드는 미확인.\n- 대량 조회: 기간 제한·Pagination 포함으로 결정 (확인됨). 세부 파라미터(기간 필수/기본값/최대 범위/페이지 크기)는 미확인.\n- 기존 Service 재사용 여부: 미확인 상태이며 조사 결과에 따라 재처리 방식 설계가 달라질 수 있음.\n\n## 작업 단위\n\n1. **사전 조사 (미확인 항목 해소)**\n   - 기존 업로드 Service 재호출 가능 구조 조사\n   - 원본 파일 보관 위치·접근 가능 여부 확인\n   - Oracle 실행계획·데이터 규모 확인 및 조회 파라미터 결정\n   - 운영 권한 역할·권한 코드 확인\n2. **Backend 조회 API**\n   - `GET /api/attachments/upload-errors` 구현 (RPT_DOC + ESPEC_ATTACH_FILE 조인, 문서 단위 오류 노출)\n   - Repository/DTO 추가: `AttachmentRepository.java`, `AttachmentUploadErrorDto.java`\n3. **Backend 재처리 API**\n   - `POST /api/attachments/{fileId}/retry` 구현 (기존 Service 재사용, 처리 전 상태 재검증)\n   - 실패 시 원인 로그 기록 및 오류 메시지 반환\n4. **Frontend 화면**\n   - `AttachmentUploadError.vue`, `attachment.ts` 추가\n   - 검색영역/Grid/재처리 Confirm/처리 중 버튼 비활성화/성공 시 Row 재조회/실패 메시지 표시\n5. **테스트 및 회귀 검증**\n   - 정상 파일만 존재 문서 미노출, 혼재 문서 노출, `USE_YN='N'` 제외\n   - 재처리 성공 시 `FILE_UPLOAD_DTTM` 생성, 이미 처리된 파일 중복 방지\n   - PRC/INS 각각 조회, 대량 조회 응답시간·실행계획 확인\n   - 기존 등록/업로드 시나리오 회귀 테스트\n\n<!-- planrepo-visualization\n{\n  \"schemaVersion\": 1,\n  \"overview\": {\n    \"headline\": \"eSPEC 업로드 오류 첨부파일 조회·재처리\",\n    \"summary\": \"운영자가 Portal에서 업로드 오류 첨부파일을 조회하고 파일 1건씩 재처리하며 결과를 추적하는 기능을 추가한다.\",\n    \"evidence\": { \"sectionId\": \"요구사항\", \"quote\": \"운영자가 Portal에서 직접 조회하고 재처리할 수 있도록 기능을 추가한다\" }\n  },\n  \"changes\": {\n    \"before\": [],\n    \"after\": [\"운영자가 화면에서 업로드 오류 문서를 조회하고 재처리 결과를 추적\"],\n    \"evidence\": { \"sectionId\": \"진행 계획\", \"quote\": \"Frontend 운영 메뉴에 조회·재처리 화면을 추가한다\" }\n  },\n  \"nodes\": [\n    {\n      \"id\": \"node-1\",\n      \"kind\": \"action\",\n      \"title\": \"업로드 오류 검색\",\n      \"detail\": \"문서번호 / 기간 / 문서구분(PRC·INS)으로 검색한다\",\n      \"evidence\": { \"sectionId\": \"사용자 시나리오\", \"quote\": \"문서번호 / 기간 / 문서구분(PRC·INS)으로 검색한다\" }\n    },\n    {\n      \"id\": \"node-2\",\n      \"kind\": \"action\",\n      \"title\": \"오류 파일 선택 및 재처리 요청\",\n      \"detail\": \"오류 파일 1건을 선택하고 재처리 전 Confirm을 확인한다\",\n      \"evidence\": { \"sectionId\": \"사용자 시나리오\", \"quote\": \"오류 파일 1건을 선택하고 재처리 전 Confirm을 확인한다\" }\n    },\n    {\n      \"id\": \"node-3\",\n      \"kind\": \"condition\",\n      \"title\": \"재처리 성공 여부\",\n      \"detail\": \"성공 시 상태 갱신, 실패 시 오류 메시지 표시\",\n      \"evidence\": { \"sectionId\": \"사용자 시나리오\", \"quote\": \"재처리 실패 시 서버 오류 메시지를 표시한다\" }\n    },\n    {\n      \"id\": \"node-4\",\n      \"kind\": \"result\",\n      \"title\": \"상태 즉시 갱신\",\n      \"detail\": \"재처리 성공 시 해당 Row를 재조회하여 상태를 갱신한다\",\n      \"evidence\": { \"sectionId\": \"사용자 시나리오\", \"quote\": \"재처리 성공 시 해당 Row를 재조회하여 상태를 즉시 갱신한다\" }\n    }\n  ],\n  \"edges\": [\n    {\n      \"from\": \"node-1\",\n      \"to\": \"node-2\",\n      \"label\": \"오류 문서 노출 후 대상 선택\",\n      \"evidence\": { \"sectionId\": \"주요 구조\", \"quote\": \"활성 첨부파일을 오류로 판정한다\" }\n    },\n    {\n      \"from\": \"node-2\",\n      \"to\": \"node-3\",\n      \"label\": \"재처리 요청 처리\",\n      \"evidence\": { \"sectionId\": \"주요 구조\", \"quote\": \"재처리 시 기존 파일 업로드 Service 로직을 재사용한다\" }\n    },\n    {\n      \"from\": \"node-3\",\n      \"to\": \"node-4\",\n      \"label\": \"성공 시 상태 갱신\",\n      \"evidence\": { \"sectionId\": \"주요 구조\", \"quote\": \"성공 시 `FILE_UPLOAD_DTTM`을 갱신한다\" }\n    }\n  ],\n  \"scenarios\": [\n    {\n      \"id\": \"scenario-1\",\n      \"label\": \"오류 파일 재처리 성공\",\n      \"description\": \"운영자가 오류 파일을 조회하고 개별 재처리하여 상태가 갱신된다\",\n      \"nodeIds\": [\"node-1\", \"node-2\", \"node-3\", \"node-4\"],\n      \"outcome\": \"FILE_UPLOAD_DTTM이 갱신되고 목록 상태가 갱신됨\",\n      \"evidence\": { \"sectionId\": \"사용자 시나리오\", \"quote\": \"재처리 성공 시 해당 Row를 재조회하여 상태를 즉시 갱신한다\" }\n    },\n    {\n      \"id\": \"scenario-2\",\n      \"label\": \"원본 부재로 재처리 실패\",\n      \"description\": \"원본 파일이 없거나 접근 불가하면 실패 사유만 반환한다\",\n      \"nodeIds\": [\"node-2\", \"node-3\"],\n      \"outcome\": \"실패 사유만 반환하고 별도 조치는 하지 않음\",\n      \"evidence\": { \"sectionId\": \"사용자 시나리오\", \"quote\": \"원본 파일이 없거나 접근 불가한 경우에는 실패 사유만 반환한다\" }\n    }\n  ],\n  \"rules\": [\n    {\n      \"id\": \"rule-1\",\n      \"title\": \"오류 판정 기준\",\n      \"detail\": \"USE_YN = 'Y' AND FILE_UPLOAD_DTTM IS NULL 인 활성 첨부파일을 오류로 본다\",\n      \"category\": \"requirement\",\n      \"evidence\": { \"sectionId\": \"요구사항\", \"quote\": \"`ESPEC_ATTACH_FILE.USE_YN = 'Y' AND FILE_UPLOAD_DTTM IS NULL`\" }\n    },\n    {\n      \"id\": \"rule-2\",\n      \"title\": \"파일 개별 재처리\",\n      \"detail\": \"재처리는 파일 1건씩 개별로 실행한다\",\n      \"category\": \"requirement\",\n      \"evidence\": { \"sectionId\": \"요구사항\", \"quote\": \"파일 1건씩 개별 재처리한다\" }\n    },\n    {\n      \"id\": \"rule-3\",\n      \"title\": \"중복 업로드 방지\",\n      \"detail\": \"이미 처리된 파일에 재요청 시 중복 업로드되지 않아야 한다\",\n      \"category\": \"success\",\n      \"evidence\": { \"sectionId\": \"사용자 시나리오\", \"quote\": \"이미 처리된 파일에 재요청 시 중복 업로드되지 않아야 한다\" }\n    },\n    {\n      \"id\": \"rule-4\",\n      \"title\": \"원본 부재 처리\",\n      \"detail\": \"원본 파일이 없거나 접근 불가하면 실패 사유만 반환한다\",\n      \"category\": \"exception\",\n      \"evidence\": { \"sectionId\": \"주요 결정\", \"quote\": \"실패 사유만 반환하고 별도 데이터 정리·알림은 이번 범위 제외\" }\n    }\n  ]\n}\n-->\n",
+          "requirementRefs": [
+            "요구사항",
+            "사용자 시나리오",
+            "진행 계획",
+            "주요 구조",
+            "주요 결정",
+            "작업 단위"
+          ],
+          "changeSummary": "초안 PLAN을 Inception Plan 형식(요구사항·사용자 시나리오·진행 계획·주요 구조·주요 결정·작업 단위)으로 재구성하고, 담당자 답변(파일 개별 재처리, 원본 부재 시 실패 사유만 반환, 기존 운영 권한 재사용, 기간 제한+Pagination 포함)을 확인된 사실로 반영했습니다. Service 재호출 가능성·권한 코드·조회 파라미터·원본 접근 여부는 미확인으로 명시하고 시각화 자료를 추가했습니다."
+        },
+        "basisInputSnapshotRef": "snapshot-778edc0f-d16b-4346-90d7-07b65ba15866",
+        "basisFingerprint": "sha256:c3586211c0b39677da838c7e4adf5afea6f61c5e574b73fa87a482eb39412bfb",
+        "provenance": {
+          "kind": "provider",
+          "sourceRunId": "run-6e734df9-f3d1-4006-a014-f6d5d236b382"
+        },
+        "freshness": "stale",
+        "staleReason": "현재 생성 입력 지문과 다릅니다.",
+        "application": {
+          "kind": "not_applied"
+        }
+      },
+      "finishedAt": "2026-09-09T07:21:03.824Z"
+    },
+    {
+      "scope": {
+        "kind": "sr",
+        "projectId": "demo-project",
+        "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471"
+      },
+      "runId": "run-47ca1656-a990-4f03-a7b3-4efcd4b5d7a0",
+      "taskKind": "ARTIFACT_REVISION",
+      "inputSnapshotId": "snapshot-b60882e3-1caf-47fd-9ba7-6f7ac3b63142",
+      "revision": 2,
+      "requestedBy": "persona-p01-owner",
+      "requestedAt": "2026-09-09T07:22:29.424Z",
+      "requestedSelection": {
+        "providerId": "claude-cli",
+        "modelChoice": {
+          "kind": "explicit",
+          "modelId": "global.anthropic.claude-opus-4-8"
+        }
+      },
+      "freshness": "current",
+      "termination": "unobserved",
+      "application": {
+        "kind": "not_applied"
+      },
+      "status": "running",
+      "startedAt": "2026-09-09T07:22:29.451Z"
+    }
+  ],
+  "generationDrafts": [
+    {
+      "draftId": "draft-9f39c89a-75fe-413b-a34d-6f93a5eca95e",
+      "taskKind": "QUESTION_PROPOSALS",
+      "basisInputSnapshotRef": "snapshot-5b0d3bea-8473-4107-8173-a212b11d5072",
+      "basisFingerprint": "sha256:669bdd56638bc88d6deca0b7129ff321b5e52d9465dbfbb3454d62a79bb3d16f",
+      "provenance": {
+        "kind": "provider",
+        "sourceRunId": "run-6cee6f90-a294-4c40-bbc0-23ecb8137793"
+      },
+      "freshness": "stale",
+      "application": {
+        "kind": "applied",
+        "applicationId": "application-d33c7e89-3be0-4e53-88e7-64ce53cdb85f",
+        "result": {
+          "kind": "questions",
+          "mappings": [
+            {
+              "temporaryId": "q1-retry-scope",
+              "ref": {
+                "kind": "question",
+                "projectId": "demo-project",
+                "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+                "entityId": "question-6205e5cb-6570-44c6-bf3f-4fc2d8b0386c"
+              }
+            },
+            {
+              "temporaryId": "q2-operator-permission",
+              "ref": {
+                "kind": "question",
+                "projectId": "demo-project",
+                "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+                "entityId": "question-c8db08ee-9108-4573-84ae-2da6ed461285"
+              }
+            },
+            {
+              "temporaryId": "q3-reuse-upload-service",
+              "ref": {
+                "kind": "question",
+                "projectId": "demo-project",
+                "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+                "entityId": "question-13fc65f6-2fd8-4543-bac9-63adf59462e6"
+              }
+            },
+            {
+              "temporaryId": "q4-date-range-limit",
+              "ref": {
+                "kind": "question",
+                "projectId": "demo-project",
+                "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+                "entityId": "question-469d36e3-1db1-49e3-b9e4-7548bd30a590"
+              }
+            },
+            {
+              "temporaryId": "q5-original-file-missing",
+              "ref": {
+                "kind": "question",
+                "projectId": "demo-project",
+                "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+                "entityId": "question-276f030c-085a-43fa-bc63-f77906129074"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "draftId": "draft-d892c2cc-56f0-4dee-a5fa-1d1b32aba046",
+      "taskKind": "ARTIFACT_REVISION",
+      "basisInputSnapshotRef": "snapshot-feeeb5d2-e03f-4d4b-bd55-7ee0e2f953bc",
+      "basisFingerprint": "sha256:02620e91bc92e979e160a28861a41183c7a56f673064721f4516bdfde570bf22",
+      "provenance": {
+        "kind": "provider",
+        "sourceRunId": "run-84f5f05f-7c81-46e5-baab-27fa314d2ffe"
+      },
+      "freshness": "stale",
+      "application": {
+        "kind": "applied",
+        "applicationId": "application-12e8c4ae-b205-4376-b60e-f9351221a5e9",
+        "result": {
+          "kind": "artifact",
+          "artifactVersionRef": {
+            "kind": "artifact",
+            "projectId": "demo-project",
+            "srId": "sr-49f8511c-c303-4943-adab-b1ac9c193471",
+            "entityId": "artifact-c958ade3-a6c6-43c7-b6c3-fe91c8e0735e",
+            "version": 2
+          }
+        }
+      }
+    },
+    {
+      "draftId": "draft-1179838c-3c1c-4c79-9560-14dd904a3049",
+      "taskKind": "ARTIFACT_REVISION",
+      "basisInputSnapshotRef": "snapshot-778edc0f-d16b-4346-90d7-07b65ba15866",
+      "basisFingerprint": "sha256:c3586211c0b39677da838c7e4adf5afea6f61c5e574b73fa87a482eb39412bfb",
+      "provenance": {
+        "kind": "provider",
+        "sourceRunId": "run-6e734df9-f3d1-4006-a014-f6d5d236b382"
+      },
+      "freshness": "stale",
+      "application": {
+        "kind": "not_applied"
+      }
+    }
+  ],
+  "implementations": [],
+  "revision": 12
+}

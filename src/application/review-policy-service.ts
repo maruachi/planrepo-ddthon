@@ -207,7 +207,10 @@ export interface ReviewPolicyService {
   applyPolicyToSr(ctx: ApplicationCommand, input: PolicyApplication): CommandResult<PolicyApplicationResult>;
 }
 
-export function createReviewPolicyService(persistence: Persistence): ReviewPolicyService {
+export function createReviewPolicyService(
+  persistence: Persistence,
+  options: { readonly documentReviewMode?: boolean } = {},
+): ReviewPolicyService {
   return {
     createPolicyVersion(ctx, input) {
       const validation = validatePolicyEdit(input);
@@ -283,7 +286,9 @@ export function createReviewPolicyService(persistence: Persistence): ReviewPolic
           updateGateConfiguration(db, ctx.scope, input.gate, { assignmentRef: value.assignmentRef });
           const impact = applyReviewConfigurationImpact(db, { projectId: ctx.scope.projectId, srId: ctx.scope.srId, actorId: ctx.actor.actorId, currentStage: sr.progressStage,
             changedVersionRef: value.assignmentRef, affectedGates: affectedReviewGates([input.gate]), reason: '검토자 배정이 바뀌어 승인 기준을 다시 검토합니다.', occurredAt: now });
-          if (value.ready) captureCurrentReviewBundle(db, { scope: ctx.scope, gate: input.gate, actorId: ctx.actor.actorId, assignment: value, policy, createdAt: now });
+          if (value.ready && options.documentReviewMode !== true) {
+            captureCurrentReviewBundle(db, { scope: ctx.scope, gate: input.gate, actorId: ctx.actor.actorId, assignment: value, policy, createdAt: now });
+          }
           const current = readGateState(db, ctx.scope, input.gate);
           if (current === undefined) throw new Error('변경한 gate를 읽을 수 없습니다.');
           const saved = receipt(ctx, 'M-030', hash, current.revision, [value.assignmentRef], now);

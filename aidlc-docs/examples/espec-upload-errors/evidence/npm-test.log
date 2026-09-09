@@ -1,0 +1,36 @@
+
+> planrepo@0.1.0 test
+> vitest run
+
+
+ RUN  v5.0.0 /Users/jwlee/workspace/codex/ddcon3
+
+ ❯ tests/integration/generation-claim.test.ts (7 tests | 1 failed) 3340ms
+   ❯ 내부 생성 claim과 terminal 저장 (7)
+     × 별도 Node worker 둘의 claim과 같은 key 접수 경합을 SQLite가 하나로 확정합니다 788ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/integration/generation-claim.test.ts > 내부 생성 claim과 terminal 저장 > 별도 Node worker 둘의 claim과 같은 key 접수 경합을 SQLite가 하나로 확정합니다
+Error: 실제 DB owner process 종료를 확인하지 못했습니다.
+ ❯ Timeout._onTimeout tests/helpers/runtime-workers.ts:133:14
+    131|   await new Promise<void>((resolvePromise, reject) => {
+    132|     const timer = setTimeout(() => {
+    133|       reject(new Error('실제 DB owner process 종료를 확인하지 못했습니다.'));
+       |              ^
+    134|     }, timeoutMs);
+    135|     void termination.then(() => {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 47 passed (48)
+      Tests  1 failed | 442 passed (443)
+   Start at  16:14:22
+   Duration  16.18s (tests 94%, transform 3%, import 3%)
+
+npm notice
+npm notice New major version of npm available! 10.9.8 -> 12.0.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.0.2
+npm notice To update run: npm install -g npm@12.0.2
+npm notice

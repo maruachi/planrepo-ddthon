@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { RevisionOrAbsentGuard } from '@/src/contracts/context';
 import type { ArtifactEdit, ArtifactView, DemoActorView, PolicyView, SRDetailView } from '@/src/contracts/views';
 import { invoke, TransportUncertainError } from '../api/client';
-import { currentPlan, documentSection, isInceptionPlan, planStateLabel, type InceptionDocumentId } from '../state/inception-plan';
+import { currentPlan, documentSection, isInceptionPlan, planState, planStateLabel, type InceptionDocumentId } from '../state/inception-plan';
 import { deriveDraftDocumentStructure } from '../state/draft-document';
 import { editablePlanMarkdown, preservePlanVisualization } from '../state/plan-visualization';
 import { DecisionPanel } from './DecisionPanel';
@@ -17,6 +17,7 @@ import type { PlanReadinessIssue } from '../state/plan-review-readiness';
 import './InceptionPlanWorkspace.css';
 
 type View = 'documents' | 'overview' | 'approval';
+type AssistanceRequest = { readonly requestId: string; readonly kind: 'questions' | 'plan' | 'visualization' | 'review'; readonly context: string };
 const VIEWS: readonly { id: View; label: string }[] = [
   { id: 'documents', label: '문서' },
   { id: 'overview', label: '요약·시각화' },
@@ -138,11 +139,23 @@ export function InceptionPlanWorkspace({ actorId, projectId, detail, members, po
   const [view, setView] = useState<View>(() => viewFrom(initialTab));
   const [aiOpen, setAiOpen] = useState(() => initialTab === 'conversation' || initialTab === 'questions' || initialTab === 'drafts');
   const [editing, setEditing] = useState(false);
+  const [revisionPreparing, setRevisionPreparing] = useState(false);
+  const [assistanceRequest, setAssistanceRequest] = useState<AssistanceRequest>();
   const [selectedSectionId, setSelectedSectionId] = useState<string>();
   const [message, setMessage] = useState<string>();
   const artifact = currentPlan(detail);
   const owner = actorId === detail.sr.ownerId;
   const plan = isInceptionPlan(artifact);
+  const approved = planState(detail) === 'approved';
+  const canEdit = owner && (!approved || revisionPreparing);
+  const showAssistance = !approved || revisionPreparing;
+  const aiRunning = detail.generationRuns.some(run => run.status === 'pending' || run.status === 'running');
+  useEffect(() => {
+    setRevisionPreparing(false);
+    setEditing(false);
+    setAssistanceRequest(undefined);
+  }, [actorId, detail.sr.scope.srId]);
+  useEffect(() => { if (!approved) setRevisionPreparing(false); }, [approved]);
   const assignedReviewerCount = detail.reviewConfigurations.find((item) => item.gate === 'G1')?.assignment?.reviewerIds.length ?? 0;
 
   useEffect(() => {
@@ -183,6 +196,28 @@ export function InceptionPlanWorkspace({ actorId, projectId, detail, members, po
       element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }));
   };
+  const requestAssistance = (kind: AssistanceRequest['kind'], context = '') => {
+    if (!canEdit || editing || aiRunning) return;
+    setEditing(false);
+    setAiOpen(true);
+    chooseView('documents');
+    setAssistanceRequest({ requestId: crypto.randomUUID(), kind, context });
+    focusAfterNavigation('inception-ai-assistance');
+  };
+  const requestReviewAssistance = (context: string) => requestAssistance('review', context);
+  const startRevision = () => {
+    setRevisionPreparing(true);
+    setEditing(false);
+    setAiOpen(false);
+    setAssistanceRequest(undefined);
+    chooseView('documents');
+  };
+  const closeRevision = () => {
+    setRevisionPreparing(false);
+    setEditing(false);
+    setAiOpen(false);
+    setAssistanceRequest(undefined);
+  };
   const resolveReviewIssue = (issue: PlanReadinessIssue) => {
     if (issue.action === 'assignment') {
       chooseView('approval');
@@ -216,40 +251,65 @@ export function InceptionPlanWorkspace({ actorId, projectId, detail, members, po
   };
 
   return <div className="inception-workspace">
-    <div className="plan-toolbar"><p>문서를 작성하고 동료와 함께 검토합니다. AI 정리는 필요할 때만 사용할 수 있습니다.</p><div><button onClick={() => { void share(); }}>링크 복사</button>{artifact !== undefined && <button onClick={download}>문서 다운로드</button>}</div></div>
+    <div className="plan-toolbar"><p>{approved ? `문서 v${artifact?.versionRef.version}의 결재를 마쳤습니다. 승인된 내용을 읽고 공유합니다.` : '문서와 필요한 보완안·시각화를 함께 검토한 뒤 최종 결재합니다. AI 보완은 선택입니다.'}</p><div><button onClick={() => { void share(); }}>링크 복사</button>{artifact !== undefined && <button onClick={download}>문서 다운로드</button>}</div></div>
     {message !== undefined && <p className="plan-feedback" role="status">{message}</p>}
     <nav className="plan-main-tabs" aria-label="Plan 작업">{VIEWS.map((item) => <button key={item.id} aria-current={view === item.id ? 'page' : undefined} onClick={() => chooseView(item.id)}>{item.label}</button>)}</nav>
 
+    {approved && <section className="plan-approval-boundary" aria-label="승인된 문서 안내" data-testid="approved-plan-boundary">
+      <div><strong>{revisionPreparing ? '개정안 준비 중' : '승인된 문서입니다'}</strong><p>{revisionPreparing
+        ? '문서와 시각화를 바꾸려는 경우에만 개정안을 준비합니다. 내용을 저장하거나 AI 제안을 반영하면 다시 검토받습니다. 준비 화면을 열거나 AI 제안을 생성하는 것만으로 기존 승인은 바뀌지 않습니다.'
+        : '질문·보완안·시각화는 결재 전에 함께 검토합니다. 새 요구나 변경 사항이 생기면 개정안을 준비합니다.'}</p></div>
+      {owner && (revisionPreparing
+        ? <button type="button" disabled={editing} onClick={closeRevision}>개정 준비 닫기</button>
+        : <button type="button" data-testid="prepare-plan-revision" onClick={startRevision}>개정안 준비</button>)}
+    </section>}
+
     <div hidden={view !== 'documents'} id="inception-plan-documents" tabIndex={-1} className="plan-document-content">
-      <header className="plan-document-heading"><div><p className="eyebrow">Plan 문서</p><h2>{detail.sr.title}</h2><p>{artifact === undefined ? '등록한 내용을 문서로 저장해 공유할 수 있습니다.' : `문서 v${artifact.versionRef.version} · ${artifact.authorOrigin === 'human' ? '사람이 작성' : 'AI 초안을 사람이 적용'}`}</p></div>{owner && artifact !== undefined && <button type="button" onClick={() => setEditing((value) => !value)}>{editing ? '본문으로 돌아가기' : '문서 편집'}</button>}</header>
-      {editing || artifact === undefined
-        ? owner
+      {showAssistance && <section className="plan-preapproval-tools" aria-label="결재 전 문서 보완">
+        <div><strong>{approved ? '개정할 내용 살펴보기' : '문서를 다듬고 함께 검토합니다'}</strong><p>질문에 답을 고르거나 직접 적고, 필요한 보완안과 시각화를 확인합니다. 아래 AI 기능은 선택 사항입니다.</p></div>
+        {canEdit && <div className="plan-preapproval-actions">
+          <button type="button" data-testid="plan-question-assistance" disabled={editing || aiRunning} onClick={() => requestAssistance('questions')}>AI 질문으로 내용 확인</button>
+          <button type="button" data-testid="plan-document-assistance" disabled={editing || aiRunning} onClick={() => requestAssistance('plan')}>AI로 문서 보완</button>
+          <button type="button" data-testid="plan-visualization-assistance" disabled={editing || aiRunning} onClick={() => requestAssistance('visualization')}>AI로 시각화 제안받기</button>
+        </div>}
+        {editing && <p className="quiet">작성 중인 내용을 저장한 뒤 AI에 보완을 요청할 수 있습니다.</p>}
+        {aiRunning && <p className="quiet" role="status">AI가 제안을 준비하고 있습니다. 아래 AI 영역에서 진행 상황을 확인할 수 있습니다.</p>}
+      </section>}
+      <header className="plan-document-heading"><div><p className="eyebrow">Plan 문서</p><h2>{detail.sr.title}</h2><p>{artifact === undefined ? '등록한 내용을 문서로 저장해 공유할 수 있습니다.' : `문서 v${artifact.versionRef.version} · ${artifact.authorOrigin === 'human' ? '사람이 작성' : 'AI 초안을 사람이 적용'}`}</p></div>{canEdit && artifact !== undefined && <button type="button" onClick={() => setEditing((value) => !value)}>{editing ? '본문으로 돌아가기' : '문서 편집'}</button>}</header>
+      {(editing && canEdit) || artifact === undefined
+        ? canEdit
           ? <SimplePlanEditor key={`${artifact?.artifactId ?? 'new'}:${artifact?.versionRef.version ?? 0}`} actorId={actorId} projectId={projectId} detail={detail} {...(artifact === undefined ? {} : { artifact })} onClose={() => setEditing(false)} onSaved={onRefresh} />
           : <section className="plan-empty-guide"><p>담당자가 등록한 내용을 문서로 저장하면 여기에서 읽고 검토할 수 있습니다.</p></section>
         : <section className="plan-document-body"><SafeMarkdown>{artifact.markdown}</SafeMarkdown></section>}
 
-      {artifact !== undefined && !editing && artifact.sectionIndex.length > 0 && <details className="workspace-details plan-section-review"><summary>문단별 의견 남기기</summary>
+      {artifact !== undefined && !editing && !approved && artifact.sectionIndex.length > 0 && <details className="workspace-details plan-section-review"><summary>문단별 의견 남기기</summary>
         <label>검토할 문단<select value={selectedSectionId ?? ''} onChange={(event) => setSelectedSectionId(event.target.value)}>{artifact.sectionIndex.map((section) => <option key={section.sectionId} value={section.sectionId}>{section.title}</option>)}</select></label>
-        {selectedSectionId !== undefined && <PlanDocumentReview actorId={actorId} projectId={projectId} detail={detail} artifact={artifact} selectedSectionId={selectedSectionId} actorName={actorName} onSaved={onRefresh} />}
+        {selectedSectionId !== undefined && <PlanDocumentReview actorId={actorId} projectId={projectId} detail={detail} artifact={artifact} selectedSectionId={selectedSectionId} actorName={actorName} {...(canEdit ? { onRequestAi: requestReviewAssistance } : {})} onSaved={onRefresh} />}
       </details>}
 
-      <details className="workspace-details" open={aiOpen} onToggle={(event) => setAiOpen(event.currentTarget.open)}>
-        <summary>AI로 문서 정리하기 <span className="quiet">(선택)</span></summary>
+      {showAssistance && <details id="inception-ai-assistance" tabIndex={-1} className="workspace-details" open={aiOpen} onToggle={(event) => setAiOpen(event.currentTarget.open)}>
+        <summary>AI 질문·보완안·시각화 <span className="quiet">(선택)</span></summary>
         <p className="quiet">문서는 직접 작성할 수 있습니다. 질문과 제안은 필요할 때만 열어 확인합니다.</p>
-        <div className="plan-conversation-layout"><div><InceptionConversation actorId={actorId} projectId={projectId} detail={detail} actorName={actorName} onSaved={onRefresh} onOpenDocument={() => openDocument()} />
+        <div className="plan-conversation-layout"><div><InceptionConversation actorId={actorId} projectId={projectId} detail={detail} actorName={actorName} {...(assistanceRequest === undefined ? {} : { request: assistanceRequest })} onSaved={onRefresh} onOpenDocument={() => openDocument()} />
           {detail.decisions.length > 0 && <details id="inception-decisions" tabIndex={-1} className="workspace-details"><summary>참고 결정 {detail.decisions.length}개</summary><DecisionPanel actorId={actorId} projectId={projectId} detail={detail} members={members} actorName={actorName} onSaved={onRefresh} /></details>}
         </div></div>
-      </details>
-      <details className="workspace-details"><summary>등록 원문과 참고 자료</summary><SRContextPanel actorId={actorId} projectId={projectId} detail={detail} actorName={actorName} onSaved={onRefresh} /></details>
+      </details>}
+      {approved && (detail.comments.length > 0 || detail.changeRequests.length > 0) && <details className="workspace-details"><summary>검토 이력 보기</summary>
+        {detail.comments.map(comment => <article key={comment.commentId}><strong>{actorName(comment.authorId)}의 의견</strong><p>{comment.body}</p></article>)}
+        {detail.changeRequests.map(change => <article key={change.changeRequestId}><strong>{change.status === 'resolved' ? '해결한 수정 요청' : '수정 요청'}</strong><p>{change.body}</p></article>)}
+      </details>}
+      <details className="workspace-details"><summary>등록 원문과 참고 자료</summary>{approved
+        ? <SafeMarkdown>{detail.originalDescription.description}</SafeMarkdown>
+        : <SRContextPanel actorId={actorId} projectId={projectId} detail={detail} actorName={actorName} onSaved={onRefresh} />}</details>
       {detail.artifacts.some((item) => item.kind !== 'requirements') && <details className="workspace-details"><summary>기존 개별 문서</summary>{detail.artifacts.filter((item) => item.kind !== 'requirements').map((item) => <section className="legacy-plan-document" key={item.artifactId}><h3>{item.sectionIndex[0]?.title ?? item.changeSummary}</h3><SafeMarkdown>{item.markdown}</SafeMarkdown></section>)}</details>}
     </div>
 
-    <div hidden={view !== 'overview'}><PlanOverview detail={detail} actorName={actorName} onOpenDocument={openDocument} onDiscuss={() => { setAiOpen(true); chooseView('documents'); }} onReview={() => chooseView('approval')} /></div>
+    <div hidden={view !== 'overview'}><PlanOverview detail={detail} actorName={actorName} onOpenDocument={openDocument} readOnly={approved} onDiscuss={() => requestAssistance('visualization')} onReview={() => chooseView('approval')} /></div>
 
     <div hidden={view !== 'approval'}>
       <section className="plan-sharing"><h2>{plan ? '문서를 함께 검토합니다' : '문서를 먼저 준비합니다'}</h2><p>{plan ? '현재 문서를 공유하고 지정한 검토자의 승인을 받을 수 있습니다.' : '문서에 내용을 저장한 뒤 검토자에게 요청할 수 있습니다.'}</p><button onClick={() => { void share(); }}>문서 링크 복사</button>{artifact !== undefined && <button onClick={download}>문서 다운로드</button>}</section>
-      <details id="inception-review-assignment" tabIndex={-1} open={assignedReviewerCount === 0} className="workspace-details"><summary>검토자 {assignedReviewerCount}명 · 배정 확인/변경</summary><SRReviewAssignment actorId={actorId} projectId={projectId} detail={detail} members={members} policies={policies} inceptionOnly onSaved={onRefresh} /></details>
-      <PlanApproval actorId={actorId} projectId={projectId} detail={detail} actorName={actorName} onResolveIssue={resolveReviewIssue} onSaved={onRefresh} />
+      {!approved && <details id="inception-review-assignment" tabIndex={-1} open={assignedReviewerCount === 0} className="workspace-details"><summary>검토자 {assignedReviewerCount}명 · 배정 확인/변경</summary><SRReviewAssignment actorId={actorId} projectId={projectId} detail={detail} members={members} policies={policies} inceptionOnly onSaved={onRefresh} /></details>}
+      <PlanApproval actorId={actorId} projectId={projectId} detail={detail} actorName={actorName} onResolveIssue={resolveReviewIssue} onReadDocument={() => chooseView('documents')} onViewVisualization={() => chooseView('overview')} {...(canEdit ? { onRequestAi: requestReviewAssistance } : {})} onSaved={onRefresh} />
     </div>
   </div>;
 }

@@ -36,3 +36,14 @@
 .inception-board.kanban-board { grid-template-columns:repeat(5,minmax(220px,1fr)); }
 @media(max-width:1120px) { .plan-conversation-layout { grid-template-columns:1fr; }.plan-live-document { position:static; max-height:520px; }.plan-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); }.plan-document-map { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 @media(max-width:640px) { .plan-documents-layout { grid-template-columns:1fr; }.plan-document-nav { position:static; flex-direction:row; overflow:auto; }.plan-document-nav button { flex:0 0 135px; }.plan-main-tabs button { padding:13px 10px; }.plan-intent,.plan-summary-card,.plan-live-document,.plan-document-body,.plan-sharing { padding:18px; }.plan-document-map { grid-template-columns:1fr; }.plan-metrics { gap:8px; }.plan-metrics>div { padding:13px; }.plan-toolbar>div { justify-content:flex-start; } }
+.plan-approval-boundary { display:flex; align-items:center; justify-content:space-between; gap:14px; margin:0 0 18px; padding:12px 16px; border:1px solid #cbdecf; border-radius:9px; background:#f4f9f5; }
+.plan-approval-boundary > div { min-width:0; }
+.plan-approval-boundary strong { color:#245f3e; }
+.plan-approval-boundary p { margin:4px 0 0; color:#5b6e61; font-size:12px; line-height:1.55; }
+.plan-approval-boundary > button { flex:0 0 auto; padding:8px 13px; background:#fff; color:#345340; }
+.plan-preapproval-tools { display:grid; gap:12px; margin:0 0 18px; padding:16px 18px; border:1px solid #dce5de; border-radius:10px; background:#f8faf8; }
+.plan-preapproval-tools strong { color:#345340; }
+.plan-preapproval-tools p { margin:4px 0 0; color:#637468; font-size:12px; line-height:1.55; }
+.plan-preapproval-actions { display:flex; flex-wrap:wrap; gap:8px; }
+.plan-preapproval-actions button { flex:1 1 180px; padding:9px 12px; background:#fff; color:#345340; }
+@media(max-width:640px) { .plan-approval-boundary { align-items:flex-start; flex-direction:column; }.plan-approval-boundary > button,.plan-preapproval-actions button { width:100%; flex-basis:auto; } }

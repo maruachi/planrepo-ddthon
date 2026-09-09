@@ -108,7 +108,7 @@ export function BundleReviewForm({ actorId, projectId, detail, bundle, actorName
         : <article key={decision.decisionId}><h4>{decision.prompt}</h4><p>{decision.currentConfirmation?.selection.text}</p><p>{decision.currentConfirmation?.rationale}</p></article>)}
       {bundle.unconfirmedDecisionSnapshots.map((decision) => <article key={decision.decisionId}><h4>{decision.prompt}</h4><p>아직 확정되지 않은 결정입니다.</p><ul>{decision.alternatives.map((item) => <li key={item.optionId}>{item.label}</li>)}</ul></article>)}
     </div>
-    {planMode && <p className="quiet">현재 문서에 적힌 내용으로 확인합니다. 별도 근거 문서를 작성하지 않아도 됩니다.</p>}
+    {planMode && <p className="quiet">현재 문서 본문을 읽고, 문서에 포함된 요약·시각화가 있으면 함께 확인한 뒤 승인합니다. 시각화가 없는 문서도 승인할 수 있습니다.</p>}
     {assigned && !alreadyApproved ? <><fieldset><legend>검토 확인 항목</legend>
       {bundle.checklistSnapshot.map((item) => <label className="checkbox-label" key={item.itemId}>
         <input type="checkbox" aria-label={item.label} checked={checked.includes(item.itemId)} disabled={alreadyApproved}
