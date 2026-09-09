@@ -117,3 +117,5 @@
 산출물 안내는 `aidlc-docs/examples/table-order/README.md`이며 검증 결과는 `aidlc-docs/examples/table-order/verification-report.md`입니다. 이번 요청은 현재 PlanRepo의 전체 Inception 흐름 시연입니다. 테이블오더 서비스의 실제 구현·운영 배포와 실제 직원 승인은 포함하지 않습니다. 기존 제품 개발 계획과 비활성 확장 설정은 유지합니다.
 
 마지막 갱신 시각은 2026-09-09T07:52:21Z입니다.
+
+후속 요청에 따라 업로드용 1분 압축본도 만들었습니다. `aidlc-docs/examples/table-order/table-order-demo-60s.mp4`는 클릭·입력·화면 전환 25개를 이어 붙인 정확히 60초 영상입니다. 하단 자막과 음성은 없습니다. 1,440프레임과 전체 디코딩을 검증했고 최종 장면 25개를 육안으로 확인했습니다. 원본과 앞선 편집본은 보존했습니다.

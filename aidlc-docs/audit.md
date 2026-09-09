@@ -4893,3 +4893,18 @@ Oracle
 **Context**: brew install git-lfs는 exit 0입니다. 이 저장소에 git lfs install --local을 적용하고 원본 MOV 두 경로를 .gitattributes에 등록했습니다. git add -A로 전체 변경을 포함했습니다. Python 검증은 staged JSON 12개 파싱, 영상 47개 ffprobe metadata, 100MiB 초과 일반 Git blob 0건으로 exit 0입니다. git lfs fsck --pointers는 exit 0입니다. 전체 git diff --cached --check는 사용자 원문·UI 덤프·실행 로그·원본 추출 Markdown의 공백으로 exit 2입니다. .gitattributes, aidlc-state.md, 예시 README.md·execution-plan.md·verification-report.md·inception-plan.md로 범위를 제한한 git diff --cached --check는 exit 0입니다. 기존 원문과 로그는 수정하지 않습니다. 검증 도중 별도 편집의 1분 영상과 작업 자산이 추가되어 마지막 저장 상태를 다시 포함합니다. 1분 영상 ffprobe의 duration은 60.000000초입니다. 커밋 검증은 제품 동작 테스트를 대체하지 않으며 제품 소스 변경이 없어 앱 테스트와 빌드는 생략했습니다. 다음 단계는 자산 commit과 일반 fast-forward push입니다.
 
 ---
+
+## 테이블오더 1분 영상 편집 완료
+**Timestamp**: 2026-09-09T07:58:54Z
+**User Input**: ""
+**AI Response**: "동작이 있는 25개 구간을 이어 60초 영상으로 만들었습니다. 하단 자막은 뺐고, 시각화 여섯 화면과 최종 승인 장면을 포함했습니다. 재생 오류와 장면 연결을 확인하고 있습니다. 최종 파일은 aidlc-docs/examples/table-order/table-order-demo-60s.mp4입니다."
+**Context**: 자막 없는 기존 전체 녹화에서 동작 전후를 선택했습니다. 일부 구간을 최대 약 2.17배속으로 재생합니다. ffprobe는 60.000000초·1440x936·24fps·1440프레임·4434614바이트를 반환했습니다. ffmpeg 전체 디코딩은 exit 0이며 로그가 비어 있습니다. 최종 25개 장면을 추출해 육안으로 확인했습니다. 영상 SHA-256은 a7ece00ade878d8d9daedd9ac4eea207491d09d7f059899f1d2825ec81ef5f43입니다. 이전 영상은 보존했습니다. 편집 계획·README·검증 보고서·프로젝트 상태를 갱신했습니다. 제품 소스 변경이 없어 테스트·타입 검사·빌드는 다시 실행하지 않았습니다.
+
+---
+
+## 전체 자산 push 결과와 최종 문서 반영
+**Timestamp**: 2026-09-09T07:59:33Z
+**AI Response**: "전체 변경을 1a31986으로 커밋했습니다. 현재 원본 영상 약 418MB와 나머지 파일을 업로드하고 있습니다. 이제 이 branch에서 git push를 실행하면 지정하신 aidlc/ljh로 푸시됩니다. 자산 업로드와 첫 푸시는 완료했습니다. 그동안 갱신된 영상 안내 문서와 검증 기록도 추가로 커밋해 반영하겠습니다. GitHub의 기존 영상 크기 경고는 있었지만 푸시는 통과했습니다."
+**Context**: git commit은 exit 0이며 자산 commit은 1a319865dafcaade2e04c7e80a06b57af1692107입니다. git push는 LFS 원본 두 개 418MB 업로드와 e040944..1a31986 fast-forward로 exit 0입니다. GitHub는 기존 eSPEC MP4의 60.81MB가 권장 50MB를 초과한다는 경고를 출력했으나 push는 허용했습니다. git ls-remote origin refs/heads/aidlc/ljh와 git rev-parse HEAD가 동일한 1a319865dafcaade2e04c7e80a06b57af1692107입니다. git lfs fsck는 exit 0입니다. 최종 자산 commit의 JSON 13개 파싱과 영상 47개 ffprobe 검증은 exit 0입니다. ffmpeg -v error -i aidlc-docs/examples/table-order/table-order-demo-60s.mp4 -f null -는 exit 0입니다. 업로드 중 별도 편집 작업의 문서 5개가 갱신되어 git diff --check로 exit 0을 확인했습니다. 이 문서와 감사 기록을 추가 commit하고 같은 대상에 push합니다. 앱 코드 변경이 없어 TDD·앱 테스트·빌드는 생략했으며 기존 원문과 실행 로그의 공백 경고는 보존했습니다. 확장 세 개는 Enabled=No로 적용 N/A입니다.
+
+---

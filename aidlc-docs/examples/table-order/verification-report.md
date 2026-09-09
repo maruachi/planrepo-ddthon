@@ -50,3 +50,14 @@ Security Baseline, Resiliency Baseline, Property-Based Testing은 프로젝트�
 - `aidlc-docs/examples/table-order/evidence/video-contact-sheet.jpg`: 편집본 주요 장면을 추출해 육안 확인한 이미지입니다.
 
 최종 문서 SHA-256은 `b86c8725be704e2d338df1be324aa56f02ce24aa0a85ece63980117ef34a6823`입니다. 실제 운영 규모와 메뉴 관리 포함 여부, 단말 갱신 정책, SSE 측정 조건 등은 문서에 구현 전 확인 항목으로 남겼습니다.
+
+## 1분 영상 추가 편집 검증
+
+사용자의 후속 요청에 따라 `aidlc-docs/examples/table-order/table-order-demo-60s.mp4`를 만들었습니다. 자막 없는 전체 녹화에서 실제 동작 25개 구간을 골랐습니다. 대기 구간은 제외하고 일부 장면은 최대 약 2.17배속으로 재생합니다. 하단 설명 자막·새 오디오·프레임 보간은 추가하지 않았습니다. 24fps 출력에는 원본 프레임의 반복이 포함됩니다.
+
+- `ffprobe -v error -show_entries format=duration,size:stream=codec_name,codec_type,width,height,avg_frame_rate,nb_frames -of json aidlc-docs/examples/table-order/table-order-demo-60s.mp4`는 exit 0입니다. H.264, 1440×936, 24fps, 1,440프레임, 정확히 60초, 4,434,614바이트입니다. 스트림은 영상 하나입니다.
+- `ffmpeg -hide_banner -v error -i aidlc-docs/examples/table-order/table-order-demo-60s.mp4 -f null -`는 exit 0입니다. 전체 디코딩 오류가 없습니다.
+- 최종 영상에서 25개 장면을 추출해 하단 자막이 없는 앱 화면과 문서·시각화·승인 결과를 육안으로 확인했습니다. 시각화에는 메뉴, 주문 성공, 주문 실패, 관리자, 이용 완료, 새 세션 화면이 포함됩니다.
+- 이번 변경은 기존 영상 편집과 문서 안내 갱신입니다. 제품 소스는 변경하지 않았으며 테스트·타입 검사·빌드는 다시 실행하지 않았습니다.
+
+편집 구간은 `aidlc-docs/examples/table-order/evidence/short60/edit-decisions.json`에 기록했습니다. 검증 결과는 `aidlc-docs/examples/table-order/evidence/short60/verification.json`이며 전체 디코딩 로그는 `aidlc-docs/examples/table-order/evidence/short60/decode.log`입니다. 영상 SHA-256은 `a7ece00ade878d8d9daedd9ac4eea207491d09d7f059899f1d2825ec81ef5f43`입니다.

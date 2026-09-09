@@ -2,10 +2,13 @@
 
 테이블오더 초안으로 PlanRepo의 문서 등록, 실제 AI 질문, 답변, 문서 보완, 시각화, 검토 요청과 최종 결재를 실행하고 녹화했습니다. 최종 문서는 v3입니다.
 
+최신 업로드용 영상은 `aidlc-docs/examples/table-order/table-order-demo-60s.mp4`입니다. 클릭·입력·화면 전환 25개 구간만 추려 정확히 60초로 편집했습니다. 하단 설명 자막과 음성은 없습니다. 일부 구간은 최대 약 2.17배속으로 재생합니다.
+
 ## 영상과 문서
 
 | 파일 | 내용 |
 |---|---|
+| `aidlc-docs/examples/table-order/table-order-demo-60s.mp4` | 최신 업로드용 1분 영상입니다. 실제 동작 중심으로 편집했고 하단 자막은 없습니다. |
 | `aidlc-docs/examples/table-order/table-order-demo.mp4` | 한국어 구간 설명을 넣은 6분 36초 편집본입니다. |
 | `aidlc-docs/examples/table-order/table-order-full.mp4` | 14분 47.83초 전체 녹화본입니다. |
 | `aidlc-docs/examples/table-order/inception-plan.md` | 앱에서 최종 승인한 문서 v3과 시각화 자료입니다. |
@@ -14,9 +17,22 @@
 | `aidlc-docs/examples/table-order/poster.png` | 승인 후 시각화 화면입니다. |
 | `aidlc-docs/examples/table-order/verification-report.md` | 실행 범위, 검증 결과와 한계입니다. |
 
-영상은 실제 컴퓨터 화면을 녹화했습니다. 원본은 저장 상태를 확인하기 위해 두 구간으로 녹화했고, 전체본은 두 구간을 시간순으로 연결했습니다. 편집본은 긴 대기와 반복 점검 구간을 줄였으며 재생 속도는 바꾸지 않았습니다. 하단의 한국어 설명만 추가했습니다. 음성은 없습니다. 원본 고해상도 녹화는 `aidlc-docs/examples/table-order/table-order-raw.mov`와 `aidlc-docs/examples/table-order/table-order-raw-02.mov`에 보존했습니다.
+영상은 실제 컴퓨터 화면을 녹화했습니다. 원본은 저장 상태를 확인하기 위해 두 구간으로 녹화했고, 전체본은 두 구간을 시간순으로 연결했습니다. 6분 36초 편집본은 긴 대기와 반복 점검 구간을 줄였으며 재생 속도는 바꾸지 않았습니다. 이 편집본에만 하단 한국어 설명을 추가했습니다. 모든 영상에 음성은 없습니다. 원본 고해상도 녹화는 `aidlc-docs/examples/table-order/table-order-raw.mov`와 `aidlc-docs/examples/table-order/table-order-raw-02.mov`에 보존했습니다.
 
-## 편집본에서 볼 수 있는 과정
+## 1분 영상에서 볼 수 있는 과정
+
+| 시작 | 장면 |
+|---|---|
+| 00:00 | 초안을 등록하고 AI 질문을 확인합니다. |
+| 00:10 | 답변을 입력하고 저장합니다. |
+| 00:16 | AI 문서를 생성하고 보완안을 반영합니다. |
+| 00:25 | 문서를 직접 편집하고 저장합니다. |
+| 00:28 | 업무 흐름과 여섯 가지 화면을 시각화합니다. |
+| 00:45 | 원문 근거와 주요 규칙을 확인합니다. |
+| 00:49 | 검토를 요청하고 확인 항목과 의견을 기록합니다. |
+| 00:55 | 가상 동료 검토와 담당자 최종 결재를 마칩니다. |
+
+## 6분 36초 편집본에서 볼 수 있는 과정
 
 | 시작 | 장면 |
 |---|---|
