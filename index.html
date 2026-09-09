@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PlanRepo · SR 설계 워크벤치 (목업)</title>
+<!--
+  PlanRepo — 자기완결 프런트엔드 목업 (Unit U1: planrepo-mockup)
+  · 서버/인증/영속/실제 AI/Git 없음 (요구사항 §3). 새로고침 시 처음 상태로 초기화 (MK-6).
+  · 외부 의존성 0 — CDN/웹폰트/네트워크 요청 없음 (NFR-SELF-1). 시스템 폰트 사용.
+  · 4개 화면 구성(V1~V4)이 동일 store·서비스를 공유하고 중앙 영역 배치만 다름 (NFR-VIS-1).
+  · Date/난수 미사용 — 고정 시드 타임스탬프 (NR-DET-1).
+  내부 구조: seed · store · answerParser · versionService · gateService · reviewService ·
+            policyService · roleService · aiRunService · variantController · widgets · shell
+-->
+<style>
+:root{
+  /* Autumn 팔레트 — 4 변형 고정 (NFR-VIS-1) */
+  --bg:#f5f2eb; --paper:#fffdf8; --ink:#352f29; --muted:#81796e; --line:#e5dfd3;
+  --rust:#a65036; --rust-light:#f3e4d9; --olive:#687044; --olive-light:#e9ecde;
+  --mustard:#967023; --mustard-light:#f4ecd2; --sidebar:#eee9df; --radius:12px;
+  --v2split:50%;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Malgun Gothic",
+    "Apple SD Gothic Neo","Noto Sans KR",Roboto,sans-serif;
+  font-size:13px; line-height:1.5; color:var(--ink); background:var(--bg);
+  -webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit;font-size:inherit;cursor:pointer;}
+h1,h2,h3,h4{margin:0;font-weight:650;}
+a{color:var(--rust);}
+:focus-visible{outline:2.5px solid var(--mustard);outline-offset:2px;border-radius:4px;}
+.skip-link{position:absolute;left:-999px;top:0;background:var(--ink);color:#fff;padding:8px 14px;z-index:100;border-radius:0 0 8px 0;}
+.skip-link:focus{left:0;}
+
+/* ---------- 레이아웃 셸 ---------- */
+.app{display:grid;grid-template-columns:236px 1fr;min-height:100vh;}
+.sidebar{background:var(--sidebar);border-right:1px solid var(--line);padding:16px 14px;position:sticky;top:0;height:100vh;overflow:auto;}
+.brand{font-size:15px;font-weight:750;letter-spacing:-.2px;display:flex;align-items:center;gap:8px;margin-bottom:2px;}
+.brand .dot{width:12px;height:12px;border-radius:50%;background:var(--rust);}
+.brand-sub{font-size:11.5px;color:var(--muted);margin:0 0 16px 20px;}
+.nav-group-label{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin:16px 4px 6px;}
+.nav-item{display:flex;align-items:center;gap:9px;width:100%;text-align:left;background:none;border:none;padding:8px 10px;border-radius:9px;color:var(--ink);font-size:13px;}
+.nav-item:hover{background:#e5ddce;}
+.nav-item.active{background:var(--rust);color:#fff;font-weight:600;}
+.nav-item .ico{font-size:14px;width:18px;text-align:center;}
+.nav-item .count{margin-left:auto;font-size:11px;background:rgba(0,0,0,.08);border-radius:20px;padding:1px 7px;}
+.nav-item.active .count{background:rgba(255,255,255,.25);}
+.side-select{width:100%;margin-top:4px;padding:7px 9px;border:1px solid var(--line);border-radius:9px;background:var(--paper);color:var(--ink);font-size:12.5px;}
+.side-block{margin-top:6px;}
+
+.main{min-width:0;display:flex;flex-direction:column;}
+.reset-banner{background:var(--mustard-light);border-bottom:1px solid #e6d9a8;color:#6d5312;padding:6px 20px;font-size:12px;display:flex;align-items:center;gap:8px;}
+.reset-banner button{margin-left:auto;background:#fff;border:1px solid #e0cf9a;border-radius:7px;padding:3px 10px;font-size:11.5px;color:#6d5312;}
+.content{padding:20px 24px;flex:1;min-width:0;}
+
+/* ---------- 상태 토큰 (색 + 아이콘 + 텍스트 (+숫자)) — 색 단독 금지 ---------- */
+.tok{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;padding:2px 9px;border-radius:20px;border:1px solid transparent;white-space:nowrap;}
+.tok .ic{font-size:11px;}
+.tok .ct{background:rgba(0,0,0,.12);border-radius:12px;padding:0 6px;font-size:11px;margin-left:1px;}
+.tok.neutral{background:#efe9df;color:#5f584e;border-color:#e0d8c9;}
+.tok.rust{background:var(--rust-light);color:#8a3f28;border-color:#e7c3b2;}
+.tok.olive{background:var(--olive-light);color:#4d5330;border-color:#cdd4b4;}
+.tok.mustard{background:var(--mustard-light);color:#7a5c15;border-color:#e5d29b;}
+.tok.done{background:#e2ecd9;color:#3f6b33;border-color:#c2d9b4;}
+.tok.danger{background:#f6ddd6;color:#9a3620;border-color:#e9b6a6;}
+
+/* ---------- 카드 / 패널 ---------- */
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:14px;}
+.panel h3{font-size:14px;margin-bottom:4px;display:flex;align-items:center;gap:8px;}
+.panel .hint{color:var(--muted);font-size:12px;margin-bottom:10px;}
+.section-title{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:700;margin:2px 0 8px;display:flex;align-items:center;gap:8px;}
+.divider{height:1px;background:var(--line);margin:12px 0;}
+.muted{color:var(--muted);}
+.small{font-size:11.5px;}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.spread{display:flex;justify-content:space-between;align-items:center;gap:10px;}
+
+/* ---------- 버튼 ---------- */
+.btn{border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:9px;padding:7px 13px;font-size:12.5px;font-weight:600;display:inline-flex;align-items:center;gap:6px;}
+.btn:hover:not(:disabled){border-color:var(--muted);}
+.btn.primary{background:var(--rust);border-color:var(--rust);color:#fff;}
+.btn.olive{background:var(--olive);border-color:var(--olive);color:#fff;}
+.btn.mustard{background:var(--mustard);border-color:var(--mustard);color:#fff;}
+.btn.ghost{background:transparent;}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
+.btn .who{font-size:10.5px;font-weight:500;opacity:.8;}
+.disabled-reason{font-size:11px;color:#9a3620;margin-top:3px;display:flex;gap:5px;align-items:flex-start;}
+.disabled-reason .ic{margin-top:1px;}
+
+/* ---------- 질문 카드 ---------- */
+.qcard{border:1px solid var(--line);border-radius:11px;padding:12px 13px;margin-bottom:10px;background:var(--paper);}
+.qcard.active{border-color:var(--rust);box-shadow:0 0 0 3px var(--rust-light);}
+.qcard.blocking{border-left:4px solid var(--rust);}
+.qcard.followup{border-left:4px solid var(--mustard);}
+.qcard-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;}
+.qcard .qtitle{font-weight:650;font-size:13px;}
+.qcard .qmeta{font-size:11px;color:var(--muted);margin-top:2px;}
+.choice{display:flex;align-items:flex-start;gap:8px;padding:6px 8px;border:1px solid var(--line);border-radius:8px;margin-top:6px;cursor:pointer;background:#fff;}
+.choice:hover{border-color:var(--muted);}
+.choice.sel{border-color:var(--olive);background:var(--olive-light);}
+.choice input{margin-top:3px;}
+.choice .cchar{font-weight:700;color:var(--mustard);min-width:16px;}
+.qcard-actions{display:flex;gap:7px;margin-top:10px;flex-wrap:wrap;align-items:center;}
+.otherbox{margin-top:6px;width:100%;padding:6px 9px;border:1px solid var(--line);border-radius:8px;font-size:12.5px;}
+
+/* ---------- diff ---------- */
+.diff{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:12px;border:1px solid var(--line);border-radius:9px;overflow:hidden;}
+.diff .dl{display:flex;gap:8px;padding:2px 10px;white-space:pre-wrap;}
+.diff .dl .sg{width:14px;flex:none;font-weight:700;color:var(--muted);}
+.diff .dl.add{background:#e6f0de;} .diff .dl.add .sg{color:#3f6b33;}
+.diff .dl.del{background:#f7e0d9;} .diff .dl.del .sg{color:#9a3620;}
+.diff .dl.mod{background:var(--mustard-light);} .diff .dl.mod .sg{color:#7a5c15;}
+.diff-tag{font-family:inherit;font-size:10px;margin-left:auto;color:var(--muted);}
+
+/* ---------- 타임라인 ---------- */
+.vtl{display:flex;flex-direction:column;gap:6px;}
+.vitem{display:flex;align-items:center;gap:9px;padding:7px 9px;border:1px solid var(--line);border-radius:8px;background:#fff;cursor:pointer;}
+.vitem:hover{border-color:var(--muted);}
+.vitem.viewing{border-color:var(--rust);background:var(--rust-light);}
+.vitem .vv{font-weight:700;}
+
+/* ---------- 체크리스트 ---------- */
+.chk{display:flex;align-items:center;gap:8px;padding:5px 6px;border-radius:7px;}
+.chk:hover{background:var(--bg);}
+.chk input{width:15px;height:15px;}
+.chk.done{color:#3f6b33;}
+
+/* ---------- 보드 ---------- */
+.board{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+.bcol{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:12px;min-width:0;}
+.bcol h4{font-size:12.5px;display:flex;align-items:center;gap:7px;margin-bottom:10px;}
+.bcol h4 .n{margin-left:auto;font-size:11px;color:var(--muted);}
+.srcard{border:1px solid var(--line);border-radius:10px;padding:11px;margin-bottom:10px;background:#fff;cursor:pointer;}
+.srcard:hover{border-color:var(--rust);}
+.srcard .t{font-weight:650;font-size:12.5px;}
+.srcard .facets{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;}
+.srcard .blk{font-size:11px;color:#9a3620;margin-top:7px;display:flex;gap:5px;}
+
+/* ---------- 인박스 ---------- */
+.tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
+.tab{border:1px solid var(--line);background:var(--paper);border-radius:20px;padding:6px 13px;font-size:12px;font-weight:600;color:var(--muted);}
+.tab.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+.irow{display:flex;align-items:center;gap:12px;padding:11px 13px;border:1px solid var(--line);border-radius:10px;margin-bottom:8px;background:var(--paper);cursor:pointer;}
+.irow:hover{border-color:var(--rust);}
+.irow .ir-main{min-width:0;}
+.irow .ir-title{font-weight:650;font-size:12.5px;}
+.irow .ir-sub{font-size:11.5px;color:var(--muted);}
+.empty{padding:34px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:12px;}
+
+/* ---------- 상세 상단바 (고정) ---------- */
+.topbar{position:sticky;top:0;z-index:20;background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:13px 16px;margin-bottom:14px;}
+.topbar .crumbs{font-size:11.5px;color:var(--muted);margin-bottom:4px;}
+.topbar .tb-title{font-size:16px;font-weight:750;}
+.topbar .tb-grid{display:flex;gap:22px;flex-wrap:wrap;margin-top:9px;}
+.topbar .kv .k{font-size:10.5px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);}
+.topbar .kv .v{font-size:12.5px;font-weight:600;margin-top:1px;}
+.need-now{background:var(--rust-light);border:1px solid #e7c3b2;border-radius:9px;padding:8px 11px;margin-top:10px;font-size:12.5px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.need-now .lb{font-weight:700;color:#8a3f28;}
+
+/* ---------- 변형 컨테이너 ---------- */
+.variant-badge{display:inline-flex;gap:6px;align-items:center;font-size:11px;color:var(--muted);margin-bottom:8px;}
+.v-single{max-width:900px;}
+.v2grid{display:grid;grid-template-columns:var(--v2split) 6px 1fr;gap:0;align-items:start;}
+.v2grid .pane{min-width:0;padding:0 14px;}
+.v2grid .pane:first-child{padding-left:0;}
+.v2divider{cursor:col-resize;background:var(--line);border-radius:4px;align-self:stretch;}
+.v2divider:hover{background:var(--muted);}
+.v3grid{display:grid;grid-template-columns:250px 1fr 340px;gap:14px;align-items:start;}
+.v3grid .col{min-width:0;}
+.dock{position:sticky;top:150px;}
+.jump-chips{display:flex;gap:6px;flex-wrap:wrap;position:sticky;top:150px;background:var(--bg);padding:8px 0;z-index:10;}
+.chip{border:1px solid var(--line);background:var(--paper);border-radius:20px;padding:4px 11px;font-size:11.5px;font-weight:600;}
+.chip.warn{background:var(--rust-light);color:#8a3f28;border-color:#e7c3b2;}
+.chip.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+.step-strip{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+.step{border:1px solid var(--line);background:var(--paper);border-radius:9px;padding:8px 12px;font-size:12px;font-weight:600;display:flex;gap:7px;align-items:center;color:var(--muted);}
+.step.active{background:var(--rust);color:#fff;border-color:var(--rust);}
+.step.done{color:#3f6b33;border-color:#c2d9b4;background:#eef4e8;}
+.focus-card{max-width:720px;margin:0 auto;}
+.wiz-nav{display:flex;justify-content:space-between;margin-top:14px;}
+
+/* 4행동 2×2 */
+.action-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.action-grid .btn{justify-content:center;}
+
+/* ---------- 서랍 ---------- */
+.scrim{position:fixed;inset:0;background:rgba(30,25,20,.4);z-index:80;}
+.drawer{position:fixed;top:0;right:0;height:100vh;width:min(440px,92vw);background:var(--paper);border-left:1px solid var(--line);z-index:90;box-shadow:-8px 0 30px rgba(0,0,0,.15);display:flex;flex-direction:column;}
+.drawer-head{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;}
+.drawer-body{padding:16px;overflow:auto;}
+.icon-btn{border:none;background:none;font-size:18px;color:var(--muted);padding:2px 8px;border-radius:8px;}
+.icon-btn:hover{background:var(--bg);}
+
+/* ---------- 토스트 & aria-live ---------- */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:10px;font-size:12.5px;z-index:120;box-shadow:0 6px 20px rgba(0,0,0,.25);}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0;}
+
+@media(max-width:1180px){
+  .v3grid{grid-template-columns:1fr;} .dock,.jump-chips{position:static;}
+  .board{grid-template-columns:repeat(2,1fr);}
+}
+@media(max-width:820px){
+  .app{grid-template-columns:1fr;}
+  .sidebar{position:static;height:auto;}
+  .v2grid{grid-template-columns:1fr;} .v2divider{display:none;}
+  .board{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">본문으로 건너뛰기</a>
+<div id="app"></div>
+<div id="live" aria-live="polite" class="sr-only"></div>
+<div id="toast-root"></div>
+<script>
+"use strict";
+/* =================================================================================
+   SEED — 고정 시드 상태 (table-order-ddthon SR-1024). Date/난수 미사용 (NR-DET-1).
+   ================================================================================= */
+function buildInitialState(){
+  const users = {
+    u_req:{id:"u_req",name:"정하은",role:"요청자"},
+    u_dev:{id:"u_dev",name:"김도현",role:"개발자"},
+    u_dec:{id:"u_dec",name:"이서준",role:"결정권자"},
+    u_rev:{id:"u_rev",name:"박민지",role:"리뷰어"},
+    u_lead:{id:"u_lead",name:"최유진",role:"리더"},
+    u_eval:{id:"u_eval",name:"한지우",role:"평가자"},
+  };
+
+  // 문서 본문(줄 배열). v2=직전 승인본, v3=현재 초안.
+  const funcV1 = [
+    "# U2 메뉴 기능 설계서",
+    "## 1. 메뉴 목록 조회",
+    "- 카테고리별 메뉴를 반환한다.",
+    "## 2. 메뉴 상세",
+    "- 이름, 가격, 설명을 포함한다.",
+  ];
+  const funcV2 = [
+    "# U2 메뉴 기능 설계서",
+    "## 1. 메뉴 목록 조회",
+    "- 카테고리별 메뉴를 반환한다.",
+    "- 정렬 기준: 인기순 기본.",
+    "## 2. 메뉴 상세",
+    "- 이름, 가격, 설명, 대표 이미지를 포함한다.",
+    "## 3. 옵션",
+    "- 옵션 처리 방식은 미정(Q2).",
+  ];
+  const funcV3 = [
+    "# U2 메뉴 기능 설계서",
+    "## 1. 메뉴 목록 조회",
+    "- 카테고리별 메뉴를 반환한다.",
+    "- 정렬 기준: 인기순 기본.",
+    "- 품절 메뉴 표시 방식은 미정(Q3).",
+    "## 2. 메뉴 상세",
+    "- 이름, 가격, 설명, 대표 이미지를 포함한다.",
+    "## 3. 옵션",
+    "- 옵션 그룹(사이즈/토핑) 모델링 방식은 미정(Q2).",
+    "- 다국어 메뉴명 지원 여부 미정(Q5).",
+  ];
+  // v2 → v3 diff (구조화 시드; Q-FD3=A)
+  const diffV2V3 = [
+    {type:"same",text:"# U2 메뉴 기능 설계서"},
+    {type:"same",text:"## 1. 메뉴 목록 조회"},
+    {type:"same",text:"- 카테고리별 메뉴를 반환한다."},
+    {type:"same",text:"- 정렬 기준: 인기순 기본."},
+    {type:"add",text:"- 품절 메뉴 표시 방식은 미정(Q3).",tag:"신규·미검토"},
+    {type:"same",text:"## 2. 메뉴 상세"},
+    {type:"same",text:"- 이름, 가격, 설명, 대표 이미지를 포함한다."},
+    {type:"same",text:"## 3. 옵션"},
+    {type:"mod",text:"- 옵션 그룹(사이즈/토핑) 모델링 방식은 미정(Q2).",tag:"수정"},
+    {type:"add",text:"- 다국어 메뉴명 지원 여부 미정(Q5).",tag:"신규·미검토"},
+  ];
+
+  const documents = {
+    "DOC-U2-FUNC":{id:"DOC-U2-FUNC",unitId:"U2",type:"기능 설계서",title:"U2 메뉴 기능 설계서",currentVersion:3},
+    "DOC-U2-NFR":{id:"DOC-U2-NFR",unitId:"U2",type:"NFR 요구",title:"U2 메뉴 NFR 요구",currentVersion:2},
+  };
+  const docVersions = {
+    "DOC-U2-FUNC@1":{docId:"DOC-U2-FUNC",version:1,body:funcV1,status:"승인",staleReview:false,createdReason:"초기 생성",prevVersion:null,inputVersions:[],approvedBy:"u_rev",approvedAt:"D1 10:20"},
+    "DOC-U2-FUNC@2":{docId:"DOC-U2-FUNC",version:2,body:funcV2,status:"승인",staleReview:false,createdReason:"1차 질문 확정 반영",prevVersion:1,inputVersions:[],approvedBy:"u_rev",approvedAt:"D2 15:40"},
+    "DOC-U2-FUNC@3":{docId:"DOC-U2-FUNC",version:3,body:funcV3,status:"초안",staleReview:true,createdReason:"옵션·품절·다국어 질문 반영(진행 중)",prevVersion:2,inputVersions:[{docId:"DOC-U1-FUNC",version:4}],diff:diffV2V3,approvedBy:null,approvedAt:null},
+    "DOC-U2-NFR@2":{docId:"DOC-U2-NFR",version:2,body:["# U2 메뉴 NFR","- 목록 응답 300ms 이내(초안)."],status:"초안",staleReview:false,createdReason:"초안",prevVersion:1,inputVersions:[],approvedBy:null,approvedAt:null},
+  };
+
+  const questions = {
+    Q2:{id:"Q2",docId:"DOC-U2-FUNC",docVersion:3,originalTitle:"## Question 2\n메뉴 옵션 그룹(사이즈/토핑)은 어떻게 모델링합니까?",
+        title:"메뉴 옵션 그룹(사이즈/토핑)은 어떻게 모델링합니까?",
+        choices:[{char:"A",text:"메뉴에 종속된 하위 엔티티"},{char:"B",text:"독립 메뉴 항목으로"},{char:"C",text:"재사용 가능한 공유 엔티티"}],
+        otherChar:"X",selectionMode:"단일",required:true,blocking:true,decisionOwner:"u_dec",parentRunId:null,parseError:null},
+    Q3:{id:"Q3",docId:"DOC-U2-FUNC",docVersion:3,originalTitle:"## Question 3\n품절 메뉴는 목록에서 어떻게 표시합니까?",
+        title:"품절 메뉴는 목록에서 어떻게 표시합니까?",
+        choices:[{char:"A",text:"흐리게 + '품절' 배지, 선택 불가"},{char:"B",text:"목록에서 숨김"}],
+        otherChar:"X",selectionMode:"단일",required:true,blocking:true,decisionOwner:"u_dec",parentRunId:null,parseError:null},
+    Q5:{id:"Q5",docId:"DOC-U2-FUNC",docVersion:3,originalTitle:"## Question 5\n다국어(한/영) 메뉴명을 지원합니까?",
+        title:"다국어(한/영) 메뉴명을 지원합니까?",
+        choices:[{char:"A",text:"v1은 한국어만"},{char:"B",text:"한/영 동시 지원"}],
+        otherChar:"X",selectionMode:"단일",required:true,blocking:true,decisionOwner:"u_dec",parentRunId:null,parseError:null},
+    Q7:{id:"Q7",docId:"DOC-U2-FUNC",docVersion:3,originalTitle:"### Clarification Question 7\n옵션 그룹을 공유 엔티티로 둘 경우, 그룹 편집 시 기존 메뉴 반영 범위는?",
+        title:"(후속) 옵션 그룹을 공유 엔티티로 둘 경우, 그룹 편집 시 기존 메뉴 반영 범위는?",
+        choices:[{char:"A",text:"즉시 전체 메뉴에 반영"},{char:"B",text:"메뉴별 스냅샷 유지"}],
+        otherChar:"X",selectionMode:"단일",required:true,blocking:false,decisionOwner:"u_dec",parentRunId:"RUN-U2-03",parseError:null},
+    Q4:{id:"Q4",docId:"DOC-U2-FUNC",docVersion:3,title:"질문 번호 중복",parseError:{kind:"중복번호",location:"줄 58, 71"},choices:[],required:true,blocking:true,decisionOwner:"u_dec"},
+    Q6:{id:"Q6",docId:"DOC-U2-FUNC",docVersion:3,title:"답변 태그 누락",parseError:{kind:"Answer누락",location:"줄 42"},choices:[],required:true,blocking:true,decisionOwner:"u_dec"},
+  };
+
+  const decisions = {
+    // Q5는 개발자가 A로 저장(제안됨)했지만 아직 확정 전.
+    Q5:{questionId:"Q5",answerState:"제안됨",answerValue:"A",saveState:"저장됨",otherText:"",source:"사람확정",history:[]},
+  };
+
+  const approvals = {
+    "DOC-U2-FUNC@1":{id:"AP1",docId:"DOC-U2-FUNC",version:1,reviewerSet:["u_rev"],policy:"전원",result:"승인",approver:"u_rev",approvedAt:"D1 10:20",
+      checklist:[{key:"c1",label:"목록 조회 계약 확인",done:true}]},
+    "DOC-U2-FUNC@2":{id:"AP2",docId:"DOC-U2-FUNC",version:2,reviewerSet:["u_rev"],policy:"전원",result:"승인",approver:"u_rev",approvedAt:"D2 15:40",
+      checklist:[{key:"c1",label:"정렬/이미지 반영 확인",done:true}]},
+    "DOC-U2-FUNC@3":{id:"AP3",docId:"DOC-U2-FUNC",version:3,reviewerSet:["u_rev"],policy:"전원",result:"대기",approver:null,approvedAt:null,
+      checklist:[
+        {key:"c1",label:"v2 대비 변경(3건) 확인",done:false},
+        {key:"c2",label:"필수 결정(Q2·Q3) 반영 확인",done:false},
+        {key:"c3",label:"형식 오류 0건 확인",done:false},
+      ]},
+  };
+
+  const revisionRequests = {
+    "RR-2":{id:"RR-2",docId:"DOC-U2-FUNC",atVersion:2,area:"옵션 처리 문단",state:"수정확인대기",
+      submitter:"u_dev",fixVersion:3,confirmer:"u_rev",blocking:true,
+      note:"옵션 설명이 모호해 옵션 그룹 개념으로 재작성 요청. v3에서 반영 제출됨."},
+  };
+  const comments = {
+    "CM-1":{id:"CM-1",rrId:"RR-2",docId:"DOC-U2-FUNC",atVersion:2,quote:"옵션 처리 방식은 미정",anchor:"## 3. 옵션",orphanedNote:null},
+    "CM-2":{id:"CM-2",rrId:null,docId:"DOC-U2-FUNC",atVersion:2,quote:"이미지 규격 명시 필요",anchor:"삭제된 문단",orphanedNote:"이전 버전의 댓글"},
+  };
+
+  const aiRuns = {
+    "RUN-U2-03":{id:"RUN-U2-03",parentRunId:null,srId:"SR-1024",taskType:"산출물생성",
+      inputVersion:{docId:"DOC-U2-FUNC",version:3},confirmedAnswers:["Q1"],
+      outputVersion:null,planApproved:true,status:"추가답변대기",checkpoint:"ckpt-3",error:null,
+      note:"산출물 생성 중 후속 질문(Q7) 발생 → 추가 답변 대기. 부모 실행·기존 답변 보존."},
+  };
+
+  const units = {
+    U1:{id:"U1",srId:"SR-1024",name:"주문",reviewStatus:"승인완료",aiStatus:"실행전",
+      facets:[{key:"기능설계",applicable:true},{key:"NFR",applicable:true}],progress:{position:"완료",unresolvedDeps:[]}},
+    U2:{id:"U2",srId:"SR-1024",name:"메뉴",reviewStatus:"산출물승인대기",aiStatus:"추가답변대기",
+      facets:[{key:"기능설계",applicable:true},{key:"NFR",applicable:true},{key:"인프라",applicable:false,reason:"신규 인프라 없음"}],
+      progress:{position:"Construction 설계",unresolvedDeps:["Q2","Q3","RR-2","형식오류"]}},
+    U3:{id:"U3",srId:"SR-1024",name:"결제",reviewStatus:"답변필요",aiStatus:"실행전",
+      facets:[{key:"기능설계",applicable:true},{key:"NFR",applicable:true}],progress:{position:"대기(U2 선행)",unresolvedDeps:["U2 완료"]}},
+  };
+
+  const srs = {
+    "SR-1024":{id:"SR-1024",title:"테이블오더 — 메뉴/옵션 도메인 설계",stage:"Construction설계",
+      assignee:"u_dev",scope:"주문·메뉴·결제 3개 유닛의 설계 산출물 확정",workflowVersion:"aidlc-v1",
+      refs:{jira:"TORDER-1024",repo:"table-order-ddthon"},
+      blockReason:"필수 결정 2건 미확정 · 형식 오류 2건 · 수정요청 1건",
+      unitIds:["U1","U2","U3"],exception:null,
+      policyConfig:{srId:"SR-1024",policy:"전원",reviewerSet:["u_rev"],changedBy:null,reason:null}},
+    "SR-1050":{id:"SR-1050",title:"쿠폰 발급 규칙 정비",stage:"Inception",assignee:"u_req",
+      scope:"쿠폰 도메인 요구 정리",workflowVersion:"aidlc-v1",refs:{jira:"TORDER-1050"},
+      blockReason:"요구사항 질문 응답 대기",unitIds:[],exception:null,
+      policyConfig:{srId:"SR-1050",policy:"전원",reviewerSet:["u_rev"]}},
+    "SR-1039":{id:"SR-1039",title:"영수증 이메일 템플릿",stage:"구현대기",assignee:"u_dev",
+      scope:"템플릿 확정 완료",workflowVersion:"aidlc-v1",refs:{jira:"TORDER-1039"},
+      blockReason:null,unitIds:[],exception:null,
+      policyConfig:{srId:"SR-1039",policy:"전원",reviewerSet:["u_rev"]}},
+    "SR-1061":{id:"SR-1061",title:"매장 운영시간 설정 UI",stage:"SR접수",assignee:"u_req",
+      scope:"신규 접수",workflowVersion:"aidlc-v1",refs:{jira:"TORDER-1061"},
+      blockReason:"인테이크 검토 대기",unitIds:[],exception:null,
+      policyConfig:{srId:"SR-1061",policy:"전원",reviewerSet:["u_rev"]}},
+  };
+
+  return {
+    // UI 상태
+    view:"detail", activeSrId:"SR-1024", activeUnitId:"U2", activeVariant:"V1",
+    activeRole:"개발자", viewingDoc:"DOC-U2-FUNC", viewingVersion:3,
+    inboxFilter:"전체", v4Step:"answer", drawerOpen:false, drawerType:null,
+    editing:{}, // questionId -> {value, otherText}
+    announce:"", toast:null,
+    // 도메인
+    users, srs, units, documents, docVersions, questions, decisions,
+    approvals, revisionRequests, comments, aiRuns,
+  };
+}
+
+/* =================================================================================
+   STORE — 단일 인메모리 트리 + pub/sub (P1). reset()으로 시드 재구성 (P7, MK-6).
+   ================================================================================= */
+const store = (function(){
+  let state = null; const subs = [];
+  const clone = o => JSON.parse(JSON.stringify(o));
+  return {
+    init(){ state = buildInitialState(); },
+    get(){ return state; },
+    set(mut){ mut(state); subs.forEach(f=>f(state)); },
+    subscribe(f){ subs.push(f); },
+    reset(){ const keepVariant = state.activeVariant, keepRole = state.activeRole;
+      state = buildInitialState(); state.activeVariant = keepVariant; state.activeRole = keepRole;
+      subs.forEach(f=>f(state)); },
+  };
+})();
+
+/* =================================================================================
+   SERVICES — 순수 함수 우선. 게이트는 파생(캐시 없음) (P3/Q-FD4).
+   ================================================================================= */
+const roleService = {
+  ROLES:["요청자","개발자","결정권자","리뷰어","리더","평가자"],
+  can(role, action){
+    // action: saveAnswer|confirmDecision|approvePlan|approveArtifact|confirmFix|startRun|advance|exception|checklist
+    const map = {
+      saveAnswer:["개발자","리더"],
+      confirmDecision:["결정권자","리더"],
+      approvePlan:["리뷰어","리더"],
+      approveArtifact:["리뷰어","리더"],
+      confirmFix:["리뷰어","리더"],
+      startRun:["개발자","리더"],
+      checklist:["리뷰어","리더"],
+      advance:["리더","리뷰어"],
+      exception:["리더"], // 리더 전용 (문서승인·인계 게이트)
+    };
+    return (map[action]||[]).includes(role);
+  },
+  reason(role, action){ return `현재 역할 '${role}'은(는) 이 행동을 수행할 수 없습니다`; }
+};
+
+const answerParser = {
+  // 지정 [Answer] 라인만 치환, 나머지 원문 보존 (AC-1). 데모: 원문 문자열 유지.
+  applyAnswer(originalTitle, value){
+    if(/\[Answer\]:/.test(originalTitle)) return originalTitle.replace(/\[Answer\]:.*/,`[Answer]: ${value}`);
+    return originalTitle + `\n[Answer]: ${value}`;
+  },
+  // 검증: 형식 오류를 위치와 함께 수집; '0건'으로 숨기지 않음 (AC-12).
+  errors(st){
+    return Object.values(st.questions).filter(q=>q.parseError)
+      .map(q=>({qId:q.id, kind:q.parseError.kind, location:q.parseError.location}));
+  }
+};
+
+const versionService = {
+  versionsOf(st, docId){
+    return Object.values(st.docVersions).filter(v=>v.docId===docId).sort((a,b)=>a.version-b.version);
+  },
+  current(st, docId){ return st.documents[docId].currentVersion; },
+  // 과거 버전 화면에서 최신 승인 불가 (AC-5).
+  canApprove(st, docId, viewingVersion){ return viewingVersion === st.documents[docId].currentVersion; },
+  getDiff(st, docId, toVersion){
+    const dv = st.docVersions[`${docId}@${toVersion}`];
+    return dv && dv.diff ? dv.diff : [];
+  },
+  // 답변 확정 → 문서 Answer 갱신. 초안이면 누적, 승인본이면 새 버전(요구 §8, AC-4).
+  confirmToDoc(st, q, value){
+    const dv = st.docVersions[`${q.docId}@${st.documents[q.docId].currentVersion}`];
+    // 데모: 초안에 누적 반영 (승인본 보존). 새 버전 생성 규칙은 v2→v3 이력으로 이미 시연.
+    if(dv.status==="초안"){ dv.createdReason = `${q.id} 답변 확정 반영`; }
+  }
+};
+
+const gateService = {
+  // 파생 순수 함수: 관련 상태에서 매번 재계산 (P3).
+  evaluate(st, gate){
+    const unmet = [];
+    const reqQs = Object.values(st.questions).filter(q=>q.blocking && !q.parseError);
+    const unconfirmed = reqQs.filter(q=>!(st.decisions[q.id] && st.decisions[q.id].answerState==="확정됨"));
+    const perr = answerParser.errors(st);
+    const openBlockingRR = Object.values(st.revisionRequests).filter(r=>r.blocking && r.state!=="확인완료");
+    const activeRuns = Object.values(st.aiRuns).filter(r=>["실행중","추가답변대기","중단재개가능"].includes(r.status));
+    const staleDocs = Object.values(st.docVersions).filter(v=>v.staleReview);
+    const unsaved = Object.values(st.decisions).filter(d=>d.saveState==="미저장"||d.answerState==="편집중");
+
+    if(gate==="AI실행"){
+      if(unsaved.length) unmet.push({key:"unsaved",label:`미저장 답변 ${unsaved.length}건`});
+      if(unconfirmed.length) unmet.push({key:"req",label:`미확정 질문 ${unconfirmed.length}건 (${unconfirmed.map(q=>q.id).join(", ")})`});
+      if(perr.length) unmet.push({key:"perr",label:`형식 오류 ${perr.length}건`});
+      if(activeRuns.length) unmet.push({key:"dup",label:`진행 중인 실행 있음 (${activeRuns.map(r=>r.id).join(", ")})`});
+    }
+    if(gate==="문서승인"){
+      const doc="DOC-U2-FUNC";
+      if(!versionService.canApprove(st, doc, st.viewingVersion)) unmet.push({key:"ver",label:`최신(v${st.documents[doc].currentVersion})이 아닌 v${st.viewingVersion}을 보는 중`});
+      if(unconfirmed.length) unmet.push({key:"req",label:`미확정 결정 ${unconfirmed.length}건 (${unconfirmed.map(q=>q.id).join(", ")})`});
+      if(openBlockingRR.length) unmet.push({key:"rr",label:`미해결 수정요청 ${openBlockingRR.length}건 (${openBlockingRR.map(r=>r.id).join(", ")})`});
+      if(perr.length) unmet.push({key:"perr",label:`형식 오류 ${perr.length}건`});
+      const ck = st.approvals["DOC-U2-FUNC@3"].checklist.filter(c=>!c.done);
+      if(ck.length) unmet.push({key:"ck",label:`체크리스트 미완료 ${ck.length}건`});
+    }
+    if(gate==="다음단계인계"){
+      const ap = st.approvals["DOC-U2-FUNC@3"];
+      if(ap.result!=="승인") unmet.push({key:"appr",label:"산출물(기능 설계서 v3) 승인 필요"});
+      if(unconfirmed.length) unmet.push({key:"req",label:`미확정 결정 ${unconfirmed.length}건`});
+      if(openBlockingRR.length) unmet.push({key:"rr",label:`미해결 수정요청 ${openBlockingRR.length}건`});
+      if(staleDocs.length) unmet.push({key:"stale",label:`재검토 필요 ${staleDocs.length}건`});
+      if(activeRuns.length) unmet.push({key:"run",label:`미해결 실행 ${activeRuns.length}건`});
+    }
+    return {passed:unmet.length===0, unmet};
+  }
+};
+
+const reviewService = {
+  // 지금 필요한 행동 (Topbar/진입점) — 우선순위: 파서오류 > 필수 미확정 > RR 확인 > 승인 > 인계
+  needNow(st){
+    const perr = answerParser.errors(st);
+    if(perr.length) return {label:`형식 오류 ${perr.length}건 수정`, target:"parse"};
+    const unconfirmed = Object.values(st.questions).filter(q=>q.blocking && !q.parseError && !(st.decisions[q.id]&&st.decisions[q.id].answerState==="확정됨"));
+    const proposed = unconfirmed.filter(q=>st.decisions[q.id]&&st.decisions[q.id].answerState==="제안됨");
+    if(unconfirmed.filter(q=>!st.decisions[q.id]).length) return {label:`답변할 질문 (${unconfirmed.filter(q=>!st.decisions[q.id]).map(q=>q.id).join(", ")})`, target:"answer"};
+    if(proposed.length) return {label:`결정 확정 필요 (${proposed.map(q=>q.id).join(", ")})`, target:"confirm"};
+    const openRR = Object.values(st.revisionRequests).filter(r=>r.blocking && r.state==="수정확인대기");
+    if(openRR.length) return {label:`수정요청 확인 필요 (${openRR.map(r=>r.id).join(", ")})`, target:"revision"};
+    if(st.approvals["DOC-U2-FUNC@3"].result!=="승인") return {label:"산출물 승인 검토", target:"approve"};
+    return {label:"다음 단계 진행 가능", target:"gate"};
+  }
+};
+
+const aiRunService = {
+  canStart(st){
+    const g = gateService.evaluate(st,"AI실행");
+    return g;
+  }
+};
+
+/* =================================================================================
+   렌더 헬퍼 & 위젯 (문자열 조립). data-testid 부여 (자동화 친화).
+   ================================================================================= */
+const esc = s => String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+const nm = (st,uid)=> uid&&st.users[uid]?st.users[uid].name:"—";
+const roleOf = (st,uid)=> uid&&st.users[uid]?st.users[uid].role:"";
+
+function tok(kind,cls,ic,label,count){
+  return `<span class="tok ${cls}"><span class="ic" aria-hidden="true">${ic}</span>${esc(label)}${count!=null?`<span class="ct">${count}</span>`:""}</span>`;
+}
+// 상태 → 토큰(색+아이콘+텍스트)
+function answerTok(st,q){
+  const d = st.decisions[q.id];
+  if(q.parseError) return tok("","danger","⚠","형식 오류");
+  const state = d? d.answerState : "미답변";
+  const m = {"미답변":["neutral","○"],"편집중":["mustard","✎"],"제안됨":["mustard","◐"],"확정됨":["done","●"]};
+  return tok("",m[state][0],m[state][1],state);
+}
+function saveTok(d){
+  if(!d) return "";
+  const m={"저장중":["mustard","⟳"],"저장됨":["olive","✓"],"저장실패":["danger","✕"],"미저장":["danger","!"]};
+  const k=m[d.saveState]||["neutral","·"];
+  return tok("",k[0],k[1],d.saveState);
+}
+function verStatusTok(dv){
+  return dv.status==="승인" ? tok("","done","✓","승인 v"+dv.version) : tok("","mustard","✎","초안 v"+dv.version);
+}
+function rrTok(rr){
+  const m={"열림":["rust","◍"],"수정확인대기":["mustard","⏳"],"확인완료":["done","✓"],"재오픈":["rust","↺"]};
+  const k=m[rr.state]||["neutral","·"]; return tok("",k[0],k[1],rr.state);
+}
+function aiTok(run){
+  const m={"실행전":["neutral","○"],"실행중":["mustard","⟳"],"추가답변대기":["mustard","?"],"초안준비":["olive","◑"],"실패":["danger","✕"],"취소":["neutral","⊘"],"중단재개가능":["mustard","⏸"]};
+  const k=m[run.status]||["neutral","·"]; return tok("",k[0],k[1],run.status);
+}
+function gateTok(res){
+  return res.passed ? tok("","done","✓","조건 충족") : tok("","rust","✕","미충족 "+res.unmet.length);
+}
+
+// 행동 버튼 (enabled + 비활성 사유 노출) — P3/NR-A11Y-5
+function actionBtn(opts){
+  const {label,action,data,cls,enabled,reason,actor,testid} = opts;
+  const dataAttrs = Object.entries(data||{}).map(([k,v])=>`data-${k}="${esc(v)}"`).join(" ");
+  const btn = `<button class="btn ${cls||""}" data-action="${action}" ${dataAttrs} ${enabled?"":"disabled"} `+
+    `data-testid="${testid||action}">${esc(label)}</button>`;
+  if(!enabled && reason) return `<div>${btn}<div class="disabled-reason"><span class="ic">⛔</span><span>${esc(reason)}</span></div></div>`;
+  return btn;
+}
+
+// 질문 카드 (T1)
+function questionCard(st,q,active){
+  if(q.parseError) return "";
+  const d = st.decisions[q.id];
+  const edit = st.editing[q.id];
+  const selVal = edit? edit.value : (d?d.answerValue:null);
+  const role = st.activeRole;
+  const canSave = roleService.can(role,"saveAnswer");
+  const canConfirm = roleService.can(role,"confirmDecision");
+  const hasSel = !!selVal;
+  const isProposed = d && d.answerState==="제안됨";
+  const isConfirmed = d && d.answerState==="확정됨";
+  const choices = q.choices.map(c=>{
+    const sel = selVal===c.char;
+    return `<label class="choice ${sel?"sel":""}" data-testid="q-${q.id}-choice-${c.char}">
+      <input type="radio" name="rq-${q.id}" ${sel?"checked":""} data-action="pick" data-q="${q.id}" data-val="${c.char}" ${isConfirmed?"":""}/>
+      <span class="cchar">${c.char}</span><span>${esc(c.text)}</span></label>`;
+  }).join("");
+  const otherSel = selVal===q.otherChar;
+  const otherRow = `<label class="choice ${otherSel?"sel":""}">
+      <input type="radio" name="rq-${q.id}" ${otherSel?"checked":""} data-action="pick" data-q="${q.id}" data-val="${q.otherChar}"/>
+      <span class="cchar">${q.otherChar}</span><span>기타(직접 입력)</span></label>
+      ${otherSel?`<input class="otherbox" placeholder="직접 입력" value="${esc(edit&&edit.otherText||"")}" data-action="othertext" data-q="${q.id}" data-testid="q-${q.id}-other"/>`:""}`;
+
+  const saveBtn = actionBtn({label:"답변 저장",action:"saveAnswer",data:{q:q.id},cls:"",
+      enabled:canSave&&hasSel&&!isConfirmed, actor:"개발자", testid:`q-${q.id}-save`,
+      reason: !canSave? roleService.reason(role,"saveAnswer") : (!hasSel?"선택하세요":(isConfirmed?"이미 확정됨":""))});
+  const confirmBtn = actionBtn({label:"결정 확정",action:"confirmDecision",data:{q:q.id},cls:"olive",
+      enabled:canConfirm&&isProposed, actor:"결정권자", testid:`q-${q.id}-confirm`,
+      reason: !canConfirm? roleService.reason(role,"confirmDecision") : (!isProposed?"먼저 답변을 저장하세요":"")});
+
+  return `<div class="qcard ${active?"active":""} ${q.blocking?"blocking":"followup"}" id="q-${q.id}" data-testid="qcard-${q.id}">
+    <div class="qcard-head">
+      <div><div class="qtitle">${esc(q.id)} · ${esc(q.title)}</div>
+        <div class="qmeta">${q.blocking?"필수 질문":"후속 질문"} · 결정 ${nm(st,q.decisionOwner)}</div></div>
+      <div class="row">${answerTok(st,q)} ${saveTok(d)}</div>
+    </div>
+    ${q.parentRunId?`<div class="small muted" style="margin-top:6px">↳ 이어서 진행되는 후속 질문입니다</div>`:""}
+    <div>${choices}${otherRow}</div>
+    ${isConfirmed?`<div class="small" style="margin-top:6px;color:#3f6b33">● 확정 — ${nm(st,d.confirmedBy)}</div>`:""}
+    <div class="qcard-actions">${saveBtn}${confirmBtn}</div>
+  </div>`;
+}
+
+// 형식 오류 카드 (AC-12)
+function parseErrorCard(st){
+  const errs = answerParser.errors(st);
+  if(!errs.length) return `<div class="panel"><div class="section-title">질문 형식</div>${tok("","done","✓","형식 오류 없음")}</div>`;
+  return `<div class="panel" style="border-color:#e9b6a6">
+    <h3>⚠ 형식 오류 ${errs.length}건</h3>
+    ${errs.map(e=>`<div class="row spread" style="padding:6px 0;border-bottom:1px solid var(--line)">
+      <div><b>${esc(e.qId)}</b> · ${esc(e.kind)} <span class="small muted">(${esc(e.location)})</span></div>
+      ${actionBtn({label:"오류 수정",action:"fixParse",data:{q:e.qId},cls:"ghost",enabled:true,testid:`fix-${e.qId}`})}
+    </div>`).join("")}
+    <div class="small muted" style="margin-top:8px">해결 전까지 다음 단계로 진행할 수 없어요.</div>
+  </div>`;
+}
+
+// 버전 타임라인 + 과거버전 승인 차단 (AC-4/5)
+function versionTimeline(st,docId){
+  const vs = versionService.versionsOf(st,docId);
+  const cur = st.documents[docId].currentVersion;
+  return `<div class="section-title">버전 이력</div>
+    <div class="vtl">${vs.map(v=>`
+      <div class="vitem ${st.viewingVersion===v.version?"viewing":""}" data-action="viewVersion" data-doc="${docId}" data-v="${v.version}" data-testid="ver-${v.version}">
+        <span class="vv">v${v.version}</span>${verStatusTok(v)}
+        <span class="small muted">${esc(v.createdReason)}</span>
+        ${v.approvedBy?`<span class="small" style="margin-left:auto;color:#3f6b33">승인: ${nm(st,v.approvedBy)} (${esc(v.approvedAt)})</span>`:`<span class="small muted" style="margin-left:auto">${v.version===cur?"현재":""}</span>`}
+      </div>`).join("")}</div>
+    ${st.viewingVersion!==cur?`<div class="disabled-reason" style="margin-top:8px"><span class="ic">⛔</span><span>과거 버전(v${st.viewingVersion})입니다. 최신 v${cur}에서만 승인할 수 있어요. <a href="#" data-action="viewVersion" data-doc="${docId}" data-v="${cur}">최신으로 이동</a></span></div>`:""}`;
+}
+
+// 변경 비교 뷰 (T2)
+function diffView(st){
+  const diff = versionService.getDiff(st,"DOC-U2-FUNC",3);
+  if(st.viewingVersion!==3){
+    return `<div class="section-title">변경 내용</div><div class="empty small">최신 v3에서 변경을 확인하세요.</div>`;
+  }
+  return `<div class="section-title">변경 내용 · v2 → v3</div>
+    <div class="diff" data-testid="diffview">${diff.map(d=>{
+      const sg = d.type==="add"?"+":d.type==="del"?"−":d.type==="mod"?"~":" ";
+      return `<div class="dl ${d.type}"><span class="sg">${sg}</span><span>${esc(d.text)}</span>${d.tag?`<span class="diff-tag">${esc(d.tag)}</span>`:""}</div>`;
+    }).join("")}</div>
+    `;
+}
+
+// 수정 요청 패널 (AC-6/7)
+function revisionPanel(st){
+  const rrs = Object.values(st.revisionRequests);
+  const role = st.activeRole;
+  return `<div class="section-title">관련 수정요청</div>
+  ${rrs.map(rr=>{
+    const isSubmitter = st.users[rr.submitter] && st.users[rr.submitter].role===role;
+    const canConfirm = roleService.can(role,"confirmFix") && rr.state==="수정확인대기";
+    const confirmerMatch = st.users[rr.confirmer] && st.users[rr.confirmer].role===role;
+    let reason="";
+    if(rr.state==="확인완료") reason="이미 확인 완료됨";
+    else if(!roleService.can(role,"confirmFix")) reason=roleService.reason(role,"confirmFix");
+    else if(!confirmerMatch) reason=`요청한 리뷰어(${nm(st,rr.confirmer)})만 확인할 수 있어요`;
+    return `<div class="panel" style="margin-bottom:10px" data-testid="rr-${rr.id}">
+      <div class="spread"><b>${esc(rr.id)} · ${esc(rr.area)}</b>${rrTok(rr)}</div>
+      <div class="small muted" style="margin:6px 0">${esc(rr.note)}</div>
+      <div class="small">제출자 ${nm(st,rr.submitter)} · 수정본 v${rr.fixVersion} · 확인자 ${nm(st,rr.confirmer)}</div>
+      <div class="row" style="margin-top:8px">
+        ${actionBtn({label:"수정 제출",action:"submitFix",data:{rr:rr.id},cls:"ghost",
+            enabled:roleService.can(role,"saveAnswer")&&rr.state==="열림",actor:"개발자",testid:`rr-${rr.id}-submit`,
+            reason: rr.state!=="열림"?"제출됨 · 리뷰어 확인 대기":roleService.reason(role,"saveAnswer")})}
+        ${actionBtn({label:"수정 확인",action:"confirmFix",data:{rr:rr.id},cls:"olive",
+            enabled:canConfirm&&confirmerMatch,actor:"리뷰어",testid:`rr-${rr.id}-confirm`,reason:reason})}
+      </div>
+      ${rr.state==="수정확인대기"?`<div class="small" style="margin-top:6px;color:#8a3f28">⏳ 제출만으로는 해결되지 않아요. 리뷰어 확인이 필요합니다.</div>`:""}
+    </div>`;
+  }).join("")}`;
+}
+
+// AI 실행 인라인 (AC-3/9/10)
+function aiRunPanel(st){
+  const run = st.aiRuns["RUN-U2-03"];
+  const g = aiRunService.canStart(st);
+  const role = st.activeRole;
+  const followUp = st.questions.Q7;
+  const q7confirmed = st.decisions.Q7 && st.decisions.Q7.answerState==="확정됨";
+  return `<div class="panel" data-testid="airun">
+    <div class="spread"><h3>AI 실행</h3>${aiTok(run)}</div>
+    <div class="small muted">입력 v${run.inputVersion.version} · 계획 승인 ${run.planApproved?"완료":"미완료"}</div>
+    <div class="divider"></div>
+    <div class="small"><b>후속 질문 Q7</b> · ${q7confirmed?"확정됨":"답변 필요"}</div>
+    <div class="row" style="margin-top:8px">
+      ${actionBtn({label:"생성 시작",action:"startRun",cls:"mustard",enabled:false,actor:"개발자",testid:"start-run",
+        reason: g.unmet.map(u=>u.label).join(" · ")})}
+      ${actionBtn({label:"이어서 실행",action:"continueRun",cls:"olive",enabled:q7confirmed&&roleService.can(role,"startRun"),actor:"개발자",testid:"continue-run",
+        reason: !q7confirmed?"Q7을 먼저 확정하세요":roleService.reason(role,"startRun")})}
+    </div>
+    
+  </div>`;
+}
+
+// 승인 패널 (문서 승인 게이트)
+function approvalPanel(st){
+  const doc="DOC-U2-FUNC"; const ap=st.approvals[`${doc}@3`]; const role=st.activeRole;
+  const g = gateService.evaluate(st,"문서승인");
+  const canApr = versionService.canApprove(st,doc,st.viewingVersion) && g.passed && roleService.can(role,"approveArtifact");
+  let reason="";
+  if(!roleService.can(role,"approveArtifact")) reason=roleService.reason(role,"approveArtifact");
+  else if(!versionService.canApprove(st,doc,st.viewingVersion)) reason=`최신 v${st.documents[doc].currentVersion}로 이동 후 승인`;
+  else if(!g.passed) reason=g.unmet.map(u=>u.label).join(" · ");
+  const canCk = roleService.can(role,"checklist");
+  return `<div class="section-title">체크리스트 · 승인 ${gateTok(g)}</div>
+    ${ap.checklist.map(c=>`<label class="chk ${c.done?"done":""}" data-testid="ck-${c.key}">
+      <input type="checkbox" ${c.done?"checked":""} ${canCk?"":"disabled"} data-action="toggleCheck" data-k="${c.key}"/>
+      <span>${c.done?"✓":"○"} ${esc(c.label)}</span></label>`).join("")}
+    ${!canCk?`<div class="disabled-reason"><span class="ic">⛔</span><span>${esc(roleService.reason(role,"checklist"))}</span></div>`:""}
+    <div class="row" style="margin-top:10px">
+      ${actionBtn({label:"산출물 승인",action:"approveArtifact",cls:"primary",enabled:canApr,actor:"리뷰어",testid:"approve-artifact",reason:reason})}
+      ${ap.result==="승인"?tok("","done","✓","승인됨"):""}
+    </div>`;
+}
+
+// 게이트 패널 (다음 단계 인계, AC-11)
+function gatePanel(st){
+  const role=st.activeRole;
+  const g = gateService.evaluate(st,"다음단계인계");
+  const canAdv = g.passed && roleService.can(role,"advance");
+  const canExc = roleService.can(role,"exception");
+  const sr = st.srs[st.activeSrId];
+  return `<div class="panel" data-testid="gatepanel">
+    <div class="spread"><h3>다음 단계 → 구현 대기</h3>${gateTok(g)}</div>
+    ${g.passed? `<div class="small" style="color:#3f6b33">모든 조건을 충족했어요 · 구현 대기로 이동합니다</div>`
+      : `<ul class="small" style="margin:8px 0 0;padding-left:18px;color:#8a3f28">${g.unmet.map(u=>`<li>${esc(u.label)}</li>`).join("")}</ul>`}
+    ${sr.exception?`<div class="small" style="margin-top:8px">${tok("","mustard","⚑","예외 진행")} ${esc(sr.exception.reason)} · 실행자 ${nm(st,sr.exception.actor)}</div>`:""}
+    <div class="row" style="margin-top:10px">
+      ${actionBtn({label:"다음 단계로",action:"advance",cls:"primary",enabled:canAdv,actor:"리더/리뷰어",testid:"advance",
+        reason:!roleService.can(role,"advance")?roleService.reason(role,"advance"):g.unmet.map(u=>u.label).join(" · ")})}
+      ${actionBtn({label:"예외 진행",action:"exception",cls:"ghost",enabled:canExc&&!g.passed,actor:"리더 전용",testid:"exception",
+        reason:!canExc?"예외 진행은 리더만 가능해요":"조건 충족 — 예외 불필요"})}
+    </div>
+    
+  </div>`;
+}
+
+function docTree(st){
+  const u=st.units.U2;
+  return `<div class="section-title">문서</div>
+    ${Object.values(st.documents).map(doc=>`
+      <div class="vitem ${st.viewingDoc===doc.id?"viewing":""}" data-action="viewDoc" data-doc="${doc.id}" data-testid="doctree-${doc.id}">
+        <span>📄</span><span>${esc(doc.title)}</span>
+        <span style="margin-left:auto">${verStatusTok(st.docVersions[doc.id+"@"+doc.currentVersion])}</span>
+      </div>`).join("")}
+    <div class="small muted" style="margin-top:8px">${u.facets.filter(f=>f.applicable===false).map(f=>`${f.key}: 해당 없음(${f.reason})`).join(" · ")}</div>`;
+}
+
+function unitTimeline(st){
+  const sr=st.srs[st.activeSrId];
+  return `<div class="section-title">유닛 진행</div>
+    ${sr.unitIds.map(uid=>{const u=st.units[uid];const cur=uid==="U2";
+      return `<div class="vitem ${cur?"viewing":""}" data-testid="unit-${uid}">
+        <span class="vv">${esc(u.name)}</span>
+        ${u.reviewStatus==="승인완료"?tok("","done","✓","완료"):cur?tok("","mustard","◐",u.progress.position):tok("","neutral","○","대기")}
+      </div>`;}).join("")}`;
+}
+
+function handoffContext(st){
+  return `<div class="section-title">인계 정보</div>
+    <div class="small">확정된 결정과 승인 산출물이 구현 담당에게 전달됩니다.</div>`;
+}
+
+/* =================================================================================
+   변형별 중앙 영역 (V1~V4) — 동일 store·위젯, 배치만 상이 (variantController)
+   ================================================================================= */
+function activeQuestions(st){
+  return Object.values(st.questions).filter(q=>!q.parseError);
+}
+function firstUnanswered(st){
+  return activeQuestions(st).find(q=>q.blocking && !(st.decisions[q.id]&&st.decisions[q.id].answerState==="확정됨")) || activeQuestions(st)[0];
+}
+
+const variants = {
+  // V1 — 단일 컬럼 (세로 우선순위 스택). 밀도 중간, 순차 스캔.
+  V1(st){
+    const active = firstUnanswered(st);
+    const qs = activeQuestions(st);
+    const unresolved = qs.filter(q=>q.blocking && !(st.decisions[q.id]&&st.decisions[q.id].answerState==="확정됨")).length;
+    return `<div class="variant-badge">단일 컬럼형 · 위에서 아래로 훑기</div>
+      <div class="v-single">
+        <div class="jump-chips">
+          <span class="chip warn">답할 질문 ${unresolved}</span>
+          <a class="chip" href="#sec-review">변경</a>
+          <a class="chip" href="#sec-rr">수정</a>
+          <a class="chip" href="#sec-gate">진행</a>
+        </div>
+        ${parseErrorCard(st)}
+        <div class="panel" id="sec-q"><div class="section-title">답변할 질문</div>
+          ${qs.map(q=>questionCard(st,q,q.id===active.id)).join("")}
+        </div>
+        <div class="panel" id="sec-review"><h3>변경 검토</h3>
+          ${diffView(st)}<div class="divider"></div>${versionTimeline(st,"DOC-U2-FUNC")}<div class="divider"></div>${approvalPanel(st)}
+        </div>
+        <div class="panel" id="sec-rr">${revisionPanel(st)}</div>
+        ${aiRunPanel(st)}
+        <div id="sec-gate">${gatePanel(st)}</div>
+      </div>`;
+  },
+
+  // V2 — 2-pane 비교 (좌 질문·결정 / 우 변경검토·승인). 동시 대조 강화.
+  V2(st){
+    const qs = activeQuestions(st);
+    const active = firstUnanswered(st);
+    return `<div class="variant-badge">좌우 비교형 · 질문과 변경을 나란히</div>
+      <div class="v2grid" data-testid="v2grid">
+        <div class="pane">
+          ${parseErrorCard(st)}
+          <div class="panel"><div class="section-title">질문·결정</div>
+            ${qs.map(q=>questionCard(st,q,q.id===active.id)).join("")}
+          </div>
+          ${aiRunPanel(st)}
+        </div>
+        <div class="v2divider" data-action="v2drag" title="드래그 또는 ←/→ 로 폭 조절" tabindex="0" role="separator" aria-label="패널 폭 조절"></div>
+        <div class="pane">
+          <div class="panel"><h3>변경 검토·승인</h3>
+            ${diffView(st)}<div class="divider"></div>${versionTimeline(st,"DOC-U2-FUNC")}<div class="divider"></div>${approvalPanel(st)}
+          </div>
+          <div class="panel">${revisionPanel(st)}</div>
+          ${gatePanel(st)}
+        </div>
+      </div>`;
+  },
+
+  // V3 — 3-pane 콕핏 (좌 트리/유닛/역할·정책 / 중 우선순위 카드 / 우 dock 검토·행동). 최고밀도.
+  V3(st){
+    const qs = activeQuestions(st);
+    const active = firstUnanswered(st);
+    const sr=st.srs[st.activeSrId];
+    return `<div class="variant-badge">콕핏형 · 한 화면에 3분할</div>
+      <div class="v3grid" data-testid="v3grid">
+        <div class="col">
+          <div class="panel">${docTree(st)}</div>
+          <div class="panel">${unitTimeline(st)}</div>
+          <div class="panel"><div class="section-title">역할 · 정책</div>
+            <div class="small muted">현재 역할: <b>${esc(st.activeRole)}</b></div>
+            <div class="small" style="margin-top:6px">승인 정책: <b>${esc(sr.policyConfig.policy)}</b> · 리뷰어 ${sr.policyConfig.reviewerSet.map(u=>nm(st,u)).join(", ")}</div>
+            
+          </div>
+        </div>
+        <div class="col">
+          ${parseErrorCard(st)}
+          <div class="panel"><div class="section-title">질문</div>
+            ${qs.map(q=>questionCard(st,q,q.id===active.id)).join("")}
+          </div>
+          ${aiRunPanel(st)}
+        </div>
+        <div class="col">
+          <div class="dock">
+            <div class="panel"><h3>변경 검토</h3>
+              ${diffView(st)}<div class="divider"></div>${versionTimeline(st,"DOC-U2-FUNC")}
+            </div>
+            <div class="panel">${approvalPanel(st)}
+              <div class="divider"></div>
+              <div class="section-title">작업</div>
+              <div class="small muted">답변 저장은 왼쪽 카드에서 합니다.</div>
+            </div>
+            <div class="panel">${revisionPanel(st)}</div>
+            ${gatePanel(st)}
+          </div>
+        </div>
+      </div>`;
+  },
+
+  // V4 — 점진 공개 (위저드: 한 번에 한 카드 + 서랍). 최저밀도, 최고 집중.
+  V4(st){
+    const steps=[
+      {k:"answer",lb:"① 답변"},{k:"confirm",lb:"② 확정"},{k:"plan",lb:"③ 계획"},
+      {k:"review",lb:"④ 검토"},{k:"revision",lb:"⑤ 수정"},{k:"gate",lb:"⑥ 인계"},
+    ];
+    const cur=st.v4Step;
+    const qs=activeQuestions(st);
+    const active=firstUnanswered(st);
+    const idx=steps.findIndex(s=>s.k===cur);
+    let card="";
+    if(cur==="answer"){ card=`<div class="panel"><div class="section-title">답변할 질문</div>${parseErrorCard(st)}${questionCard(st,active,true)}</div>`; }
+    else if(cur==="confirm"){ card=`<div class="panel"><div class="section-title">결정 확정</div>${qs.map(q=>questionCard(st,q,false)).join("")}</div>`; }
+    else if(cur==="plan"){ card=aiRunPanel(st); }
+    else if(cur==="review"){ card=`<div class="panel"><h3>변경 검토·승인</h3>${diffView(st)}<div class="divider"></div>${versionTimeline(st,"DOC-U2-FUNC")}<div class="divider"></div>${approvalPanel(st)}</div>`; }
+    else if(cur==="revision"){ card=`<div class="panel">${revisionPanel(st)}</div>`; }
+    else if(cur==="gate"){ card=gatePanel(st); }
+    return `<div class="variant-badge">집중형 · 단계별로 하나씩</div>
+      <div class="step-strip" data-testid="v4steps">
+        ${steps.map((s,i)=>`<button class="step ${s.k===cur?"active":""} ${i<idx?"done":""}" data-action="v4step" data-step="${s.k}" data-testid="v4step-${s.k}">${esc(s.lb)}</button>`).join("")}
+      </div>
+      <div class="focus-card">
+        ${card}
+        <div class="row" style="margin-top:10px">
+          <button class="btn ghost" data-action="drawer" data-type="context" data-testid="open-drawer">☰ 맥락 보기</button>
+        </div>
+        <div class="wiz-nav">
+          <button class="btn ghost" data-action="v4step" data-step="${steps[Math.max(0,idx-1)].k}" ${idx===0?"disabled":""}>← 이전</button>
+          <button class="btn" data-action="v4step" data-step="${steps[Math.min(steps.length-1,idx+1)].k}" ${idx===steps.length-1?"disabled":""}>다음 →</button>
+        </div>
+      </div>`;
+  }
+};
+
+/* =================================================================================
+   셸 렌더 (사이드바 · 보드 · 인박스 · 상세) + 루트 render()
+   ================================================================================= */
+function sidebar(st){
+  const inboxCount = 3;
+  return `<aside class="sidebar">
+    <div class="brand"><span class="dot"></span>PlanRepo</div>
+    <div class="brand-sub">SR 설계 워크벤치 · 목업</div>
+    <div class="nav-group-label">화면</div>
+    <button class="nav-item ${st.view==="board"?"active":""}" data-action="nav" data-view="board" data-testid="nav-board"><span class="ico">▦</span>보드</button>
+    <button class="nav-item ${st.view==="inbox"?"active":""}" data-action="nav" data-view="inbox" data-testid="nav-inbox"><span class="ico">▤</span>검토 인박스<span class="count">${inboxCount}</span></button>
+    <button class="nav-item ${st.view==="detail"?"active":""}" data-action="nav" data-view="detail" data-testid="nav-detail"><span class="ico">▧</span>SR 상세 (SR-1024)</button>
+
+    <div class="nav-group-label">화면 구성 (비교)</div>
+    <select class="side-select" data-action="variant" data-testid="variant-select" aria-label="화면 구성 선택">
+      ${[["V1","V1 · 단일 컬럼"],["V2","V2 · 좌우 비교"],["V3","V3 · 콕핏(3분할)"],["V4","V4 · 집중 진행"]]
+        .map(([v,l])=>`<option value="${v}" ${st.activeVariant===v?"selected":""}>${l}</option>`).join("")}
+    </select>
+    <div class="small muted side-block">같은 데이터, 배치만 다른 4가지 안</div>
+
+    <div class="nav-group-label">역할 전환 (데모)</div>
+    <select class="side-select" data-action="role" data-testid="role-select" aria-label="역할 선택">
+      ${roleService.ROLES.map(r=>`<option value="${r}" ${st.activeRole===r?"selected":""}>${r}</option>`).join("")}
+    </select>
+    <div class="small muted side-block">역할에 따라 가능한 작업이 달라집니다</div>
+
+    <div class="nav-group-label">데모</div>
+    <button class="nav-item" data-action="reset" data-testid="reset-nav"><span class="ico">↺</span>처음 상태로 초기화</button>
+  </aside>`;
+}
+
+function boardView(st){
+  const cols=[["SR접수","접수"],["Inception","Inception"],["Construction설계","Construction 설계"],["구현대기","구현 대기"]];
+  const stageIcon={"SR접수":"neutral·○","Inception":"mustard·◐","Construction설계":"rust·◑","구현대기":"done·✓"};
+  return `<div class="content" id="main">
+    <div class="spread" style="margin-bottom:14px"><h1 style="font-size:20px">보드</h1>
+      <span class="small muted">SR별 진행 단계</span></div>
+    <div class="board">${cols.map(([stage,label])=>{
+      const items=Object.values(st.srs).filter(s=>s.stage===stage);
+      return `<div class="bcol"><h4>${esc(label)}<span class="n">${items.length}</span></h4>
+        ${items.map(s=>srCard(st,s)).join("")||`<div class="small muted" style="padding:8px">없음</div>`}</div>`;
+    }).join("")}</div>
+  </div>`;
+}
+function srCard(st,s){
+  const facets = s.unitIds.map(uid=>{const u=st.units[uid];
+    return u.reviewStatus==="승인완료"?tok("","done","✓",u.name):
+           u.reviewStatus==="답변필요"?tok("","rust","!",u.name):tok("","mustard","◐",u.name);}).join(" ");
+  return `<div class="srcard" data-action="openSr" data-sr="${s.id}" data-testid="srcard-${s.id}">
+    <div class="t">${esc(s.id)} · ${esc(s.title)}</div>
+    <div class="small muted" style="margin-top:3px">담당 ${nm(st,s.assignee)} · ${esc(s.refs.jira||"")}</div>
+    ${facets?`<div class="facets">${facets}</div>`:""}
+    ${s.blockReason?`<div class="blk">⛔ ${esc(s.blockReason)}</div>`:`<div class="small" style="margin-top:7px;color:#3f6b33">✓ 차단 없음</div>`}
+  </div>`;
+}
+
+function inboxView(st){
+  const filters=["전체","승인 대기","수정요청","답변 필요"];
+  const items=[
+    {id:"DOC-U2-FUNC@3",title:"U2 메뉴 기능 설계서 v3 — 산출물 승인 검토",sub:"변경 3건 · 미확정 2건 · 형식 오류 2건",cat:"승인 대기"},
+    {id:"RR-2",title:"RR-2 수정요청 확인 — 옵션 처리 문단",sub:"제출자 김도현 · 수정본 v3 · 확인자 박민지",cat:"수정요청"},
+    {id:"Q2Q3",title:"U2 메뉴 — 답변할 질문 (Q2·Q3)",sub:"결정권자 이서준",cat:"답변 필요"},
+  ];
+  const shown=st.inboxFilter==="전체"?items:items.filter(i=>i.cat===st.inboxFilter);
+  return `<div class="content" id="main">
+    <div class="spread" style="margin-bottom:14px"><h1 style="font-size:20px">검토 인박스</h1>
+      <span class="small muted">지금 내 확인이 필요한 항목</span></div>
+    <div class="tabs">${filters.map(f=>`<button class="tab ${st.inboxFilter===f?"active":""}" data-action="inboxFilter" data-f="${f}" data-testid="inbox-tab-${f}">${f}</button>`).join("")}</div>
+    ${shown.length?shown.map(i=>`<div class="irow" data-action="openSr" data-sr="SR-1024" data-testid="inbox-${i.id}">
+        <span style="font-size:20px">${i.cat==="승인 대기"?"📋":i.cat==="수정요청"?"✎":"❓"}</span>
+        <div class="ir-main"><div class="ir-title">${esc(i.title)}</div><div class="ir-sub">${esc(i.sub)}</div></div>
+        <span class="btn ghost small">열기 →</span>
+      </div>`).join("")
+      :`<div class="empty">'${esc(st.inboxFilter)}' 항목이 없습니다.</div>`}
+  </div>`;
+}
+
+function topbar(st){
+  const sr=st.srs[st.activeSrId]; const u=st.units[st.activeUnitId];
+  const need=reviewService.needNow(st);
+  return `<div class="topbar" data-testid="topbar">
+    <div class="crumbs">보드 › ${esc(sr.stage)} › ${esc(sr.id)} › ${esc(u.name)} 유닛</div>
+    <div class="tb-title">${esc(sr.id)} · ${esc(sr.title)}</div>
+    <div class="tb-grid">
+      <div class="kv"><div class="k">현재 작업</div><div class="v">${esc(u.name)} 유닛 · ${esc(u.progress.position)}</div></div>
+      <div class="kv"><div class="k">담당자</div><div class="v">${nm(st,sr.assignee)}</div></div>
+      <div class="kv"><div class="k">검토 상태</div><div class="v">${esc(u.reviewStatus)}</div></div>
+      <div class="kv"><div class="k">AI 상태</div><div class="v">${esc(u.aiStatus)}</div></div>
+    </div>
+    <div class="need-now" data-testid="neednow"><span class="lb">지금 필요한 행동:</span> ${esc(need.label)}
+      ${sr.blockReason?`<span class="small muted">· 차단: ${esc(sr.blockReason)}</span>`:""}</div>
+  </div>`;
+}
+
+function detailView(st){
+  return `<div class="content" id="main">
+    ${topbar(st)}
+    ${variants[st.activeVariant](st)}
+  </div>`;
+}
+
+function drawer(st){
+  if(!st.drawerOpen) return "";
+  return `<div class="scrim" data-action="closeDrawer"></div>
+    <div class="drawer" role="dialog" aria-modal="true" aria-label="맥락 서랍" data-testid="drawer">
+      <div class="drawer-head"><b>맥락</b>
+        <button class="icon-btn" data-action="closeDrawer" aria-label="닫기" data-testid="close-drawer">✕</button></div>
+      <div class="drawer-body">
+        <div class="panel">${docTree(st)}</div>
+        <div class="panel">${versionTimeline(st,"DOC-U2-FUNC")}</div>
+        <div class="panel">${revisionPanel(st)}</div>
+        <div class="panel">${handoffContext(st)}</div>
+      </div>
+    </div>`;
+}
+
+function render(){
+  const st=store.get();
+  // 스크롤 위치 보존 (targeted-render 근사)
+  const scrollMap={};
+  document.querySelectorAll("[data-scroll]").forEach(el=>scrollMap[el.getAttribute("data-scroll")]=el.scrollTop);
+  const app=document.getElementById("app");
+  const body = st.view==="board"?boardView(st): st.view==="inbox"?inboxView(st): detailView(st);
+  app.innerHTML=`<div class="app">${sidebar(st)}<div class="main">
+    <div class="reset-banner" data-testid="reset-banner">↺ 데모 화면입니다 · 새로고침하면 처음 상태로 돌아갑니다
+      <button data-action="reset">지금 초기화</button></div>
+    ${body}</div></div>${drawer(st)}`;
+  document.querySelectorAll("[data-scroll]").forEach(el=>{if(scrollMap[el.getAttribute("data-scroll")]!=null)el.scrollTop=scrollMap[el.getAttribute("data-scroll")];});
+  // aria-live
+  if(st.announce){ document.getElementById("live").textContent=st.announce; }
+  // toast
+  const tr=document.getElementById("toast-root");
+  tr.innerHTML = st.toast?`<div class="toast" role="status">${esc(st.toast)}</div>`:"";
+}
+
+/* =================================================================================
+   이벤트 위임 — #app 컨테이너에 위임(리스너 재부착 불필요)
+   ================================================================================= */
+function announce(st,msg){ st.announce=msg; }
+function toast(msg){ store.set(s=>s.toast=msg); setTimeout(()=>store.set(s=>{if(s.toast===msg)s.toast=null;}),2200); }
+
+function handleAction(action, ds){
+  const st=store.get();
+  switch(action){
+    case "nav": store.set(s=>{s.view=ds.view;}); break;
+    case "openSr": store.set(s=>{s.view="detail";s.activeSrId="SR-1024";s.activeUnitId="U2";}); break;
+    case "variant": break; // select 처리는 change 이벤트
+    case "inboxFilter": store.set(s=>s.inboxFilter=ds.f); break;
+    case "viewVersion": store.set(s=>{s.viewingDoc=ds.doc;s.viewingVersion=parseInt(ds.v,10);announce(s,`v${ds.v} 열람`);}); break;
+    case "viewDoc": store.set(s=>{s.viewingDoc=ds.doc;s.viewingVersion=s.documents[ds.doc].currentVersion;}); break;
+    case "pick": store.set(s=>{
+        const q=ds.q, val=ds.val;
+        s.editing[q]=s.editing[q]||{value:null,otherText:""};
+        s.editing[q].value=val;
+        // 편집 중이면 기존 확정/제안을 편집중으로 표기
+        if(!s.decisions[q]) s.decisions[q]={questionId:q,answerState:"편집중",answerValue:val,saveState:"미저장",otherText:"",source:"사람확정",history:[]};
+        else { s.decisions[q].answerState="편집중"; s.decisions[q].saveState="미저장"; s.decisions[q].answerValue=val; }
+        announce(s,`${q} 선택 ${val} — 아직 저장 전`);
+      }); break;
+    case "othertext": store.set(s=>{s.editing[ds.q]=s.editing[ds.q]||{value:"X",otherText:""};s.editing[ds.q].otherText=ds.value;}); break;
+    case "saveAnswer": store.set(s=>{
+        const q=ds.q; const ed=s.editing[q]||{};
+        s.decisions[q]=s.decisions[q]||{questionId:q,history:[],source:"사람확정"};
+        s.decisions[q].answerState="제안됨"; s.decisions[q].saveState="저장됨";
+        s.decisions[q].answerValue=ed.value; s.decisions[q].otherText=ed.otherText||"";
+        announce(s,`${q} 답변 저장(제안됨) — 확정·승인 아님`);
+      }); toast("답변 저장됨 (제안 상태)"); break;
+    case "confirmDecision": store.set(s=>{
+        const q=ds.q; const d=s.decisions[q];
+        if(!d||d.answerState!=="제안됨") return;
+        d.answerState="확정됨"; d.confirmedBy="u_dec"; d.confirmedAt="D3 11:05";
+        d.history.push({value:d.answerValue,confirmedBy:"u_dec",at:"D3 11:05"});
+        // 문서 Answer 갱신(초안 누적) — 승인본 보존
+        versionService.confirmToDoc(s, s.questions[q], d.answerValue);
+        announce(s,`${q} 결정 확정 — 문서 반영, 새 승인 필요`);
+      }); toast("결정 확정됨"); break;
+    case "fixParse": store.set(s=>{
+        s.questions[ds.q].parseError=null; announce(s,`${ds.q} 형식 오류 수정됨`);
+        // 수정 후 재검증: 오류 제거로 게이트 unmet 감소
+      }); toast(`${ds.q} 형식 오류 수정됨`); break;
+    case "submitFix": store.set(s=>{const rr=s.revisionRequests[ds.rr];rr.state="수정확인대기";rr.submitter="u_dev";rr.fixVersion=3;announce(s,`${ds.rr} 수정본 제출 — 여전히 차단(확인 필요)`);}); toast("수정 제출됨 · 리뷰어 확인 대기"); break;
+    case "confirmFix": store.set(s=>{const rr=s.revisionRequests[ds.rr];rr.state="확인완료";rr.blocking=false;announce(s,`${ds.rr} 수정 확인 완료 — 차단 해제`);}); toast("수정 확인 완료"); break;
+    case "toggleCheck": store.set(s=>{const c=s.approvals["DOC-U2-FUNC@3"].checklist.find(x=>x.key===ds.k);c.done=!c.done;}); break;
+    case "approveArtifact": store.set(s=>{
+        const ap=s.approvals["DOC-U2-FUNC@3"];ap.result="승인";ap.approver="u_rev";ap.approvedAt="D3 14:30";
+        const dv=s.docVersions["DOC-U2-FUNC@3"];dv.status="승인";dv.approvedBy="u_rev";dv.approvedAt="D3 14:30";dv.staleReview=false;
+        s.units.U2.reviewStatus="승인완료";
+        announce(s,"기능 설계서 v3 승인 완료");
+      }); toast("산출물 승인 완료 (v3)"); break;
+    case "continueRun": store.set(s=>{const r=s.aiRuns["RUN-U2-03"];r.status="초안준비";announce(s,"후속 답변 반영 — 실행 이어감(초안 준비)");}); toast("이어서 실행 중"); break;
+    case "startRun": break; // 가드로 항상 비활성 상태에서 표시
+    case "advance": store.set(s=>{s.srs["SR-1024"].stage="구현대기";s.units.U2.progress.position="구현 대기";announce(s,"다음 단계로 — 구현 대기 (Git 쓰기 없음)");}); toast("구현 대기로 이동했습니다"); break;
+    case "exception": store.set(s=>{s.srs["SR-1024"].exception={gate:"다음단계인계",reason:"긴급 데모 — 리더 예외 진행",actor:"u_lead"};announce(s,"리더 예외 진행 기록됨");}); toast("예외 진행 기록됨"); break;
+    case "v4step": store.set(s=>s.v4Step=ds.step); break;
+    case "drawer": store.set(s=>{s.drawerOpen=true;s.drawerType=ds.type;}); setTimeout(()=>{const d=document.querySelector(".drawer .icon-btn");if(d)d.focus();},0); break;
+    case "closeDrawer": store.set(s=>s.drawerOpen=false); break;
+    case "reset": store.reset(); toast("처음 상태로 초기화됨"); break;
+  }
+}
+
+document.getElementById("app").addEventListener("click",e=>{
+  const t=e.target.closest("[data-action]");
+  if(!t) return;
+  const action=t.getAttribute("data-action");
+  if(["variant","role","othertext","pick","toggleCheck"].includes(action)) return; // change/handled 별도
+  e.preventDefault();
+  const ds={}; for(const a of t.attributes){ if(a.name.startsWith("data-")) ds[a.name.slice(5)]=a.value; }
+  handleAction(action,ds);
+});
+document.getElementById("app").addEventListener("change",e=>{
+  const t=e.target.closest("[data-action]"); if(!t) return;
+  const action=t.getAttribute("data-action");
+  const ds={}; for(const a of t.attributes){ if(a.name.startsWith("data-")) ds[a.name.slice(5)]=a.value; }
+  if(action==="variant"){ store.set(s=>{s.activeVariant=t.value;}); }
+  else if(action==="role"){ store.set(s=>{s.activeRole=t.value; announce(s,`역할 전환: ${t.value}`);}); }
+  else if(action==="pick"){ handleAction("pick",ds); }
+  else if(action==="othertext"){ ds.value=t.value; handleAction("othertext",ds); }
+  else if(action==="toggleCheck"){ handleAction("toggleCheck",ds); }
+});
+// Esc로 서랍 닫기 + 포커스 트랩 근사
+document.addEventListener("keydown",e=>{
+  const st=store.get();
+  if(e.key==="Escape" && st.drawerOpen){ store.set(s=>s.drawerOpen=false); }
+  // V2 divider 키보드 폭 조절
+  if(document.activeElement && document.activeElement.getAttribute&&document.activeElement.getAttribute("data-action")==="v2drag"){
+    if(e.key==="ArrowLeft"||e.key==="ArrowRight"){
+      e.preventDefault();
+      const cur=parseInt(getComputedStyle(document.documentElement).getPropertyValue("--v2split"))||50;
+      const next=Math.min(75,Math.max(30,cur+(e.key==="ArrowRight"?4:-4)));
+      document.documentElement.style.setProperty("--v2split",next+"%");
+    }
+  }
+});
+// V2 divider 드래그
+document.getElementById("app").addEventListener("pointerdown",e=>{
+  const d=e.target.closest('[data-action="v2drag"]'); if(!d) return;
+  const grid=d.closest(".v2grid"); const rect=grid.getBoundingClientRect();
+  const move=ev=>{ let pct=((ev.clientX-rect.left)/rect.width)*100; pct=Math.min(75,Math.max(30,pct));
+    document.documentElement.style.setProperty("--v2split",pct+"%"); };
+  const up=()=>{document.removeEventListener("pointermove",move);document.removeEventListener("pointerup",up);};
+  document.addEventListener("pointermove",move);document.addEventListener("pointerup",up);
+});
+
+/* =================================================================================
+   INIT
+   ================================================================================= */
+store.subscribe(()=>render());
+store.init();
+render();
+</script>
+</body>
+</html>

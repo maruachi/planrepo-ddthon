@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f2eb">
+  <title>AI DLC Workbench · Autumn</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip" href="#main">본문으로 이동</a>
+  <aside class="sidebar">
+    <a class="brand" href="#board"><span class="brand-mark">w.</span><span>Workbench<small>AI DEVELOPMENT LIFECYCLE</small></span></a>
+    <div class="workspace-label">WORKSPACE</div>
+    <nav aria-label="주 메뉴">
+      <a href="#board" data-nav="board"><span>▦</span> AI DLC Board</a>
+      <a href="#inbox" data-nav="inbox"><span>▤</span> 내 검토함 <b id="inbox-count"></b></a>
+      <a href="#list" data-nav="list"><span>☷</span> SR 목록</a>
+      <a href="#settings" data-nav="settings"><span>⚙</span> 설정</a>
+    </nav>
+    <div class="sidebar-note"><span class="small-label">CONNECTED WORKFLOW</span><p>요구사항부터 코드까지,<br>하나의 작업 맥락으로.</p><div><span class="status-dot"></span> Jira · GitHub · Claude Code</div></div>
+    <div class="profile"><span class="avatar">지</span><div><strong>이지은</strong><small>리뷰어 · 결제 도메인 리더</small></div><span>⌄</span></div>
+  </aside>
+  <div class="shell">
+    <header class="topbar"><div><span class="muted">프로젝트</span><select id="project" aria-label="프로젝트 선택"><option value="all">Commerce Platform</option><option value="PAY">Payments</option><option value="AUTH">Identity</option></select><span class="top-divider">/</span><span class="repo">⑂ commerce/platform</span></div><div><span class="demo">INTERACTIVE MOCKUP</span><a href="#inbox" class="notification" aria-label="알림 및 내 검토함">♧<i></i></a><span class="avatar tiny">지</span></div></header>
+    <main id="main" tabindex="-1"></main>
+    <footer>AI DLC Workbench <span>가을 팔레트 · UI 시안 · 모든 연동은 예시 데이터</span></footer>
+  </div>
+  <dialog id="dialog" aria-labelledby="dialog-title"><div class="dialog-head"><h2 id="dialog-title"></h2><button data-action="close" aria-label="닫기">×</button></div><div id="dialog-body"></div></dialog>
+  <div id="toast" role="status" hidden></div>
+  <script src="app.js"></script>
+</body>
+</html>
