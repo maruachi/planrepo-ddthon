@@ -53,3 +53,16 @@ test('receipt survives reopening with exact original result and replay protectio
   const receipt = unwrap(t.store.commit(c)); t.db.close(); const db = openDatabase(t.path); const store = new SQLiteStore(db);
   try { expect(unwrap(store.commit(c))).toEqual(receipt); expect(unwrap(store.read({ kind: 'receipt', operationId: c.command.operationId }))).toMatchObject({ ...receipt, fingerprint: 'persisted' }); } finally { db.close(); }
 });
+test('manual board movement is atomic, persistent and independent from workflow_column', () => {
+  const t = setup(); const operationId = randomUUID(); const c = emptyChanges();
+  c.requireSrs.push(t.sr.id); c.boardMovement = { srId: t.sr.id, expectedColumn: 'sr_list', targetColumn: 'requirements_analysis' };
+  c.command = { operationId, kind: 'move_board', fingerprint: 'move' }; c.outcome = { kind: 'move_board', srId: t.sr.id, changed: true };
+  expect(unwrap(t.store.commit(c))).toMatchObject({ operationId, kind: 'move_board' });
+  expect(unwrap(t.store.read({ kind: 'boardItem', srId: t.sr.id })).column).toBe('requirements_analysis');
+  expect(unwrap(t.store.read({ kind: 'sr', srId: t.sr.id })).column).toBe('sr_list');
+  const stale = emptyChanges(); stale.requireSrs.push(t.sr.id); stale.boardMovement = { srId: t.sr.id, expectedColumn: 'sr_list', targetColumn: 'requirements_analysis' };
+  expect(t.store.commit(stale)).toMatchObject({ ok: false, error: { code: 'WORKFLOW_CONFLICT' } });
+  t.db.close(); const db = openDatabase(t.path); const store = new SQLiteStore(db);
+  try { expect(unwrap(store.read({ kind: 'boardItem', srId: t.sr.id })).column).toBe('requirements_analysis'); expect(unwrap(store.commit(c))).toMatchObject({ operationId }); }
+  finally { db.close(); }
+});

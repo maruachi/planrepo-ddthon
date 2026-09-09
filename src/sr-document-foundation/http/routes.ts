@@ -1,7 +1,7 @@
 import express, { Router, type Request } from 'express';
 import { AUTHOR, type VersionRef } from '../../shared/contracts.js';
 import { fail } from '../../shared/errors.js';
-import { LIMITS } from '../../shared/limits.js';
+import { COLUMNS, LIMITS, type Column } from '../../shared/limits.js';
 import { id, object, text } from '../../shared/validation.js';
 import type { LocalAppBoundary } from './boundary.js';
 import { errorHandler, sendResult } from './error-handler.js';
@@ -10,6 +10,11 @@ import type { PlanningService } from '../../aidlc-planning/services/planning-ser
 import { planningRoutes } from '../../aidlc-planning/http/planning-routes.js';
 import type { Router as ExpressRouter } from 'express';
 const param = (r: Request, name: string) => id(r.params[name], name);
+const column = (value: unknown, field: string): Column => {
+  const candidate = text(value, field);
+  if (!COLUMNS.some(([key]) => key === candidate)) fail('VALIDATION_ERROR', '올바른 보드 상태가 필요합니다.', { field });
+  return candidate as Column;
+};
 const ref = (r: Request, version: unknown): VersionRef => ({ srId: param(r, 'srId'), documentId: param(r, 'documentId'), versionId: id(version, 'versionId') });
 export function routes(boundary: LocalAppBoundary, planning?: PlanningService, review?: ExpressRouter, worktreeSpike?: ExpressRouter): Router {
   const router = Router();
@@ -27,8 +32,13 @@ export function routes(boundary: LocalAppBoundary, planning?: PlanningService, r
   router.get('/config', async (_req, res) => sendResult(res, await boundary.query({ kind: 'config' })));
   router.get('/board', async (req, res) => sendResult(res, await boundary.query({ kind: 'board', options: pageOptions(req.query) })));
   router.post('/srs', async (req, res) => sendResult(res, await boundary.command({ kind: 'create', input: srDraft(req.body) }, AUTHOR, id(req.get('X-Operation-Id'))), 201));
+  router.post('/srs/:srId/board-movements', async (req, res) => {
+    const b = object(req.body, ['expectedColumn', 'targetColumn']);
+    sendResult(res, await boundary.command({ kind: 'move_board', srId: param(req, 'srId'), expectedColumn: column(b.expectedColumn, 'expectedColumn'), targetColumn: column(b.targetColumn, 'targetColumn') }, AUTHOR, id(req.get('X-Operation-Id'))));
+  });
   router.get('/operations/:operationId', async (req, res) => sendResult(res, await boundary.query({ kind: 'operation', operationId: param(req, 'operationId') })));
   router.get('/srs/:srId', async (req, res) => sendResult(res, await boundary.query({ kind: 'sr', srId: param(req, 'srId') })));
+  router.get('/srs/:srId/board-item', async (req, res) => sendResult(res, await boundary.query({ kind: 'boardItem', srId: param(req, 'srId') })));
   router.get('/srs/:srId/documents', async (req, res) => sendResult(res, await boundary.query({ kind: 'documents', srId: param(req, 'srId'), options: pageOptions(req.query) })));
   router.get('/srs/:srId/documents/:documentId/versions', async (req, res) => sendResult(res, await boundary.query({ kind: 'versions', srId: param(req, 'srId'), documentId: param(req, 'documentId'), options: pageOptions(req.query) })));
   router.get('/srs/:srId/documents/:documentId/versions/:versionId', async (req, res) => sendResult(res, await boundary.query({ kind: 'version', target: ref(req, req.params.versionId) })));

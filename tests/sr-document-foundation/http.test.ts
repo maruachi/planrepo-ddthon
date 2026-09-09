@@ -32,3 +32,19 @@ test('HTTP rejects malformed/oversized input and preserves stored data', async (
     expect(unwrap(t.sr.listBoard()).items).toEqual([]);
   } finally { await t.stop(); }
 });
+test('HTTP manually moves one adjacent board column with idempotent replay and strict validation', async () => {
+  const t = await testServer(); try {
+    const created = (await (await t.post('/api/srs', { title: '이동 대상', description: '설명' })).json()).data;
+    const operationId = randomUUID(); const path = `/api/srs/${created.id}/board-movements`;
+    const first = await t.post(path, { expectedColumn: 'sr_list', targetColumn: 'requirements_analysis' }, operationId);
+    expect(first.status).toBe(200); expect((await first.json()).data.column).toBe('requirements_analysis');
+    expect((await (await fetch(t.base + `/api/srs/${created.id}/board-item`)).json()).data.column).toBe('requirements_analysis');
+    const replay = await t.post(path, { expectedColumn: 'sr_list', targetColumn: 'requirements_analysis' }, operationId);
+    expect(replay.status).toBe(200); expect((await replay.json()).data.column).toBe('requirements_analysis');
+    expect((await (await fetch(t.base + `/api/srs/${created.id}`)).json()).data.column).toBe('sr_list');
+    expect((await t.post(path, { expectedColumn: 'sr_list', targetColumn: 'requirements_analysis' })).status).toBe(409);
+    expect((await t.post(path, { expectedColumn: 'requirements_analysis', targetColumn: 'implemented' })).status).toBe(400);
+    expect((await t.post(path, { expectedColumn: 'requirements_analysis', targetColumn: 'inception', extra: true })).status).toBe(400);
+    expect((await t.post(path, { expectedColumn: 'invalid', targetColumn: 'inception' })).status).toBe(400);
+  } finally { await t.stop(); }
+});

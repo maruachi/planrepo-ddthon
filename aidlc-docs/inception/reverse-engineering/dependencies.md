@@ -12,6 +12,9 @@ flowchart LR
     SQLite[SQLite Adapter]
     Worker[Diff Worker]
     Runner[Claude Runner]
+    Worktree[Worktree Spike]
+    Git[System Git]
+    Files[Managed Worktree Files]
     App --> HTTP
     App --> Services
     UI --> Ports
@@ -21,9 +24,15 @@ flowchart LR
     Services --> SQLite
     Services --> Worker
     Services --> Runner
+    App --> Worktree
+    Worktree --> Ports
+    Worktree --> SQLite
+    Worktree --> Git
+    Worktree --> Files
+    Worktree --> Runner
 ```
 
-Text alternative: the composition root constructs routes and services. UI and HTTP use shared contracts. Services depend on ports, with SQLite, the diff worker, and Claude runner as adapters.
+Text alternative: the composition root constructs legacy and worktree-spike routes/services. UI and HTTP use shared contracts. Legacy services depend on SQLite, the diff worker, and Claude runner adapters. The worktree spike additionally depends on the SQLite database boundary, system Git, managed worktree files, and a worktree-specific Claude runner.
 
 ### Application shell depends on all feature packages
 
@@ -39,6 +48,16 @@ Text alternative: the composition root constructs routes and services. UI and HT
 
 - **Type**: compile and runtime.
 - **Reason**: review validates exact document versions and uses SR workflow/column state.
+
+### Worktree spike depends on shared validation and the foundation database
+
+- **Type**: compile and runtime.
+- **Reason**: the feature reuses common result/error/limit validation, mounts through the foundation route composition, and persists schema-v7 worktree state, reviews and document history through the existing database connection. It does not use the legacy `StorePort` transaction algebra for every worktree mutation.
+
+### Worktree spike depends on system process and filesystem services
+
+- **Type**: runtime.
+- **Reason**: system Git provisions/reuses the SR worktree; Node filesystem/crypto APIs parse state, capture manifests, and hash-check changed Markdown; Claude Code runs with the worktree as its current directory.
 
 ### UI packages depend on shared browser clients
 
@@ -65,6 +84,7 @@ Text alternative: the composition root constructs routes and services. UI and HT
 | `typescript` | 7.0.2 | Static compilation/checking. | Apache-2.0 |
 | `vite` | 8.2.2 | Browser development/build. | MIT |
 | `vitest` | 5.0.0 | Tests. | MIT |
+| `fast-check` | 4.9.0 | Property-based manifest tests. | MIT |
 | `tsx` | 4.23.13 | Development TypeScript execution. | MIT |
 | `@vitejs/plugin-react` | 6.1.1 | Vite React support. | MIT |
 | `@types/*` direct packages | pinned | Type declarations for Node, React, Express, and SQLite. | MIT |
@@ -75,17 +95,23 @@ License values above were read from the committed lockfile package entries.
 
 ### Claude Code CLI
 
-- **Version**: not pinned by the application.
-- **Purpose**: generate planning results.
-- **Invocation**: subprocess without shell interpolation.
-- **Current constraints**: user settings are permitted for provider credentials, while tools, hooks, MCP, project settings, slash commands, and session persistence are disabled.
-- **Enhancement impact**: the runner contract must add worktree identity, profile policy, allowed project capabilities, session/transcript metadata, partial-output collection, and Git-write enforcement.
+- **Version**: not pinned by the application; 2.1.266 was observed during the 2026-09-09 refresh.
+- **Purpose**: generate legacy planning results and resume AI-DLC inside a managed worktree.
+- **Invocation**: runners spawn subprocesses without shell interpolation; the worktree runner passes the exact resume prompt and worktree current directory.
+- **Available local capabilities**: `--session-id` and `--resume` preserve a conversation; print mode supports realtime `stream-json` input/output, partial messages and replayed user messages.
+- **Current constraints**: the worktree runner invokes only `claude -p`, ends stdin immediately after the resume prompt, buffers stdout until close, drops stderr text, and persists neither session identity nor transcript. Claude cannot receive a follow-up answer from the browser during a run.
 
-## Missing Dependencies or Abstractions for Worktree Integration
+### System Git
 
-- No Git command adapter or worktree lifecycle abstraction.
+- **Version**: environment-provided; not pinned by the application.
+- **Purpose**: validate repositories, list worktrees, resolve refs, and create/reuse deterministic SR branches/worktrees.
+- **Invocation**: subprocess argument arrays accepted only by `assertGitCommandAllowed`.
+
+## Remaining Missing Abstractions for Full Worktree Integration
+
 - No content-addressed blob/checkpoint store.
-- No safe managed-path walker or symlink policy module.
-- No AI-DLC state/profile parser registry.
-- No transcript redaction/storage adapter.
+- No durable worktree lifecycle/cleanup/recovery store beyond a summarized spike view.
+- No AI-DLC profile/parser registry beyond the single legacy state parser.
+- No durable Claude session/run/transcript store, redaction adapter, realtime transport, or stdin message command.
 - No execution resource scheduler beyond one-running-state checks per SR.
+- No repository trust registry or multi-repository authorization model.

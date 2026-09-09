@@ -15,15 +15,20 @@ export interface PageOptions { limit?: number; cursor?: string }
 export interface Page<T> { items: T[]; nextCursor: string | null }
 export interface AppError { code: string; message: string; field?: string; target?: string; currentVersionRef?: VersionRef; operationId?: string }
 export type Result<T> = { ok: true; data: T } | { ok: false; error: AppError };
-export type CommandKind = 'create' | 'edit' | 'restore' | 'planning_advance' | 'planning_answer' | 'planning_decide' | 'planning_complete' | 'review_request' | 'review_result' | 'mark_implemented';
+export type CommandKind = 'create' | 'edit' | 'restore' | 'move_board' | 'planning_advance' | 'planning_answer' | 'planning_decide' | 'planning_complete' | 'review_request' | 'review_result' | 'mark_implemented' | 'worktree_review_request' | 'worktree_review_result';
 export interface CommandContext { operationId: string; kind: CommandKind; fingerprint: string }
 export interface CommandReceipt { operationId?: string; kind: CommandKind; srId: string; ref?: VersionRef; runId?: string; reviewId?: string; changed: boolean; committedAt: string }
 export interface MutationResult { view: DocumentView; changed: boolean }
 export type OperationStatus = { status: 'committed'; receipt: CommandReceipt } | { status: 'in_progress' | 'unknown' };
 export interface GeneratedArtifact { logicalKey: string; documentId?: string; title: string; body: string }
-export type LocalCommand = { kind: 'create'; input: SRDraft } | { kind: 'edit'; target: VersionRef; body: string } | { kind: 'restore'; source: VersionRef };
+export type LocalCommand =
+  | { kind: 'create'; input: SRDraft }
+  | { kind: 'edit'; target: VersionRef; body: string }
+  | { kind: 'restore'; source: VersionRef }
+  | { kind: 'move_board'; srId: string; expectedColumn: Column; targetColumn: Column };
 export type LocalQuery =
   | { kind: 'board'; options?: PageOptions }
+  | { kind: 'boardItem'; srId: string }
   | { kind: 'sr'; srId: string }
   | { kind: 'documents'; srId: string; options?: PageOptions }
   | { kind: 'versions'; srId: string; documentId: string; options?: PageOptions }

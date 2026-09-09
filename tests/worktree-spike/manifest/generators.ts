@@ -1,4 +1,5 @@
 import fc from 'fast-check';
+import { createHash } from 'node:crypto';
 import type { ManifestEntry, ScopedManifest } from '../../../src/worktree-spike/contracts.js';
 
 const pathSegmentArbitrary = fc.oneof(
@@ -37,3 +38,16 @@ export const invalidManifestPathArbitrary = fc.oneof(
   ),
   pathSegmentArbitrary.map((segment) => `../${segment}.md`),
 );
+
+export const worktreeDocumentPathArbitrary = fc.array(pathSegmentArbitrary, { minLength: 0, maxLength: 3 })
+  .chain(directories => pathSegmentArbitrary.filter(name => !['aidlc-state', 'audit'].includes(name)).map(filename => ['aidlc-docs', ...directories, `${filename}.md`].join('/')));
+
+export const unicodeMarkdownBodyArbitrary = fc.string({ maxLength: 2048 });
+
+export const worktreeDocumentSnapshotArbitrary = fc.record({
+  path: worktreeDocumentPathArbitrary,
+  body: unicodeMarkdownBodyArbitrary,
+  origin: fc.constantFrom('ai_generated' as const, 'human_edit' as const),
+}).map(value => ({ ...value, hash: createHash('sha256').update(value.body).digest('hex') }));
+
+export const worktreeVersionBodiesArbitrary = fc.uniqueArray(unicodeMarkdownBodyArbitrary, { minLength: 1, maxLength: 16 });

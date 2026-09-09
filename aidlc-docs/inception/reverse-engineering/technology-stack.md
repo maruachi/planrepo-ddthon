@@ -29,9 +29,9 @@
 | --- | --- | --- |
 | Node.js | `>=24 <25` | Server, worker threads, filesystem/process APIs. |
 | SQLite | bundled through `better-sqlite3` | Local durable state with WAL/full-sync configuration. |
-| Claude Code CLI | Configurable executable | External planning generation. |
+| Claude Code CLI | Configurable executable; 2.1.266 observed locally | External worktree AI-DLC execution. The installed CLI exposes session resume and bidirectional stream-JSON modes, but the application currently uses only one-shot print mode. |
 | HTTP | `127.0.0.1`, default port 4310 | Local browser/server transport. |
-| Filesystem | App-root DB and generated worker output | No repository/worktree storage integration yet. |
+| Git and filesystem | Configured repository plus `.planrepo/worktrees` by default | Deterministic SR worktrees, managed-file hashing, legacy state reads, and changed Markdown reads. |
 
 ## Build Tools
 
@@ -48,11 +48,13 @@
 | Tool | Version | Purpose |
 | --- | ---: | --- |
 | Vitest | 5.0.0 | Unit and integration tests. |
-| Node assertions/process fixtures | Node 24 | Fake CLI, filesystem, worker, and HTTP integration tests. |
+| fast-check | 4.9.0 | Property tests for scoped-manifest normalization, serialization round trips, and delta invariants. |
+| Node assertions/process fixtures | Node 24 | Fake CLI, temporary Git/filesystem, worker, and HTTP integration tests. |
 
 ## Infrastructure Assessment
 
 - No cloud SDK, container runtime, IaC framework, remote database, queue, or telemetry backend is declared.
 - No lint script or formatter configuration is present.
 - No CI workflow is present.
-- Worktree integration can use Node's `child_process` and filesystem APIs already in the stack, but requires explicit Git command policy, canonical path enforcement, symlink-safe traversal, content hashing/blob storage, and lifecycle recovery components.
+- The vertical spike uses existing Node `child_process`, crypto, path and filesystem APIs plus the system Git executable; no Git library was added.
+- Git command allowlisting, canonical containment, symlink rejection and SHA-256 hashing exist for the spike. Content-addressed blobs, full checkpoints, lifecycle cleanup/recovery and a repository trust registry remain absent.

@@ -55,6 +55,29 @@
 | POST | `/api/srs/:srId/reviews/:reviewId/results` | Record a terminal review result. | Reviewer role and `{ kind, comment }`; operation header. | `ReviewView`. |
 | POST | `/api/srs/:srId/implementation` | Record manual implementation completion. | Author role and `{ revision }`; operation header. | `SR`. |
 
+### Worktree vertical spike
+
+| Method | Path | Purpose | Request | Success response |
+| --- | --- | --- | --- | --- |
+| GET | `/api/srs/:srId/worktree-spike` | Read configured/readiness/stage/run/change status. | SR ID path. | `WorktreeSpikeView`. |
+| GET | `/api/srs/:srId/worktree-spike/document` | Read a current or historical managed Markdown version with containment and hash checks. | Required `path`; optional `versionId`. | `WorktreeDocumentView`. |
+| GET | `/api/srs/:srId/worktree-spike/document/versions` | List immutable versions for one managed Markdown path. | Required `path`. | Page-shaped version list. |
+| POST | `/api/srs/:srId/worktree-spike/document/edits` | Atomically save a human edit with optimistic hash protection and immutable history. | `{ path, expectedHash, body }`; operation header. | `WorktreeDocumentEditResult`. |
+| POST | `/api/srs/:srId/worktree-spike/provision` | Create or reuse the deterministic SR worktree and parse state. | Empty JSON object; operation header. | `WorktreeSpikeView`. |
+| POST | `/api/srs/:srId/worktree-spike/resume` | Run the exact AI-DLC resume prompt inside the worktree and collect the delta. | Empty JSON object; operation header. | `WorktreeSpikeView`, HTTP 202 only after the process exits. |
+
+### Board movement
+
+- `POST /api/srs/:srId/board-movements` validates an expected current column and one adjacent target column.
+- The mutation persists a nullable manual-board override and leaves AI-DLC workflow state unchanged.
+
+### Interactive execution API gap
+
+- There is no run resource carrying a Claude session ID or transcript cursor.
+- There is no SSE, WebSocket or incremental HTTP response endpoint for Claude events.
+- There is no user-message command that writes to the active Claude stdin stream.
+- The current resume request remains open until the child exits, so a Claude approval question cannot be answered through PlanRepo.
+
 ## Internal APIs
 
 ### `StorePort`
@@ -78,6 +101,8 @@
 - `prepareGenerated(srId, runId, artifacts)` prepares but does not commit AI-generated versions.
 
 ### `PlanningService`
+
+The legacy planning service and routes remain in source but are not mounted by the current `createApp` composition.
 
 - `getWorkflow` computes actions, latest targets, approval validity, and latest run.
 - `command` dispatches idempotent advance, answer, decision, and complete commands.
@@ -107,6 +132,25 @@
 - `request` creates an author-owned review request tied to an exact version.
 - `submitResult` records one reviewer-owned terminal result.
 - `listReviews` and `getReview` enrich stored reviews with latest-version context.
+
+### `WorktreeSpikeService`
+
+- `get(srId)` returns an in-memory or schema-v7-compatible persisted worktree view.
+- `provision(srId, operationId)` creates/reuses a worktree, parses `aidlc-state.md`, and persists readiness/status.
+- `resume(srId, operationId)` captures manifests, invokes the worktree runner, computes changed paths/documents, reparses state, and persists success/failure.
+- `document(srId, path, versionId?)` reads the current recorded Markdown or one immutable historical version.
+- `versions(srId, path)` lists immutable AI-generated and human-edit versions.
+- `edit(srId, operationId, request)` performs an expected-hash atomic file update and records/replays immutable edit history.
+- `close()` cancels active worktree runner processes.
+
+### Worktree ports and adapters
+
+- `GitWorktreePort.provision` is implemented by `GitWorktreeManager` using allowlisted system Git commands.
+- `AidlcStateParserPort.parse` is implemented by `LegacyAidlcStateParser` for `aidlc-docs/aidlc-state.md`.
+- `ManifestPort.capture/diff` is implemented by `ScopedManifestService` over managed AI-DLC paths.
+- `WorktreeAidlcRunnerPort.run/close` is implemented by `WorktreeAidlcRunner` with a four-hour run bound. It has no `send`, `events`, `resumeSession` or `cancel(runId)` contract.
+- `WorktreeSpikePersistencePort.load/save` is implemented by `SQLiteWorktreeSpikePersistence`.
+- `WorktreeDocumentHistoryPort` is implemented by `SQLiteWorktreeDocumentHistory`; `WorktreeDocumentWriterPort` is implemented by `WorktreeDocumentWriter`.
 
 ## Data Models and Relationships
 
@@ -140,6 +184,12 @@
 - Status transitions once from requested to approved or changes-requested.
 - Review target identity and terminal results are protected by triggers/service checks.
 
-## Required API Evolution
+### WorktreeSpikeView
 
-The worktree requirements need new resource families for repositories, SR workspaces, profiles, synchronization/drift, executions/transcripts, file artifacts, checkpoints, approval baselines, interactions, restore previews/execution, and lifecycle cleanup. Existing document and planning endpoints cannot represent path-based file truth or dynamic AI-DLC state without contract changes.
+- Fields: SR ID, configuration/readiness, optional branch/worktree root, parsed current stage/first incomplete item, run status, changed paths, changed Markdown summaries, and optional error.
+- Persistence: one schema-v7-compatible `worktree_spike_states` JSON payload per SR, updated by upsert; related tables retain worktree document history, review records and edit receipts.
+- Volatile boundary: operation deduplication and active worktree handles remain process-memory state.
+
+## Remaining API Evolution
+
+The worktree resource family now supports persisted status, document reads/edits/history and reviews, while manual board movement has an independent command. The broader requirements still need repositories, durable SR workspace lifecycle, profiles, synchronization/drift, durable executions/session IDs/transcripts, streaming events, interactive messages, file checkpoints, approval baselines, restore and cleanup resources.

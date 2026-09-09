@@ -8,6 +8,7 @@
 | `src/sr-document-foundation` | Domain/application | SRs, documents, versions, history, comparison, restoration, HTTP, persistence, and main UI. |
 | `src/aidlc-planning` | Domain/integration | Fixed AI-DLC planning workflow, context, Claude execution, questions, decisions, and UI. |
 | `src/review-implementation` | Domain/application | Version-specific peer review, demo roles, and manual implementation completion. |
+| `src/worktree-spike` | Domain/integration | Deterministic Git worktrees, legacy AI-DLC state parsing, scoped manifests, worktree Claude execution, changed-document reads, minimal persistence, HTTP, and UI. |
 
 ## Shared Packages
 
@@ -27,22 +28,24 @@ None. The repository contains no CDK, Terraform, CloudFormation, container defin
 | `tests/sr-document-foundation` | Unit/integration | Foundation services, SQLite, HTTP, worker, and client state. |
 | `tests/aidlc-planning` | Unit/integration | Policy, context, runner, workflow service, migration, HTTP, and client state. |
 | `tests/review-implementation` | Unit/integration | Review storage/service/HTTP/UI and end-to-end feature interaction. |
+| `tests/worktree-spike` | Unit/integration/property | Git policy/provisioning, state parsing, manifest invariants and round trips, runner/client behavior, persistence, and vertical integration. |
 
 ## Runtime Components
 
 | Component | Count | Notes |
 | --- | ---: | --- |
 | Node HTTP process | 1 | Express and either Vite middleware or static assets. |
-| SQLite database | 1 | Local file with schema version 3. |
+| SQLite database | 1 | Local file with schema version 7, including worktree status, reviews, document history and manual board overrides. |
 | Diff worker | 1 | Long-lived worker per app instance. |
-| Claude process | 0..N | One per running SR in theory; current service has no explicit global resource limiter. |
+| Claude process | 0..N | Legacy planning and worktree resume runners can spawn processes; no shared global resource limiter exists. |
+| Git worktree | 0..N | One deterministic managed worktree per provisioned SR when repository configuration is enabled. |
 
 ## Total Count
 
-- **Logical source packages**: 6.
-- **Application/domain packages**: 4.
+- **Logical source packages**: 7.
+- **Application/domain packages**: 5.
 - **Shared packages**: 2.
 - **Infrastructure packages**: 0.
-- **Test packages**: 3.
-- **Source files**: 72 under `src/`.
-- **Test/support files**: 29 under `tests/`.
+- **Test packages**: 4.
+- **Source files**: 101 under `src/`.
+- **Test/support files**: 44 under `tests/`.

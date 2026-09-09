@@ -25,8 +25,11 @@ it('migrates a populated v1 database preserving original inputs, versions, event
     const tables = ['srs', 'documents', 'document_versions', 'history_events', 'event_version_refs', 'command_receipts'];
     const before = tables.map(table => db.prepare(`SELECT * FROM ${table} ORDER BY rowid`).all());
     db.close(); db = openDatabase(path);
-    expect(db.pragma('user_version', { simple: true })).toBe(3);
-    expect(tables.map(table => db.prepare(`SELECT * FROM ${table} ORDER BY rowid`).all())).toEqual(before);
+    expect(db.pragma('user_version', { simple: true })).toBe(7);
+    const after = tables.map(table => db.prepare(`SELECT * FROM ${table} ORDER BY rowid`).all());
+    expect((after[0] as { manual_board_column: null }[]).every(row => row.manual_board_column === null)).toBe(true);
+    after[0] = (after[0] as Record<string, unknown>[]).map(({ manual_board_column: _, ...row }) => row);
+    expect(after).toEqual(before);
     const migrated = new SQLiteStore(db);
     expect(unwrap(migrated.read({ kind: 'receipt', operationId: first.command.operationId }))).toMatchObject({ fingerprint: 'legacy-create', kind: 'create' });
     expect(unwrap(migrated.read({ kind: 'version', target: document.pointers[0]! })).body).toBe(' 문서 원문\r\n\t내용\n');

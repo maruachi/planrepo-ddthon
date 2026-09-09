@@ -29,6 +29,12 @@ export class SQLiteStore implements StorePort {
       if (!c.outcome || c.outcome.kind !== c.command.kind) fail('STORAGE_FAILED', '명령 결과 계약이 일치하지 않습니다.');
     }
     for (const srId of c.requireSrs) q.sr(srId);
+    if (c.boardMovement) {
+      if (c.planning) fail('STORAGE_FAILED', '수동 보드 이동은 계획 상태를 변경하지 않습니다.');
+      const movement = c.boardMovement;
+      const changed = this.db.prepare('UPDATE srs SET manual_board_column=? WHERE id=? AND COALESCE(manual_board_column,workflow_column)=?').run(movement.targetColumn, movement.srId, movement.expectedColumn).changes;
+      if (changed !== 1) fail('WORKFLOW_CONFLICT', '보드 상태가 변경되었습니다. 새로 확인해 주세요.');
+    }
     if (c.review) {
       if (c.planning) fail('STORAGE_FAILED', '리뷰는 계획 상태를 변경하지 않습니다.');
       const { review, expectedStatus } = c.review; const sr = q.sr(review.srId);
@@ -84,7 +90,7 @@ export class SQLiteStore implements StorePort {
     }
     if (c.sr) {
       const s = c.sr;
-      this.db.prepare('INSERT INTO srs VALUES (?,?,?,?,?,?,?,?,?)').run(s.id, s.title, s.description, s.attachmentMarkdown ?? null, s.attachmentDisplayName ?? null, s.createdAt, s.actor.source, s.actor.role ?? null, s.column);
+      this.db.prepare('INSERT INTO srs(id,title,description,attachment_markdown,attachment_display_name,created_at,actor_source,actor_role,workflow_column) VALUES (?,?,?,?,?,?,?,?,?)').run(s.id, s.title, s.description, s.attachmentMarkdown ?? null, s.attachmentDisplayName ?? null, s.createdAt, s.actor.source, s.actor.role ?? null, s.column);
     }
     for (const d of c.documents) this.db.prepare('INSERT INTO documents VALUES (?,?,?,?,?)').run(d.id, d.srId, d.logicalKey, d.latestVersionId, d.createdAt);
     for (const v of c.versions) this.db.prepare('INSERT INTO document_versions VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)').run(v.versionId, v.srId, v.documentId, this.next('document_versions', 'version_number', 'document_id', v.documentId), v.title, v.body, v.origin, v.createdAt, v.actor.source, v.actor.role ?? null, v.baseVersionId ?? null, v.sourceVersionId ?? null, v.runId ?? null);

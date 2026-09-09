@@ -7,6 +7,8 @@ import { compareLines } from '../../src/sr-document-foundation/compare/line-diff
 import { AUTHOR } from '../../src/shared/contracts.js';
 import { unwrap } from '../../src/shared/errors.js';
 import { LIMITS } from '../../src/shared/limits.js';
+import { emptyChanges } from '../../src/sr-document-foundation/storage/store-port.js';
+import { initialWorkflow } from '../../src/aidlc-planning/policy/planning-policy.js';
 test('create validates bytes/Unicode while preserving original description and empty attachment', () => {
   const t = services(); try {
     for (const input of [{ title: ' ', description: 'a' }, { title: 'a', description: ' ' }, { title: 'a', description: '\ud800' }, { title: '가'.repeat(1366), description: 'a' }]) expect(t.sr.create(input, AUTHOR).ok).toBe(false);
@@ -31,5 +33,19 @@ test('edit and restore create new immutable versions; no-op edit differs from ex
     const before = t.db.prepare('SELECT count(*) AS n FROM history_events').get();
     expect(unwrap(await t.docs.compare(v1, v2)).unchanged).toBe(false);
     expect(t.db.prepare('SELECT count(*) AS n FROM history_events').get()).toEqual(before);
+  } finally { t.close(); }
+});
+test('manual board movement accepts only adjacent state and never mutates AI-DLC workflow state', () => {
+  const t = services(); try {
+    const sr = unwrap(t.sr.create({ title: '보드 이동', description: '설명' }, AUTHOR)); const planning = emptyChanges();
+    const workflow = { ...initialWorkflow(sr.id), column: 'inception' as const, status: 'awaiting_approval' as const, revision: 1 };
+    planning.requireSrs.push(sr.id); planning.planning = { expectedRevision: null, state: workflow }; unwrap(t.store.commit(planning));
+    const command = { operationId: randomUUID(), kind: 'move_board' as const, fingerprint: 'manual-move' };
+    expect(unwrap(t.sr.moveBoard(sr.id, 'inception', 'construction', AUTHOR, command)).column).toBe('construction');
+    expect(unwrap(t.sr.moveBoard(sr.id, 'inception', 'construction', AUTHOR, command)).column).toBe('construction');
+    expect(unwrap(t.store.read({ kind: 'workflow', srId: sr.id }))).toEqual(workflow);
+    expect(unwrap(t.sr.getDetail(sr.id)).column).toBe('inception');
+    expect(t.sr.moveBoard(sr.id, 'construction', 'implemented', AUTHOR)).toMatchObject({ ok: false, error: { code: 'VALIDATION_ERROR' } });
+    expect(t.sr.moveBoard(sr.id, 'inception', 'construction', AUTHOR)).toMatchObject({ ok: false, error: { code: 'WORKFLOW_CONFLICT' } });
   } finally { t.close(); }
 });

@@ -5,7 +5,7 @@ import type { DocumentView } from '../../shared/contracts.js';
 import { LIMITS } from '../../shared/limits.js';
 import { PagedText } from './PagedText.js';
 const safeURL = (url: string) => /^(https?:\/\/|mailto:|#)/i.test(url) ? url : '';
-export function DocumentReader({ view }: { view: DocumentView }) {
+export function DocumentReader({ view }: { view: Pick<DocumentView, 'body' | 'versionId'> }) {
   let lines = 0; for (const c of view.body) if (c === '\n') lines++;
   const large = new TextEncoder().encode(view.body).length > LIMITS.renderBytes || lines + 1 > LIMITS.renderLines;
   const [raw, setRaw] = useState(large);

@@ -2,9 +2,9 @@
 
 ## System Overview
 
-PlanRepo is a single Node.js process serving an Express REST API and a React browser application on `127.0.0.1`. It uses an embedded SQLite database and a worker process for document diffs. Planning runs spawn Claude Code CLI asynchronously. Service classes express business rules; a shared `StorePort` and `ChangeSet` make multi-record mutations atomic.
+PlanRepo is a single Node.js process serving an Express REST API and a React browser application on `127.0.0.1`. It uses an embedded SQLite database and a worker process for document diffs. Legacy planning code remains in the repository, while the active composition mounts the worktree subsystem and worktree review routes. The worktree subsystem provisions deterministic per-SR Git worktrees and runs the exact AI-DLC resume prompt inside them. Service classes express business rules; the shared store handles core SR mutations, while schema-v7 adapters persist worktree views, document versions, reviews and manual board overrides.
 
-The current architecture has no repository registry, worktree manager, file collector, blob store, AI-DLC profile adapter, or dynamic state parser. These are the primary seams required by the worktree integration enhancement.
+The spike now has a configured repository path, worktree manager, managed-file manifest, legacy `aidlc-state.md` parser, worktree runner, changed-Markdown reader/writer, immutable AI/human version history and worktree-specific review. It still has no repository registry, content-addressed blob/checkpoint store, profile registry, drift/restore lifecycle, approval baseline, or durable execution/session/transcript model.
 
 ## Architecture Diagram
 
@@ -16,19 +16,27 @@ flowchart TB
     Docs[Document Service]
     Planning[Planning Service]
     Review[Review Service]
+    WorktreeService[Worktree Spike Service]
     Context[Planning Context Builder]
     Policy[Fixed Planning Policy]
     Runner[Claude Plan Runner]
+    WorktreeRunner[Worktree AI DLC Runner]
+    GitManager[Git Worktree Manager]
+    StateParser[Legacy State Parser]
+    Manifest[Scoped Manifest]
     Store[SQLite Store]
     Diff[Diff Worker]
     CLI[Claude Code CLI]
     DB[(SQLite Database)]
     Temp[Temporary Run Directory]
+    Repo[Configured Git Repository]
+    Worktree[Managed SR Worktree]
     UI --> HTTP
     HTTP --> SR
     HTTP --> Docs
     HTTP --> Planning
     HTTP --> Review
+    HTTP --> WorktreeService
     Planning --> Context
     Planning --> Policy
     Planning --> Runner
@@ -36,13 +44,24 @@ flowchart TB
     Docs --> Store
     Planning --> Store
     Review --> Store
+    WorktreeService --> Store
+    WorktreeService --> GitManager
+    WorktreeService --> StateParser
+    WorktreeService --> Manifest
+    WorktreeService --> WorktreeRunner
     Docs --> Diff
     Runner --> CLI
     CLI --> Temp
+    GitManager --> Repo
+    Repo --> Worktree
+    StateParser --> Worktree
+    Manifest --> Worktree
+    WorktreeRunner --> CLI
+    CLI --> Worktree
     Store --> DB
 ```
 
-Text alternative: the React UI calls the Express boundary. The boundary delegates to SR, document, planning, and review services. All services use the SQLite store; document comparison uses a worker. Planning also uses a context builder, a fixed-stage policy, and a Claude runner that executes inside a temporary directory.
+Text alternative: the diagram inventories source-level packages and relationships. The current composition mounts SR/document, worktree review, and worktree-spike services; legacy planning packages remain available in source but are not mounted. The worktree path uses Git, a legacy state parser, a scoped manifest and a separate Claude runner, then persists status and immutable document versions in SQLite.
 
 ## Component Descriptions
 
@@ -81,10 +100,17 @@ Text alternative: the React UI calls the Express boundary. The boundary delegate
 - **Dependencies**: SR/document services, store, shared review contracts.
 - **Type**: Application/domain.
 
+### Worktree vertical-spike subsystem
+
+- **Purpose**: prove a repository-backed AI-DLC resume flow alongside the legacy planner.
+- **Responsibilities**: provision/reuse a deterministic SR branch and worktree, parse current stage/first incomplete item, capture before/after managed-file manifests, run Claude with the exact resume prompt and worktree current directory, expose and safely edit changed Markdown, persist immutable versions, and deduplicate in-process operations.
+- **Dependencies**: system Git, filesystem/crypto/process APIs, Claude Code CLI, schema-v7 worktree adapters.
+- **Type**: Application/integration spike.
+
 ### SQLite persistence
 
 - **Purpose**: persist all current business state locally.
-- **Responsibilities**: schema migration through version 3, paged reads, transactional `ChangeSet` commits, optimistic checks, idempotency receipts, and immutable-record triggers.
+- **Responsibilities**: schema migration through version 7, paged reads, transactional `ChangeSet` commits, optimistic checks, idempotency receipts, immutable-record triggers, worktree view/history/review persistence, and manual board overrides.
 - **Dependencies**: `better-sqlite3`.
 - **Type**: Data store adapter.
 
@@ -128,8 +154,9 @@ Text alternative: a user action commits a running workflow before Claude is invo
 
 - **External executable**: Claude Code CLI, supplied as `PLANREPO_CLAUDE_PATH` or `claude` on `PATH`.
 - **Database**: one SQLite file, default `.planrepo/planrepo.sqlite` under the application root.
+- **Git executable and repository**: system Git operates on `PLANREPO_REPOSITORY_PATH`; managed SR worktrees default under `.planrepo/worktrees` or `PLANREPO_WORKSPACE_ROOT`.
 - **Browser integration**: HTTP only on `127.0.0.1`, with exact Host and Origin enforcement.
-- **File inputs**: AI-DLC rule detail files are read from `.aidlc-rule-details` or configured path. Repository project files are not currently read.
+- **File inputs**: legacy planning reads AI-DLC rule detail files from `.aidlc-rule-details` or a configured path. The spike reads managed instructions plus `aidlc-docs/**/*.md` and selected state metadata inside the configured worktree, then hash-validates changed Markdown before display.
 - **Third-party APIs**: none called directly by PlanRepo; provider access occurs within Claude Code CLI.
 
 ## Infrastructure Components
@@ -142,10 +169,13 @@ Text alternative: a user action commits a running workflow before Claude is invo
 
 | Required capability | Current seam | Gap |
 | --- | --- | --- |
-| Repository registration | SR creation and config | No repository entity, allowed-root validation, or trust confirmation. |
-| Per-SR worktree | None | No Git adapter, lifecycle, base SHA, branch, or recovery state. |
-| Dynamic AI-DLC profiles | `PLANNING_STAGES`, `PlanningContextBuilder` | Stage list and rules are compile-time fixed; no state locator/parser. |
-| Worktree Claude execution | `PlanRunnerPort`, `ClaudePlanRunner` | Port is reusable, but implementation forces a temporary directory and disables project capabilities. |
-| File source of truth | `DocumentService` and DB versions | Documents exist only as database records; no relative-path identity or atomic file write. |
-| Checkpoints and drift | `ChangeSet` and receipts | Transaction pattern helps, but no manifests, blobs, file hashes, tombstones, or drift states. |
+| Repository registration | `PLANREPO_REPOSITORY_PATH` config | Single configured root only; no repository entity, base-SHA policy, trust confirmation, or multi-repository lifecycle. |
+| Per-SR worktree | `GitWorktreeManager` | Deterministic provision/reuse exists; no durable lifecycle state, cleanup, drift status, or base selection contract. |
+| Dynamic AI-DLC profiles | `LegacyAidlcStateParser` plus fixed `PLANNING_STAGES` | One legacy Markdown parser exists, but no profile registry, version detection, or dynamic capability contract. |
+| Worktree Claude execution | `WorktreeAidlcRunner` | Exact prompt and current directory are proven, but the runner invokes `claude -p`, closes stdin after one prompt, buffers stdout until exit, discards stderr content, and stores no session ID. Interactive turns, transcript streaming, restart recovery and partial outcomes are absent. |
+| Claude CLI continuation | Installed Claude Code 2.1.266 | The local CLI supports `--session-id`, `--resume`, `--input-format stream-json`, `--output-format stream-json`, partial messages and user-message replay, but PlanRepo does not use these capabilities. |
+| File source of truth | Legacy DB versions plus worktree reads/writes | The two authorities coexist. Atomic expected-hash file edits and immutable per-document bodies exist, but there is no complete checkpoint or unified cross-model lineage. |
+| Worktree document history | `WorktreeDocumentWriter` and `SQLiteWorktreeDocumentHistory` | Atomic expected-hash edits and immutable AI/human versions exist; compare, restore, external drift and full checkpoint lineage remain incomplete. |
+| Checkpoints and drift | `ScopedManifestService` and SHA-256 summaries | Before/after delta exists only within a run; no durable start/end manifests, content blobs, tombstones, or drift state machine. |
 | Recovery and rollback | document restoration | Single DB document restore exists; no worktree file/checkpoint restore or append-only audit policy. |
+| Manual board movement | board service/API/UI and nullable override | Adjacent manual movement is implemented independently from AI-DLC progress; drag/drop and arbitrary jumps remain out of scope. |

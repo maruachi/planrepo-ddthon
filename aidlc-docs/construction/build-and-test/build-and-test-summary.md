@@ -5,7 +5,7 @@ U1 SR·문서 기반, U2 AI-DLC 계획·CLI, U3 리뷰·수동 완료를 구현�
 | 항목 | 최종 결과 |
 |---|---|
 | 타입 검사 | 클라이언트·Node 서버·테스트 통과 |
-| 전체 테스트 | 31파일/118개 통과, 실패 0 |
+| 전체 테스트 | 최신 40파일/146개 통과, 실패 0 |
 | 빌드 | Vite UI·Node 서버/워커 성공 |
 | 실제 CLI | 원래 U2에서 문서 1개 생성·DB 저장·UI 열람 성공; Worktree spike는 fake launcher만 검증 |
 | 실제 브라우저 | 원래 U3 흐름 통과, pageerror 0; Worktree status panel browser smoke는 미실행 |
@@ -54,3 +54,112 @@ U1 SR·문서 기반, U2 AI-DLC 계획·CLI, U3 리뷰·수동 완료를 구현�
 | PBT-10 | Advisory/Compliant | Example-based filesystem/Git/parser/runner tests 병행 |
 
 Applicable enabled extension rule의 non-compliance는 없다.
+
+## Manual Board Status Movement Build and Test Result
+
+- **Code Generation approval**: Q1 B approved via “진행”.
+- **Build capture**: Success. `npm run typecheck`, `npm test` and `npm run build` passed before the next concurrent workflow began editing shared files.
+- **Full test capture**: 36 files, 133 tests passed with zero failures; worker build passed.
+- **Focused current-state test**: 6 files, 24 tests passed against the newer shared schema state.
+- **Latest full test**: 38 files, 139 tests passed with zero assertion failures when rerun with loopback permission.
+- **Build artifacts**: `dist/client/` and `dist/server/`; Vite transformed 309 modules.
+- **PBT**: 2 properties, seed 424242, at least 150 runs per property, shrinking enabled.
+- **Integration**: UI contract, strict HTTP mutation, atomic SQLite persistence, restart, conflict, replay and workflow-state isolation are covered.
+- **Performance**: N/A; no performance requirement was introduced for the local single-user Hotfix.
+- **Security/Resiliency**: Disabled/N/A for this workflow.
+- **E2E browser**: Not run for this Hotfix; render-level accessibility, HTTP integration and production bundling passed.
+- **Production deployment readiness**: Not asserted. Operations remains a placeholder.
+
+After the clean capture, the concurrently authorized Worktree Document History workflow started schema v7 and contract changes. A later global typecheck temporarily failed only in its incomplete `src/worktree-spike/` fixtures; the Hotfix focused suite remained green. A final global rerun was scheduled after that workflow stabilized, without modifying its out-of-scope files.
+
+The latest privileged full test run passed all 139 tests. During the immediately following production build, a new concurrent edit briefly introduced a TypeScript error in `src/worktree-spike/storage/sqlite-worktree-spike-persistence.ts`; Manual Board code did not cause that error. After that concurrent edit stabilized, the final `npm run typecheck` and `npm run build` rerun both passed. The current shared-worktree build is therefore clean at this gate.
+
+### Manual Board Overall Status
+
+- **Hotfix build capture**: Success
+- **Hotfix tests**: Pass
+- **Current shared-worktree full tests**: Pass, 139 of 139
+- **Current shared-worktree production build**: Success after final stabilization rerun
+- **Ready for Operations placeholder**: Yes for Manual Board workflow handoff; no production deployment readiness claim
+
+[Manual Board implementation](../manual-board-status-movement/code/implementation-summary.md), [verification evidence](../manual-board-status-movement/code/verification.md), [focused code plan](../plans/manual-board-status-movement-code-generation-plan.md).
+
+### Manual Board Extension Compliance
+
+| Extension/Rule | Status | Build and Test rationale |
+| --- | --- | --- |
+| Security Baseline | Disabled/N/A | No security extension requirements are enabled for this Hotfix |
+| Resiliency Baseline | Disabled/N/A | No resiliency extension requirements are enabled; persistence/replay examples still pass |
+| PBT-02 | Compliant | Valid adjacent move followed by its inverse returns the original column |
+| PBT-03 | Compliant | Canonical adjacency, range and boundary invariants passed |
+| PBT-07 | Compliant | Reusable finite `Column` and direction generators are used |
+| PBT-08 | Compliant | Fixed seed 424242, at least 150 runs and shrinking are recorded |
+| PBT-09 | Compliant | Existing fast-check 4.9.0 and Vitest integration is reused |
+| PBT-01/04/05/06/10 | N/A or advisory compliant | No Functional Design stage, reference algorithm or required stateful PBT; business-critical examples accompany properties |
+
+No applicable enabled extension rule has a blocking finding for the Manual Board Hotfix.
+
+## Worktree Document Edit and History Build and Test Result
+
+- **Code Generation approval**: Q1 B approved via “승인 후 최소 Build and Test 단계 진행”.
+- **Build**: Success. `npm run typecheck` and `npm run build` passed.
+- **Build artifacts**: `dist/client/` and `dist/server/`; Vite transformed 310 modules.
+- **Focused Worktree suite**: 15 files, 50 tests passed with zero failures in the minimal Build and Test rerun.
+- **Latest full suite**: 40 files, 146 tests passed with zero failures immediately before documentation-only updates.
+- **Integration**: Complete current-set collection, AI v1, human v2, unchanged later run, current/historical HTTP reads, replay/conflict, atomic file save, compensation and restart recovery passed.
+- **PBT**: PBT-02/PBT-03 passed 150 cases each with fast-check 4.9.0, seed 424242 and shrinking enabled; reusable valid Unicode/path/hash/sequence generators satisfy PBT-07/08/09.
+- **Performance**: N/A; no latency, load, throughput or concurrency requirement was introduced.
+- **Security/Resiliency**: Disabled/N/A. Path containment, symlink rejection, immutable records and optimistic conflicts are feature correctness controls, not a security certification.
+- **E2E browser**: No new browser automation dependency or manual browser session was run. UI state/client contracts, HTTP integration, accessibility labels/test IDs and production bundling passed.
+- **Operations readiness**: Yes for workflow transition to the Operations placeholder; no production deployment readiness claim.
+
+Catchable metadata failure after filesystem replacement triggers compensating restore. Host crash consistency between rename and SQLite commit remains explicitly deferred with visual diff, restore, tombstone, external drift/checkpoint and approval invalidation.
+
+[Implementation summary](../worktree-document-edit-history/code/implementation-summary.md), [verification evidence](../worktree-document-edit-history/code/verification.md), [approved code plan](../plans/worktree-document-edit-history-code-generation-plan.md).
+
+### Worktree Document Edit and History Extension Compliance
+
+| Extension/Rule | Status | Build and Test rationale |
+| --- | --- | --- |
+| Security Baseline | Disabled/N/A | Extension disabled; no security certification claimed |
+| Resiliency Baseline | Disabled/N/A | Extension disabled; crash checkpoint/recovery remains deferred |
+| PBT-02 | Compliant | Valid snapshot path/body/hash/origin/version round-trip passed |
+| PBT-03 | Compliant | Contiguous newest-first versions, latest-hash no-op and current-pointer invariant passed |
+| PBT-07 | Compliant | Reusable bounded Unicode body, managed path, SHA-256 and sequence generators used |
+| PBT-08 | Compliant | Fixed seed 424242, 150 runs/property and shrinking recorded |
+| PBT-09 | Compliant | Existing fast-check 4.9.0 with Vitest used |
+| PBT-01/04/05/06/10 | N/A or advisory compliant | Partial mode; critical filesystem/storage examples accompany properties |
+
+No applicable enabled extension rule has a blocking finding.
+
+## Initial SR Prompt Selection Hotfix Build and Test Result
+
+- **Code Generation approval**: Q1 B approved via “Continue to Next Stage — 승인 후 최소 Build and Test 진행”.
+- **Build**: Success. `npm run typecheck` and `npm run build` passed in the Build and Test stage.
+- **Build artifacts**: `dist/client/` and `dist/server/`; Vite transformed 309 modules.
+- **Focused suite**: 4 files, 18 tests passed with zero failures.
+- **Full suite**: worker build plus 43 files, 160 tests passed with zero failures.
+- **Integration**: first SR prompt, attachment/no-attachment, exact later resume, same session ID, persisted service restart, SR lookup failure and Worktree/document-history compatibility passed.
+- **Performance**: N/A; no latency, throughput, load or concurrency SLA was introduced.
+- **Contract/Security/E2E**: no microservice/API contract change; Security extension disabled; real authenticated Claude and manual browser E2E were not executed.
+- **Production deployment readiness**: not asserted. The workflow is ready only to enter the Operations placeholder.
+- **Diff quality**: `git diff --check` passed; no duplicate `_modified` or `_new` source/test file was introduced.
+
+The approximately 501 kB Vite client chunk advisory is pre-existing and unrelated to this server-side prompt selection Hotfix.
+
+[Implementation summary](../initial-sr-prompt-selection/code/implementation-summary.md), [verification evidence](../initial-sr-prompt-selection/code/verification.md), [approved code plan](../plans/initial-sr-prompt-selection-code-generation-plan.md), [Build and Test plan](../plans/initial-sr-prompt-selection-build-and-test-plan.md).
+
+### Initial SR Prompt Selection Extension Compliance
+
+| Extension/Rule | Status | Build and Test rationale |
+| --- | --- | --- |
+| Security Baseline | Disabled/N/A | No security extension requirement is enabled; no certification claimed |
+| Resiliency Baseline | Disabled/N/A | No resiliency extension requirement is enabled; persisted-session example still passes |
+| PBT-02 | N/A | Prompt construction has no inverse or round trip |
+| PBT-03 | Compliant | Prompt determinism, source preservation and SR isolation passed |
+| PBT-07 | Compliant | Structured SR generator covers Unicode, Markdown and optional attachment fields |
+| PBT-08 | Compliant | Fixed seed 424242, 150 runs per property and shrinking are recorded |
+| PBT-09 | Compliant | Existing fast-check 4.9.0 with Vitest 5.0.0 is used |
+| PBT-01/04/05/06/10 | N/A or advisory compliant | Partial mode; no extra blocking rule applies and focused examples accompany properties |
+
+No applicable enabled extension rule has a blocking finding for the Initial SR Prompt Selection Hotfix.

@@ -10,6 +10,7 @@ export class LocalAppBoundary {
   async query(q: LocalQuery): Promise<Result<unknown>> {
     switch (q.kind) {
       case 'board': return this.sr.listBoard(q.options);
+      case 'boardItem': return this.sr.getBoardItem(q.srId);
       case 'sr': return this.sr.getDetail(q.srId);
       case 'documents': return this.docs.listDocuments(q.srId, q.options);
       case 'version': return this.docs.readVersion(q.target);
@@ -28,6 +29,7 @@ export class LocalAppBoundary {
         case 'create': return this.sr.create(c.input, actor, context);
         case 'edit': return this.docs.edit(c.target, c.body, actor, context);
         case 'restore': return this.docs.restore(c.source, actor, context);
+        case 'move_board': return this.sr.moveBoard(c.srId, c.expectedColumn, c.targetColumn, actor, context);
       }
     });
   }

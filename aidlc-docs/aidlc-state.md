@@ -5,17 +5,17 @@
 - **Workflow Version**: AI-DLC v1.0.1
 - **Project Type**: Brownfield — follow-up worktree integration enhancement; original MVP began greenfield
 - **Start Date**: 2026-09-08T11:10:23Z
-- **Current Phase**: CONSTRUCTION — Worktree Integration 1-hour Vertical Spike
-- **Current Stage**: Build and Test — WT-Spike results awaiting Operations approval Q1
-- **Requirements Depth**: Comprehensive — system-wide Git/filesystem/process/DB trust and recovery boundaries
-- **Source**: [Worktree integration requirements](../requirements/planrepo-aidlc-worktree-requirements.md); builds on [original requirements](../requirements/planrepo-requirements.md)
+- **Current Phase**: OPERATIONS — Initial SR Prompt Selection Hotfix complete
+- **Current Stage**: Workflow complete — Operations placeholder acknowledged
+- **Requirements Depth**: Minimal — 30-minute prompt-selection Hotfix
+- **Source**: [Initial SR prompt selection requirements](inception/requirements/initial-sr-prompt-selection-requirements.md); builds on the existing Worktree interactive continuation baseline
 
 ## Workspace State
 - **Existing Code**: Yes — U1/U2/U3 complete; actual CLI generation/storage and integrated browser flows verified
 - **Programming Languages**: TypeScript — React UI, Express services, SQLite storage and worker generated
 - **Build System**: npm/Vite/TypeScript/Vitest — locked install, typecheck, build and focused tests passed
 - **Project Structure**: Local modular app in src/, tests/ and root configuration; workflow docs in aidlc-docs/
-- **Reverse Engineering Needed**: Yes — the completed MVP is now a brownfield baseline and no reverse-engineering artifacts exist
+- **Reverse Engineering Needed**: No — current artifacts cover the affected Worktree runner, service, state parser and SR boundaries
 - **Workspace Root**: /Users/dgyim/works/ddthon-2026/fix-ydg-01
 - **Existing AI-DLC State / Reverse Engineering Artifacts**: Existing completed workflow state found; no reverse-engineering artifacts found for the current codebase
 - **Pre-existing Git Changes**: README.md deleted; requirements/, AGENTS.md and .aidlc-rule-details/ untracked. Preserved.
@@ -26,6 +26,104 @@
 - **User Source Requirements**: requirements/; preserve original source
 
 ## Stage Progress
+### INITIAL SR PROMPT SELECTION HOTFIX
+- [x] Workspace Detection — Brownfield TypeScript application; Worktree prompt contracts and tests identified
+- [x] Reverse Engineering — SKIPPED: current artifacts cover the affected boundaries
+- [x] Requirements Analysis — approved via “Approve & Continue - 승인 후 최소 Workflow Planning 진행”
+- [x] User Stories — SKIPPED: isolated prompt-selection bug fix with complete acceptance scenarios
+- [x] Workflow Planning — approved via “Approve & Continue — 승인 후 Code Generation Part 1 진행”
+- [x] Application Design — SKIPPED by recommended minimal plan; existing service boundaries reused
+- [x] Units Generation — SKIPPED by recommended minimal plan; single Hotfix unit
+- [x] Functional Design — SKIPPED by recommended minimal plan; prompt invariants move to Code Generation plan
+- [x] NFR Requirements — SKIPPED by recommended minimal plan; existing stack retained
+- [x] NFR Design — SKIPPED by recommended minimal plan; no new runtime pattern
+- [x] Infrastructure Design — SKIPPED by recommended minimal plan; no infrastructure change
+- [x] Code Generation — generated artifacts approved via “Continue to Next Stage — 승인 후 최소 Build and Test 진행”
+- [x] Build and Test — approved via “Approve & Continue — 승인 후 Operations placeholder 진행”; focused 4 files/18 tests and full 43 files/160 tests passed
+- [x] Operations — placeholder acknowledged; workflow complete with no deployment or external mutation
+- **Scope boundary**: First SR session receives the SR requirements specification; subsequent persisted-session runs receive the exact AI-DLC resume prompt.
+- **Timebox**: 30-minute implementation after mandatory approvals.
+- **Requirements plan**: [Checklist](inception/plans/initial-sr-prompt-selection-requirements-analysis-plan.md)
+- **Requirements**: [Focused requirements](inception/requirements/initial-sr-prompt-selection-requirements.md)
+- **Requirements approval**: [Q1](inception/requirements/initial-sr-prompt-selection-requirements-approval-questions.md)
+- **User Stories assessment**: [Skip decision](inception/plans/initial-sr-prompt-selection-user-stories-assessment.md)
+- **Workflow checklist**: [Checklist](inception/plans/initial-sr-prompt-selection-workflow-planning-plan.md)
+- **Execution plan**: [30-minute plan](inception/plans/initial-sr-prompt-selection-execution-plan.md)
+- **Workflow approval**: [Q1](inception/plans/initial-sr-prompt-selection-workflow-planning-approval-questions.md)
+- **Code Generation plan**: [8-step Part 2 plan](construction/plans/initial-sr-prompt-selection-code-generation-plan.md)
+- **Code Generation approval**: [Q1](construction/plans/initial-sr-prompt-selection-code-generation-approval-questions.md)
+- **Generated artifacts**: [Implementation](construction/initial-sr-prompt-selection/code/implementation-summary.md), [Internal contracts](construction/initial-sr-prompt-selection/code/api-reference.md), [Verification](construction/initial-sr-prompt-selection/code/verification.md)
+- **Generated-artifact approval**: [Q1](construction/initial-sr-prompt-selection/code/code-generation-approval-questions.md)
+- **Build and Test plan**: [Checklist](construction/plans/initial-sr-prompt-selection-build-and-test-plan.md)
+- **Build and Test approval**: [Q1](construction/build-and-test/initial-sr-prompt-selection-approval-questions.md)
+- **Verification**: typecheck, focused 4 files/18 tests, full 43 files/160 tests, production build and `git diff --check` passed; prompt PBT seed 424242 with 150 runs/property.
+- **Extensions**: Security No, Resiliency No, PBT Partial; no blocking Requirements Analysis findings.
+- **Completion**: 2026-09-09T06:11:53Z; all approved stages complete.
+
+### STATEFUL INTERACTIVE AI-DLC CONTINUATION
+- [x] Workspace Detection — brownfield TypeScript application; existing reverse-engineering baseline is stale for changed Worktree service, HTTP and client boundaries
+- [x] Reverse Engineering — Q1 B approved via 30-minute minimal-workflow continuation instruction
+- [x] Requirements Analysis — Q1 C approved via “진행해줘.”
+- [x] User Stories — REUSED: approved US-WT-08, US-WT-10 and US-WT-11
+- [x] Workflow Planning — Q1 C approved via “진행해줘.”
+- [x] Application Design — SKIPPED by approved 30-minute plan; existing boundaries extended
+- [x] Units Generation — SKIPPED by approved plan; single focused unit
+- [x] Functional Design — SKIPPED by approved plan; invariants moved to Code Generation plan
+- [x] NFR Requirements — SKIPPED by approved plan; existing local stack and limits retained
+- [x] NFR Design — SKIPPED by approved plan; lifecycle contracts moved to Code Generation plan
+- [x] Infrastructure Design — SKIPPED; no infrastructure change
+- [ ] Code Generation — implementation and verification complete; generated-artifact approval pending
+- [ ] Build and Test
+- **Scope boundary**: Preserve Claude context across continuation runs and provide interactive, visible Claude output with user message input from PlanRepo.
+- **Reverse Engineering approval**: [Q1](inception/reverse-engineering/stateful-interactive-continuation-reverse-engineering-approval-questions.md)
+- **Requirements**: [Focused requirements](inception/requirements/stateful-interactive-continuation-requirements.md)
+- **Requirements approval**: [Q1](inception/requirements/stateful-interactive-continuation-requirements-approval-questions.md)
+- **Timebox**: 30-minute implementation; polling-based duplex stream vertical slice, no SSE/WebSocket/TUI.
+- **Execution plan**: [30-minute plan](inception/plans/stateful-interactive-continuation-execution-plan.md)
+- **Workflow approval**: [Q1](inception/plans/stateful-interactive-continuation-workflow-planning-approval-questions.md)
+- **Code Generation plan**: [8-step plan](construction/plans/stateful-interactive-continuation-code-generation-plan.md)
+- **Code Generation approval**: [Q1](construction/plans/stateful-interactive-continuation-code-generation-approval-questions.md)
+- **Generated artifacts**: [Implementation](construction/stateful-interactive-continuation/code/implementation-summary.md), [API](construction/stateful-interactive-continuation/code/api-reference.md), [Verification](construction/stateful-interactive-continuation/code/verification.md)
+- **Generated-artifact approval**: [Q1](construction/stateful-interactive-continuation/code/code-generation-approval-questions.md)
+- **Verification**: 42 files/155 tests, full typecheck, production build and `git diff --check` passed; PBT seed 424242 with 150 runs/property
+- **Preserved concurrent work**: Worktree Document Edit and History implementation, Manual Plan Board Operations approval, and prior Worktree Integration Operations gate remain intact.
+
+### WORKTREE DOCUMENT EDIT AND HISTORY
+- [x] Workspace Detection — brownfield TypeScript application; refreshed reverse-engineering artifacts cover the Worktree read path
+- [x] Reverse Engineering — SKIPPED: refreshed artifacts are current for this focused request
+- [x] Requirements Analysis — Q1 B approved via “승인 후 Workflow Planning 진행. 다만 최소 워크플로우로 진행해줘.”
+- [x] User Stories — REUSED: approved US-WT-13 and US-WT-14 cover Worktree history exploration and safe editing
+- [x] Workflow Planning — Q1 C approved via “C 바로 구현 진행해줘.”
+- [x] Application Design — SKIPPED by approved minimal plan; current Worktree boundaries reused
+- [x] Units Generation — SKIPPED by approved minimal plan; single focused unit
+- [x] Functional Design — SKIPPED by approved minimal plan; blocking contracts moved to Code Generation plan
+- [x] NFR Requirements — SKIPPED by approved minimal plan; existing stack and limits retained
+- [x] NFR Design — SKIPPED by approved minimal plan; consistency and recovery rules moved to Code Generation plan
+- [x] Infrastructure Design — SKIPPED by approved minimal plan; local runtime only
+- [x] Code Generation — generated artifacts Q1 B approved via “승인 후 최소 Build and Test 단계 진행”
+- [x] Build and Test — approved via “Approve & Continue — 승인 후 Operations placeholder 진행”; focused 15 files/50 tests and latest full 40 files/146 tests passed
+- [x] Operations — placeholder acknowledged; workflow complete with no deployment or external mutation
+- **Scope boundary**: Edit and save eligible Worktree AI-DLC Markdown with immutable version history; version comparison and restoration remain deferred.
+- **Preserved concurrent work**: Manual Plan Board Status Movement workflow is complete and Worktree Integration Build and Test Operations approval remains unresolved.
+
+### MANUAL PLAN BOARD STATUS MOVEMENT
+- [x] Workspace Detection — brownfield TypeScript application; reverse-engineering baseline is stale
+- [x] Reverse Engineering — current-code refresh approved via “승인 후 진행”
+- [x] Requirements Analysis — Q1 C approved via “승인 후 최소 Workflow Planning 진행”
+- [x] User Stories — SKIPPED by approved Hotfix simplification; acceptance scenarios retained in Requirements
+- [x] Workflow Planning — Q1 C approved via “최소 Code Generation plan으로 진행”
+- [x] Application Design — SKIPPED by approved Hotfix plan; existing boundaries reused
+- [x] Units Generation — SKIPPED by approved Hotfix plan; single Hotfix unit
+- [x] Functional Design — SKIPPED by approved Hotfix plan; properties carried into code plan
+- [x] NFR Requirements — SKIPPED by approved Hotfix plan; existing stack retained
+- [x] NFR Design — SKIPPED by approved Hotfix plan; no new pattern introduced
+- [x] Infrastructure Design — SKIPPED by approved Hotfix plan; no infrastructure change
+- [x] Code Generation — generated-artifact Q1 B approved via “진행”
+- [x] Build and Test — approved via “Approve & Continue”; instructions and results complete
+- [x] Operations — placeholder acknowledged; workflow complete with no deployment or external mutation
+- **Scope boundary**: Manual button-based board movement only; no coupling to AI-DLC workflow progression
+- **Prior pending gate**: Worktree Integration Build and Test Operations approval Q1 remains unresolved and preserved
+
 ### WORKTREE INTEGRATION ENHANCEMENT
 - [x] Workspace Detection — brownfield TypeScript application; existing reverse-engineering artifacts absent
 - [x] Reverse Engineering — approved via continuation instruction on 2026-09-09T03:16:26Z
@@ -240,10 +338,10 @@ For the Worktree Integration Enhancement, Security and Resiliency are disabled. 
 5. All three extensions remain disabled/N/A. Preserve original user files and README deletion.
 
 ## Last Completed
-WT-Spike focused Build and Test execution/instructions: 118 tests, typecheck and production build passed; PBT Partial compliant.
+Manual Plan Board Status Movement workflow complete through the Operations placeholder.
 
 ## Next Step
-Explicit approval in [WT-Spike Build and Test Q1](construction/build-and-test/worktree-integration-spike-approval-questions.md). After Q1 B, mark Build and Test complete and transition to the Operations placeholder.
+No further Manual Plan Board Status Movement action is required. Preserve the currently active Stateful Interactive AI-DLC Continuation workflow and other pending gates.
 
 ## Worktree Integration Spike Code Generation Summary
 - **Plan**: [WT-Spike Code Generation plan](construction/plans/worktree-integration-spike-code-generation-plan.md), Part 1 approved and all executable Part 2 items complete; generated-artifact approval remains open

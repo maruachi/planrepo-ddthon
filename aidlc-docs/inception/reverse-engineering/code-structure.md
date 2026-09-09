@@ -18,25 +18,29 @@ flowchart TB
     Foundation[src/sr-document-foundation]
     Planning[src/aidlc-planning]
     Review[src/review-implementation]
+    Worktree[src/worktree-spike]
     App --> Foundation
     App --> Planning
     App --> Review
+    App --> Worktree
     Foundation --> Shared
     Planning --> Shared
     Planning --> Foundation
     Review --> Shared
     Review --> Foundation
+    Worktree --> Shared
+    Worktree --> Foundation
 ```
 
-Text alternative: the app composition root depends on the three feature areas. Every feature uses shared contracts; planning and review also depend on the document/storage foundation.
+Text alternative: the app composition root depends on four feature areas. Every feature uses shared contracts; planning, review, and the worktree spike also depend on foundation behavior or its SQLite database boundary.
 
 ## Existing Source Files Inventory
 
 ### Application composition
 
 - `src/app/client.tsx` - mounts the React router and application shell.
-- `src/app/config.ts` - resolves loopback server, database, Claude, rules, and worker configuration.
-- `src/app/create-app.ts` - composition root for database, services, API, Vite/static assets, and shutdown.
+- `src/app/config.ts` - resolves loopback server, database, Claude, rules, worker, optional repository, and managed-workspace configuration.
+- `src/app/create-app.ts` - composition root for database, services, legacy planning, worktree-spike adapters/API, Vite/static assets, and shutdown.
 - `src/app/server.ts` - starts the HTTP server and installs signal handling.
 - `src/app/WorkspaceShell.tsx` - global layout, demo role switch, and multi-owner dirty-navigation guard.
 - `src/app/roles.css` - role switch styling.
@@ -65,10 +69,11 @@ Text alternative: the app composition root depends on the three feature areas. E
 - `src/sr-document-foundation/http/operations.ts` - command fingerprint and receipt behavior.
 - `src/sr-document-foundation/http/error-handler.ts` - result-to-HTTP and exception mapping.
 - `src/sr-document-foundation/storage/database.ts` - opens and configures SQLite.
-- `src/sr-document-foundation/storage/migrations.ts` - validates schema identity and migrates versions 1 through 3.
+- `src/sr-document-foundation/storage/migrations.ts` - validates schema identity and migrates versions 1 through 4.
 - `src/sr-document-foundation/storage/migrations/001-foundation.ts` - SR/document/version/history/receipt schema.
 - `src/sr-document-foundation/storage/migrations/002-planning.ts` - workflow/run/link schema.
 - `src/sr-document-foundation/storage/migrations/003-reviews.ts` - review schema.
+- `src/sr-document-foundation/storage/migrations/004-worktree-spike.ts` - one persisted worktree-spike JSON view per SR.
 - `src/sr-document-foundation/storage/store-port.ts` - read algebra and transactional `ChangeSet` port.
 - `src/sr-document-foundation/storage/sqlite-store.ts` - `StorePort` implementation and atomic optimistic commit.
 - `src/sr-document-foundation/storage/queries.ts` - prepared/query mapping helpers.
@@ -120,12 +125,30 @@ Text alternative: the app composition root depends on the three feature areas. E
 - `src/review-implementation/ui/review-client.ts` - review response guards and mutation tracker.
 - `src/review-implementation/ui/review.css` - review panel styling.
 
+### Worktree vertical spike
+
+- `src/worktree-spike/contracts.ts` - exact resume prompt, run bounds, view/document/manifest contracts, and integration ports.
+- `src/worktree-spike/worktree-spike-service.ts` - worktree provision/resume orchestration, summarized state persistence, document reads, and in-process operation deduplication.
+- `src/worktree-spike/git/git-command-policy.ts` - explicit Git argument allowlist.
+- `src/worktree-spike/git/git-worktree.ts` - repository validation plus deterministic branch/worktree provisioning and reuse.
+- `src/worktree-spike/state/legacy-aidlc-state-parser.ts` - current-stage and first-unchecked-item extraction from legacy state Markdown.
+- `src/worktree-spike/manifest/scoped-manifest.ts` - managed-path traversal, SHA-256 capture, canonical serialization, deserialization, and delta calculation.
+- `src/worktree-spike/runner/worktree-aidlc-runner.ts` - bounded shell-free Claude execution in the worktree with exact prompt/cwd.
+- `src/worktree-spike/storage/sqlite-worktree-spike-persistence.ts` - schema-v7-compatible worktree JSON view validation/load/upsert.
+- `src/worktree-spike/files/worktree-document-reader.ts` - hash-checked, size-bounded, symlink-safe changed Markdown reading.
+- `src/worktree-spike/http/worktree-spike-routes.ts` - status, document, provision, and resume endpoints.
+- `src/worktree-spike/ui/worktree-spike-client.ts` - strict response guard and mutation client.
+- `src/worktree-spike/ui/WorktreeDocumentTree.tsx` - hierarchy for changed worktree Markdown summaries.
+- `src/worktree-spike/ui/WorktreeDocumentWorkspace.tsx` - selected changed-document fetch and display workspace.
+- `src/worktree-spike/ui/WorktreeSpikePanel.tsx` - readiness/stage/run/delta display and manual provision/resume controls.
+
 ## Test Structure
 
 - `tests/sr-document-foundation/` - configuration, migrations, storage, services, HTTP, idempotency, pagination, worker/diff, and UI-state tests with four helpers.
 - `tests/aidlc-planning/` - policy, context, CLI, migration, service, HTTP, and client-state tests plus a fake Claude executable.
 - `tests/review-implementation/` - migration, service, HTTP, cross-feature integration, and client-state tests.
-- The previous completed workflow records 23 test files and 86 passing tests. This reverse-engineering session could not rerun them because dependencies are not installed in this checkout; both `npm test` and `npm run typecheck` stopped at `tsc: command not found` before compiling code.
+- `tests/worktree-spike/` - Git policy/provisioning, legacy parser, manifest unit/property, runner/client, persistence, and isolated vertical integration tests.
+- The current reverse-engineering refresh records 101 source files, 44 test/support files, successful typecheck, and 139 passing tests across 38 Vitest files.
 
 ## Design Patterns
 
@@ -159,12 +182,25 @@ Text alternative: the app composition root depends on the three feature areas. E
 - **Purpose**: reject edits, approvals, and transitions based on stale state.
 - **Implementation**: exact expected refs/revisions are checked in the storage transaction.
 
+### Managed filesystem boundary
+
+- **Location**: `GitWorktreeManager`, `ScopedManifestService`, and `readWorktreeDocument`.
+- **Purpose**: constrain Git and filesystem operations to the configured repository/workspace and managed AI-DLC paths.
+- **Implementation**: Git command allowlisting, canonical containment checks, symlink rejection, deterministic paths, SHA-256 manifests, and hash verification on read.
+
+### Focused spike persistence
+
+- **Location**: `SQLiteWorktreeSpikePersistence`, `SQLiteWorktreeDocumentHistory`, worktree review persistence, and schema migrations 4 through 7.
+- **Purpose**: retain minimal worktree readiness/run/change display state across application restarts.
+- **Implementation**: validated per-SR JSON payload upsert with immutable SR identity and no-delete triggers; active handles and operation promises remain in memory.
+
 ## Structural Risks for the Enhancement
 
 - Fixed `PLANNING_STAGES` and `stageIndex` are embedded in contracts, policy, service, storage payloads, board projection, UI, and tests.
-- The runner deliberately creates and deletes an OS temporary directory; it cannot observe or preserve repository files.
-- The system prompt and CLI flags explicitly forbid tools/file edits and disable project settings, hooks, slash commands, MCP, and session persistence.
-- `DocumentRecord.logicalKey` is not a worktree-relative path contract, and document bodies are authoritative in SQLite.
-- Startup recovery only changes database run status; it does not inspect partially changed files.
-- The schema has no repository, workspace, profile, checkpoint, file snapshot/blob, interaction-version, approval-baseline, or restore entity.
+- The legacy runner deliberately creates and deletes an OS temporary directory, while the worktree runner edits repository files; the two execution models and artifact authorities coexist.
+- The worktree runner enables repository work but still uses one-shot `claude -p`; it does not expose installed CLI session/stream capabilities or model a durable session/transcript.
+- Legacy `DocumentRecord.logicalKey` is not a worktree-relative path contract and legacy document bodies remain authoritative in SQLite; the spike introduces a separate path/hash view without unifying these models.
+- Startup recovery only changes legacy database run status; it does not reconcile a persisted worktree spike left `running` or retain partial manifests.
+- Schema v7 stores worktree views, document history, reviews and manual board overrides; it still has no repository registry, durable workspace lifecycle, profile, checkpoint/blob, Claude session/transcript, approval-baseline, or restore entity.
+- Board state is projected from workflow state when present and has no independent movement command; adding manual movement requires an explicit precedence/persistence rule.
 - Source modules are mostly compact, but several files are highly condensed into long statements, which raises review and modification risk for a broad cross-cutting change.

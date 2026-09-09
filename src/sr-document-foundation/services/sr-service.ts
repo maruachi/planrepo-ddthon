@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import type { ActorContext, CommandContext, PageOptions, SR, SRDraft } from '../../shared/contracts.js';
 import { fail, result, unwrap } from '../../shared/errors.js';
+import { adjacentColumn, type Column } from '../../shared/limits.js';
 import { emptyChanges, type StorePort } from '../storage/store-port.js';
 import { DirectSRInput, type SRInputPort } from './sr-input.js';
 export class SRService {
@@ -14,7 +15,24 @@ export class SRService {
     return unwrap(this.store.read({ kind: 'sr', srId: receipt.srId }));
   }, 'STORAGE_FAILED'); }
   listBoard(options?: PageOptions) { return this.store.read({ kind: 'board', options }); }
+  getBoardItem(srId: string) { return this.store.read({ kind: 'boardItem', srId }); }
   getDetail(srId: string) { return this.store.read({ kind: 'sr', srId }); }
+  moveBoard(srId: string, expectedColumn: Column, targetColumn: Column, actor: ActorContext, command?: CommandContext) { return result(() => {
+    if (actor.source !== 'user') fail('ROLE_REQUIRED', '사용자가 보드 상태를 이동해 주세요.');
+    if (command) {
+      const receipt = unwrap(this.store.read({ kind: 'receipt', operationId: command.operationId }));
+      if (receipt) {
+        if (receipt.kind !== command.kind || receipt.fingerprint !== command.fingerprint || receipt.srId !== srId) fail('OPERATION_CONFLICT', '같은 요청 식별자에 다른 내용이 있습니다.');
+        return unwrap(this.getBoardItem(srId));
+      }
+    }
+    const current = unwrap(this.getBoardItem(srId));
+    if (current.column !== expectedColumn) fail('WORKFLOW_CONFLICT', '보드 상태가 변경되었습니다. 새로 확인해 주세요.');
+    if (adjacentColumn(expectedColumn, 'previous') !== targetColumn && adjacentColumn(expectedColumn, 'next') !== targetColumn) fail('VALIDATION_ERROR', '인접한 보드 상태로만 이동할 수 있습니다.', { field: 'targetColumn' });
+    const c = emptyChanges(); c.requireSrs.push(srId); c.boardMovement = { srId, expectedColumn, targetColumn };
+    c.command = command; c.outcome = { kind: 'move_board', srId, changed: true };
+    unwrap(this.store.commit(c)); return unwrap(this.getBoardItem(srId));
+  }, 'STORAGE_FAILED'); }
   markImplemented(srId: string, actor: ActorContext, revision: number, command?: CommandContext) { return result(() => {
     if (actor.source !== 'user' || actor.role !== 'author') fail('ROLE_REQUIRED', '작성자 역할에서 완료를 표시해 주세요.');
     if (command) {

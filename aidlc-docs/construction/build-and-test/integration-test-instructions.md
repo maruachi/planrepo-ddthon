@@ -41,3 +41,84 @@ npx vitest run tests/worktree-spike/integration.test.ts
 ```
 
 자동 integration tests는 외부 서비스, remote clone, 사용자 DB와 실제 Claude CLI를 사용하지 않는다.
+
+## Manual Board Status Movement Scenarios
+
+### Scenario 1 — UI to HTTP to SQLite
+
+- Setup: 임시 SQLite database를 사용하는 local test server를 시작하고 `sr_list` SR을 생성한다.
+- Execute: 카드의 다음 동작과 동일한 body로 `POST /api/srs/:srId/board-movements`를 호출한다.
+- Expected: board summary는 바로 다음 정규 열을 반환하고 재조회와 database reopen 후에도 유지된다.
+- Cleanup: test server와 임시 database directory를 닫고 삭제한다.
+
+### Scenario 2 — Manual Override Isolation
+
+- Setup: AI-DLC workflow가 `inception`인 SR을 준비한다.
+- Execute: expected `inception`, target `construction`으로 수동 보드 이동을 commit한다.
+- Expected: board item만 `construction`으로 표시되고 SR detail과 planning workflow column/revision/status는 그대로다. PlanningService는 호출되지 않는다.
+
+### Scenario 3 — Conflict and Replay
+
+- Execute: 같은 operation ID와 동일 body를 두 번 호출한 뒤, 새 operation ID로 stale expected column과 비인접 target을 각각 전송한다.
+- Expected: 동일 operation replay는 추가 이동 없이 성공하고 stale request는 409, 비인접 request는 400이며 저장 상태는 보존된다.
+
+자동 실행 명령은 Unit Test 문서의 Manual Board focused suite와 같다. 별도 서비스 endpoint, credential 또는 cleanup command는 필요하지 않는다.
+
+## Worktree Document Edit and History Scenarios
+
+### Scenario 1 — AI Run to Immutable History
+
+- Setup: 임시 SR, SQLite DB와 isolated Worktree에서 AI runner test double이 `aidlc-docs/**/*.md`를 생성한다.
+- Execute: Worktree resume 후 current document와 version list를 조회한다.
+- Expected: 전체 현재 Markdown set이 색인되고 첫 버전은 `ai_generated` v1이며 실제 파일 SHA-256과 본문이 일치한다.
+- Cleanup: test가 임시 DB와 Worktree root를 삭제한다.
+
+### Scenario 2 — Browser Contract to Atomic File and SQLite
+
+- Execute: current hash와 새 본문을 UUID `X-Operation-Id`로 edit endpoint에 전송하고 같은 요청을 재전송한다.
+- Expected: 실제 Worktree 파일과 latest pointer는 v2 `human_edit`로 바뀌고 v1은 그대로 남는다. 재전송은 같은 result를 반환하며 중복 버전을 만들지 않는다.
+- Failure boundaries: stale hash, traversal, symlink, protected state/audit path와 1 MiB 초과는 원본을 변경하지 않는다. metadata commit failure는 catchable 범위에서 원본 복구를 시도한다.
+
+### Scenario 3 — Historical Read and Restart
+
+- Execute: v1 version ID를 명시해 읽고, 앱 service/database를 다시 열어 current와 history를 재조회한다.
+- Expected: v1은 읽기 전용 과거 본문이고 v2는 최신이며, 재시작 전후 path/hash/body/origin/version identity가 같다.
+
+### Scenario 4 — Next Unchanged AI Run
+
+- Execute: 사람 편집된 파일이 있는 동일 Worktree에서 변경 없는 다음 resume을 수행한다.
+- Expected: runner는 사람 편집 본문을 같은 `cwd`에서 읽을 수 있고, 문서 목록은 유지되며 동일 hash의 AI 버전을 추가하지 않는다.
+
+```bash
+./node_modules/.bin/vitest run tests/worktree-spike/integration.test.ts tests/worktree-spike/document-history.test.ts
+```
+
+통합 테스트는 local loopback server, 임시 SQLite와 임시 filesystem/Git fixture만 사용한다. 사용자 repository, 실제 Claude 인증, Git commit/add/push 또는 외부 endpoint는 사용하지 않는다.
+
+## Initial SR Prompt Selection Hotfix Scenarios
+
+### Scenario 1 — New SR to Initial Requirements Prompt
+
+- **Setup**: no persisted Claude session ID; provide one SR title, description and optional Markdown attachment through the read-only requirements port.
+- **Execute**: provision and resume the SR Worktree.
+- **Expected**: the captured prompt contains only that SR's specification and ends with the AI-DLC requirements/workflow start sentence; runner executes once for a replayed operation ID.
+
+### Scenario 2 — Existing Session to Exact Resume Prompt
+
+- **Setup**: complete the first interactive run so its session ID is persisted.
+- **Execute**: explicitly resume again.
+- **Expected**: the same session ID is passed with resume mode and input equals `aidlc-docs/aidlc-state.md를 확인하고, 첫 번째 미완료 항목부터 이어서 진행해주세요.` exactly; SR requirements are not resent.
+
+### Scenario 3 — Service Restart
+
+- **Setup**: construct a new service instance over a persisted ready view containing the prior session ID.
+- **Execute**: call resume without an in-memory child.
+- **Expected**: exact resume mode is selected without reading SR requirements, then normal manifest/state collection completes.
+
+### Scenario 4 — Missing SR Boundary
+
+- **Setup**: configure the requirements provider to fail for the requested SR.
+- **Execute**: attempt the first run.
+- **Expected**: the request fails before any Claude runner invocation.
+
+The focused command is documented in `unit-test-instructions.md`. Tests use fake runner/Claude boundaries, temporary SQLite/filesystem/Git fixtures and local loopback only. They do not invoke real Claude authentication or mutate a user repository.

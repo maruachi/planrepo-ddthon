@@ -1,7 +1,7 @@
 import type { ErrorRequestHandler, Response } from 'express';
 import type { Result } from '../../shared/contracts.js';
 import { errorOf } from '../../shared/errors.js';
-export const statusFor = (code: string): number => ({ VALIDATION_ERROR: 400, REFERENCE_MISMATCH: 400, ROLE_REQUIRED: 403, NOT_FOUND: 404, PAYLOAD_TOO_LARGE: 413, UNSUPPORTED_MEDIA_TYPE: 415, REVIEW_CONFLICT: 409, REVIEW_ACTION_BLOCKED: 409, VERSION_CONFLICT: 409, OPERATION_CONFLICT: 409, WORKFLOW_CONFLICT: 409, PLANNING_ACTION_BLOCKED: 409, APPROVAL_REQUIRED: 409, IN_PROGRESS: 409, STORAGE_BUSY: 503, COMPARE_BUSY: 503, OUTCOME_UNKNOWN: 503 }[code] ?? 500);
+export const statusFor = (code: string): number => ({ VALIDATION_ERROR: 400, REFERENCE_MISMATCH: 400, ROLE_REQUIRED: 403, NOT_FOUND: 404, PAYLOAD_TOO_LARGE: 413, UNSUPPORTED_MEDIA_TYPE: 415, REVIEW_CONFLICT: 409, REVIEW_ACTION_BLOCKED: 409, WORKTREE_DOCUMENT_READ_ONLY: 409, VERSION_CONFLICT: 409, OPERATION_CONFLICT: 409, WORKFLOW_CONFLICT: 409, PLANNING_ACTION_BLOCKED: 409, APPROVAL_REQUIRED: 409, IN_PROGRESS: 409, STORAGE_BUSY: 503, COMPARE_BUSY: 503, OUTCOME_UNKNOWN: 503 }[code] ?? 500);
 export function sendResult(res: Response, value: Result<unknown>, success = 200): void { res.status(value.ok ? success : statusFor(value.error.code)).json(value); }
 export const errorHandler: ErrorRequestHandler = (error: unknown, _req, res, _next) => {
   const parser = error as { type?: string; status?: number };

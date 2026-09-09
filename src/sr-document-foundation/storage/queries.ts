@@ -12,12 +12,22 @@ const document = (r: Row): DocumentRecord => ({ id: String(r.id), srId: String(r
 const summary = (r: Row): VersionSummary => ({ ...ref(r), versionNumber: Number(r.version_number), title: String(r.title), origin: r.origin as VersionSummary['origin'], createdAt: String(r.created_at), actor: actor(r), isLatest: r.id === r.latest_version_id, ...(r.base_version_id ? { baseVersionId: String(r.base_version_id) } : {}), ...(r.source_version_id ? { sourceVersionId: String(r.source_version_id) } : {}), ...(r.run_id ? { runId: String(r.run_id) } : {}) });
 const versionColumns = 'v.id,v.sr_id,v.document_id,v.version_number,v.title,v.origin,v.created_at,v.actor_source,v.actor_role,v.base_version_id,v.source_version_id,v.run_id,d.latest_version_id';
 export class Queries {
-  constructor(readonly db: Database.Database) {}
+  private readonly effectiveColumn: string;
+  constructor(readonly db: Database.Database) {
+    const manual = db.prepare("SELECT 1 FROM pragma_table_info('srs') WHERE name='manual_board_column'").get();
+    this.effectiveColumn = manual ? 'COALESCE(manual_board_column,workflow_column)' : 'workflow_column';
+  }
   one(sql: string, ...params: (string | number)[]): Row | undefined { return this.db.prepare(sql).get(...params) as Row | undefined; }
   all(sql: string, ...params: (string | number)[]): Row[] { return this.db.prepare(sql).all(...params) as Row[]; }
   sr(srId: string): SR {
     const r = this.one('SELECT * FROM srs WHERE id=?', srId); if (!r) fail('NOT_FOUND', 'SR을 찾을 수 없습니다.', { target: srId });
     return { id: srId, title: String(r.title), description: String(r.description), createdAt: String(r.created_at), actor: actor(r), column: r.workflow_column as SR['column'], ...(r.attachment_markdown !== null ? { attachmentMarkdown: String(r.attachment_markdown) } : {}), ...(r.attachment_display_name !== null ? { attachmentDisplayName: String(r.attachment_display_name) } : {}) };
+  }
+  boardItem(srId: string): SRSummary {
+    const r = this.one(`SELECT id,title,created_at,${this.effectiveColumn} AS board_column FROM srs WHERE id=?`, srId);
+    if (!r) fail('NOT_FOUND', 'SR을 찾을 수 없습니다.', { target: srId });
+    const pendingReviews = Number(this.one("SELECT (SELECT COUNT(*) FROM reviews WHERE sr_id=? AND status='requested')+(SELECT COUNT(*) FROM worktree_reviews WHERE sr_id=? AND status='requested') AS n", srId, srId)?.n ?? 0);
+    return { id: srId, title: String(r.title), createdAt: String(r.created_at), column: r.board_column as SRSummary['column'], pendingReviews };
   }
   document(srId: string, documentId: string): DocumentRecord {
     this.sr(srId); const r = this.one('SELECT * FROM documents WHERE id=?', documentId);
@@ -38,7 +48,8 @@ export class Queries {
   receipt(operationId: string): (CommandReceipt & { fingerprint: string }) | null {
     const r = this.one('SELECT * FROM command_receipts WHERE operation_id=?', operationId); if (!r) return null;
     const run = this.one('SELECT run_id FROM planning_receipt_runs WHERE operation_id=?', operationId);
-    const review = this.one('SELECT review_id FROM review_receipts WHERE operation_id=?', operationId);
+    const review = this.one('SELECT review_id FROM review_receipts WHERE operation_id=?', operationId)
+      ?? this.one('SELECT review_id FROM worktree_review_receipts WHERE operation_id=?', operationId);
     return { operationId, kind: r.command_kind as CommandReceipt['kind'], fingerprint: String(r.fingerprint), srId: String(r.sr_id), changed: r.changed === 1, committedAt: String(r.committed_at), ...(review ? { reviewId: String(review.review_id) } : {}), ...(run ? { runId: String(run.run_id) } : {}), ...(r.document_id ? { ref: { srId: String(r.sr_id), documentId: String(r.document_id), versionId: String(r.version_id) } } : {}) };
   }
   review(srId: string, reviewId: string): ReviewRecord {
@@ -60,6 +71,7 @@ export class Queries {
     if (q.kind === 'workflow') return this.workflow(q.srId);
     if (q.kind === 'run') return this.run(q.srId, q.runId);
     if (q.kind === 'runningRuns') return this.all("SELECT payload FROM planning_runs WHERE status='running'").map(r => JSON.parse(String(r.payload)) as PlanningRun);
+    if (q.kind === 'boardItem') return this.boardItem(q.srId);
     if (q.kind === 'sr') return this.sr(q.srId);
     if (q.kind === 'document') return this.document(q.srId, q.documentId);
     if (q.kind === 'version') return this.version(q.target);
@@ -73,8 +85,8 @@ export class Queries {
     const { limit, key } = paging(scope, q.options);
     if (q.kind === 'board') {
       cursorKey(key, ['string', 'string']);
-      const rows = this.all(`SELECT id,title,created_at,workflow_column FROM srs ${key ? 'WHERE (created_at,id)<(?,?)' : ''} ORDER BY created_at DESC,id DESC LIMIT ?`, ...(key ?? []), limit + 1);
-      return page(rows.map(r => { const w = this.workflow(String(r.id)); const pendingReviews = Number(this.one("SELECT COUNT(*) AS n FROM reviews WHERE sr_id=? AND status='requested'", String(r.id))?.n ?? 0); return { id: String(r.id), title: String(r.title), createdAt: String(r.created_at), column: r.workflow_column as SRSummary['column'], pendingReviews, ...(w ? { inceptionCycle: w.inceptionCycle, constructionCycle: w.constructionCycle, planningStatus: w.status } : {}) }; }), limit, scope, r => [r.createdAt, r.id]);
+      const rows = this.all(`SELECT id FROM srs ${key ? 'WHERE (created_at,id)<(?,?)' : ''} ORDER BY created_at DESC,id DESC LIMIT ?`, ...(key ?? []), limit + 1);
+      return page(rows.map(r => this.boardItem(String(r.id))), limit, scope, r => [r.createdAt, r.id]);
     }
     this.sr(q.srId);
     if (q.kind === 'reviews') {
