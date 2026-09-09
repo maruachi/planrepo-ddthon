@@ -1,0 +1,119 @@
+{
+  "schemaVersion": 1,
+  "project": {
+    "name": "PlanRepo 데모 프로젝트",
+    "revision": 1
+  },
+  "personas": [
+    { "persona": "P-01", "displayName": "SR 담당자", "roles": ["sr_owner"] },
+    { "persona": "P-02", "displayName": "업무 확인자·요청자", "roles": ["business_requester"] },
+    { "persona": "P-03", "displayName": "동료 검토자", "roles": ["reviewer"] },
+    { "persona": "P-04", "displayName": "결정권자", "roles": ["decision_maker"] },
+    { "persona": "P-05", "displayName": "팀 관리자", "roles": ["team_admin"] }
+  ],
+  "policy": {
+    "version": 1,
+    "description": "DEMO-4 기본 동료 검토 정책",
+    "gates": {
+      "G1": {
+        "requiredRoles": ["reviewer"],
+        "checklist": [
+          { "itemId": "g1-requirements", "label": "요구사항과 완료 기준을 확인했습니다." },
+          { "itemId": "g1-evidence", "label": "질문·결정과 근거를 확인했습니다." }
+        ]
+      },
+      "G2": {
+        "requiredRoles": ["reviewer"],
+        "checklist": [
+          { "itemId": "g2-plan", "label": "진행 계획·설계·구현 계획을 확인했습니다." },
+          { "itemId": "g2-verification", "label": "작업과 검증 연결을 확인했습니다." }
+        ]
+      }
+    }
+  },
+  "scenarios": [
+    {
+      "key": "PAY-102",
+      "title": "결제 취소 기능",
+      "purpose": "결제 취소 정책과 예외를 확정합니다.",
+      "description": "고객이 승인된 결제를 취소할 수 있도록 합니다.",
+      "revision": 1,
+      "artifacts": { "requirementsVersions": 1, "includePlanning": false },
+      "question": {
+        "id": "question-pay-exceptions",
+        "classificationId": "classification-pay-question",
+        "resultVersion": 1,
+        "text": "부분 취소·중복 요청·외부 실패 때 상태를 어떻게 처리합니까?",
+        "reason": "취소 기간 결정만으로 예외 흐름이 완성되지 않습니다.",
+        "status": "open",
+        "requiredGate": "G1"
+      },
+      "decision": {
+        "id": "decision-pay-cancel-window",
+        "classificationId": "classification-pay-decision",
+        "version": 1,
+        "prompt": "결제 취소 가능 기간을 선택합니다.",
+        "alternatives": [
+          { "optionId": "same-day", "label": "당일", "description": "승인 당일까지만 허용합니다." },
+          { "optionId": "seven-days", "label": "7일", "description": "승인 뒤 7일까지 허용합니다." }
+        ],
+        "selectedOption": "seven-days",
+        "impact": "취소 가능 여부와 오류 안내에 영향을 줍니다.",
+        "rationale": "고객 지원 정책과 맞춥니다.",
+        "requiredGate": "G1"
+      },
+      "gates": {
+        "G1": { "reviewEpoch": 1, "validity": "not_passed", "needsNewBundle": false, "bundle": true, "approval": false, "pass": false },
+        "G2": { "reviewEpoch": 1, "validity": "not_passed", "needsNewBundle": false, "bundle": false, "approval": false, "pass": false }
+      }
+    },
+    {
+      "key": "AUTH-331",
+      "title": "로그인 오류 처리",
+      "purpose": "로그인 실패 원인을 안전하고 일관되게 안내합니다.",
+      "description": "인증 실패 종류별 사용자 안내와 복구 경로를 정의합니다.",
+      "revision": 3,
+      "artifacts": { "requirementsVersions": 1, "includePlanning": true, "implementationPlanVersions": 2 },
+      "gates": {
+        "G1": { "reviewEpoch": 1, "validity": "valid", "needsNewBundle": false, "bundle": true, "approval": true, "pass": true },
+        "G2": { "reviewEpoch": 2, "validity": "not_passed", "needsNewBundle": true, "bundle": true, "bundleEpoch": 1, "approval": true, "pass": false }
+      },
+      "change": {
+        "id": "change-auth-error-handling",
+        "eventId": "event-auth-error-handling-applied",
+        "originalImplementationPlanVersion": 1,
+        "currentImplementationPlanVersion": 2,
+        "sectionId": "auth-error-contract",
+        "body": "계정 잠김과 일시적 공급자 오류를 구분해 주세요.",
+        "applicationSummary": "오류 분류와 복구 안내를 구현 계획에 반영했습니다."
+      }
+    },
+    {
+      "key": "NOTI-028",
+      "title": "알림 수신 설정",
+      "purpose": "사용자가 알림 채널과 수신 여부를 관리합니다.",
+      "description": "이메일과 앱 알림의 수신 설정을 저장하고 적용합니다.",
+      "revision": 3,
+      "artifacts": { "requirementsVersions": 1, "includePlanning": true, "implementationPlanVersions": 1 },
+      "gates": {
+        "G1": { "reviewEpoch": 1, "validity": "valid", "needsNewBundle": false, "bundle": true, "approval": true, "pass": true },
+        "G2": { "reviewEpoch": 1, "validity": "valid", "needsNewBundle": false, "bundle": true, "approval": true, "pass": true }
+      },
+      "handoff": { "id": "handoff-noti-028-h1", "version": 1 }
+    },
+    {
+      "key": "CAT-093",
+      "title": "상품 검색 필터",
+      "purpose": "카탈로그 검색 결과를 조건별로 좁힙니다.",
+      "description": "가격·카테고리·재고 조건을 조합한 상품 검색 필터를 제공합니다.",
+      "revision": 5,
+      "artifacts": { "requirementsVersions": 2, "includePlanning": true, "implementationPlanVersions": 1 },
+      "gates": {
+        "G1": { "reviewEpoch": 2, "validity": "invalid", "needsNewBundle": true, "bundle": true, "bundleEpoch": 1, "approval": true, "pass": true, "invalidated": true },
+        "G2": { "reviewEpoch": 2, "validity": "invalid", "needsNewBundle": true, "bundle": true, "bundleEpoch": 1, "approval": true, "pass": true, "invalidated": true }
+      },
+      "handoff": { "id": "handoff-cat-093-h1", "version": 1 },
+      "implementation": { "id": "implementation-cat-093-h1", "status": "started", "manual": true }
+    }
+  ]
+}

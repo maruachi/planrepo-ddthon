@@ -1,0 +1,69 @@
+.plan-readiness,
+.stale-review-bundle {
+  margin: 18px 0;
+  padding: 20px;
+  border: 1px solid #e3d5ac;
+  border-radius: 12px;
+  background: #fffaf0;
+}
+
+.plan-readiness h3,
+.stale-review-bundle h3 {
+  margin: 5px 0 10px;
+}
+
+.plan-readiness ul {
+  display: grid;
+  gap: 10px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.plan-readiness li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 15px;
+  border: 1px solid #e4dfcf;
+  border-radius: 9px;
+  background: #fff;
+}
+
+.plan-readiness li p {
+  margin: 5px 0;
+  color: #58685e;
+}
+
+.plan-readiness li small {
+  color: #6d776f;
+}
+
+.plan-readiness li button {
+  flex: 0 0 auto;
+}
+
+.gate-condition-details {
+  margin: 14px 0;
+  padding: 12px 14px;
+  border: 1px solid #dce4de;
+  border-radius: 9px;
+  background: #fafcfa;
+}
+
+.gate-condition-details summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+
+@media (max-width: 700px) {
+  .plan-readiness li {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .plan-readiness li button {
+    align-self: flex-start;
+  }
+}

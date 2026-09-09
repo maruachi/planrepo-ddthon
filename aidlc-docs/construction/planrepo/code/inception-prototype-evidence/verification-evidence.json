@@ -1,0 +1,110 @@
+{
+  "capturedAt": "2026-09-09T05:27:29.236136+00:00",
+  "source": "isolated local QA fixture",
+  "testRunId": "72a1b3b9-2945-4900-aef6-5e7713d79a5e",
+  "runs": [
+    {
+      "run_id": "run-c71c776a-3bc1-4664-9c97-27002132138a",
+      "task_kind": "QUESTION_PROPOSALS",
+      "status": "succeeded",
+      "started_at": "2026-09-09T05:07:24.209Z",
+      "finished_at": "2026-09-09T05:07:54.365Z",
+      "providerSelection": {
+        "providerId": "claude-cli",
+        "modelChoice": {
+          "kind": "explicit",
+          "modelId": "global.anthropic.claude-opus-4-8"
+        }
+      }
+    },
+    {
+      "run_id": "run-1041fd3c-a035-4515-95d5-db0e51482873",
+      "task_kind": "ARTIFACT_REVISION",
+      "status": "succeeded",
+      "started_at": "2026-09-09T05:09:20.493Z",
+      "finished_at": "2026-09-09T05:09:55.447Z",
+      "providerSelection": {
+        "providerId": "claude-cli",
+        "modelChoice": {
+          "kind": "explicit",
+          "modelId": "global.anthropic.claude-opus-4-8"
+        }
+      }
+    },
+    {
+      "run_id": "run-4e1655ee-2489-4442-8b3b-1ac44bf089db",
+      "task_kind": "ARTIFACT_REVISION",
+      "status": "succeeded",
+      "started_at": "2026-09-09T05:17:14.130Z",
+      "finished_at": "2026-09-09T05:19:01.638Z",
+      "providerSelection": {
+        "providerId": "claude-cli",
+        "modelChoice": {
+          "kind": "explicit",
+          "modelId": "global.anthropic.claude-opus-4-8"
+        }
+      }
+    }
+  ],
+  "planVersions": [
+    {
+      "version": 1,
+      "kind": "requirements",
+      "author_origin": "human",
+      "created_at": "2026-09-09T05:06:47.843Z",
+      "change_summary": "일반 초안에 최소 요구사항 구조를 붙여 첫 문서로 저장합니다."
+    },
+    {
+      "version": 2,
+      "kind": "requirements",
+      "author_origin": "ai_applied",
+      "created_at": "2026-09-09T05:10:35.137Z",
+      "change_summary": "단일 문단이던 초안을 Inception Plan 구조(요구사항·사용자 시나리오·진행 계획·주요 구조·주요 결정·작업 단위)로 재구성했습니다. 확인된 답변(30분 단위·평일 09:00~18:00·최대 2시간)과 추가 합의(수용 인원 이상 조회, 시작 전 취소, SSO 사용자 ID 전달, 구조 연결 직원→예약 화면→예약 API→예약 데이터베이스, 검토 목표는 문서·구조 합의)를 확인/미확인으로 구분해 반영했습니다."
+    },
+    {
+      "version": 3,
+      "kind": "requirements",
+      "author_origin": "human",
+      "created_at": "2026-09-09T05:11:45.357Z",
+      "change_summary": "검토 의견을 반영해 연속 예약의 경계 시간 규칙을 명확히 했습니다."
+    },
+    {
+      "version": 4,
+      "kind": "requirements",
+      "author_origin": "ai_applied",
+      "created_at": "2026-09-09T05:20:47.461Z",
+      "change_summary": "합의된 요구사항·구조·결정을 유지하면서 사람이 확인한 네 가지 상황(예약 가능한 시간 선택, 겹치는 예약 선택, 시작 전 본인 예약 취소, 시작 뒤 취소 요청)을 담은 상황별 시각화 자료를 추가했습니다. 신규 화면 문구는 확정이 아닌 '제안'으로 명시하고, 이 문서가 실제 실행 결과가 아닌 Inception 설계·검토 대상임을 진행 계획에 명확히 했습니다."
+    }
+  ],
+  "approvals": [
+    {
+      "gate": "G1",
+      "result": "approved",
+      "approved_at": "2026-09-09T05:12:20.719Z",
+      "comment": "요구사항, 사용자 시나리오, 구조, 주요 결정과 작업 단위를 검토했습니다. 요청한 경계 시간 규칙도 반영됐습니다."
+    },
+    {
+      "gate": "G1",
+      "result": "approved",
+      "approved_at": "2026-09-09T05:23:15.091Z",
+      "comment": "Plan v4의 조건별 경로, 화면 제안, 약속과 예외를 근거 문서와 대조했습니다. 화면 예시는 실제 구현 결과가 아닌 제안입니다."
+    }
+  ],
+  "visualization": {
+    "kind": "ready",
+    "nodes": 9,
+    "edges": 7,
+    "scenarios": 4,
+    "rules": 5
+  },
+  "userDataPreservation": {
+    "tables": 37,
+    "changed": [],
+    "srCount": {
+      "count": 5
+    },
+    "integrity": {
+      "integrity_check": "ok"
+    }
+  }
+}

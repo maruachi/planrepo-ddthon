@@ -1,0 +1,50 @@
+{
+  "seedId": "DEMO-4",
+  "version": "1",
+  "projectId": "demo-project",
+  "teamId": "demo-team",
+  "defaultActorId": "persona-p01-owner",
+  "personaIds": {
+    "P-01": "persona-p01-owner",
+    "P-02": "persona-p02-requester",
+    "P-03": "persona-p03-reviewer",
+    "P-04": "persona-p04-decision-maker",
+    "P-05": "persona-p05-admin"
+  },
+  "srIds": {
+    "PAY-102": "sr-pay-102",
+    "AUTH-331": "sr-auth-331",
+    "NOTI-028": "sr-noti-028",
+    "CAT-093": "sr-cat-093"
+  },
+  "policyId": "policy-demo-review",
+  "initialStates": {
+    "PAY-102": "requirements",
+    "AUTH-331": "planning",
+    "NOTI-028": "ready",
+    "CAT-093": "requirements"
+  },
+  "entityIds": {
+    "PAY-102": {
+      "questionId": "question-pay-exceptions",
+      "decisionId": "decision-pay-cancel-window",
+      "g1BundleId": "bundle-pay-102-g1-v1"
+    },
+    "AUTH-331": {
+      "changeRequestId": "change-auth-error-handling",
+      "g1BundleId": "bundle-auth-331-g1-v1",
+      "g2BundleId": "bundle-auth-331-g2-v1"
+    },
+    "NOTI-028": {
+      "g1BundleId": "bundle-noti-028-g1-v1",
+      "g2BundleId": "bundle-noti-028-g2-v1",
+      "handoffId": "handoff-noti-028-h1"
+    },
+    "CAT-093": {
+      "g1BundleId": "bundle-cat-093-g1-v1",
+      "g2BundleId": "bundle-cat-093-g2-v1",
+      "handoffId": "handoff-cat-093-h1",
+      "implementationId": "implementation-cat-093-h1"
+    }
+  }
+}

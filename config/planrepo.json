@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "server": {
+    "host": "127.0.0.1",
+    "port": 4173,
+    "devPort": 5173
+  },
+  "paths": {
+    "dataDir": ".planrepo/data",
+    "runsDir": ".planrepo/runs",
+    "logsDir": ".planrepo/logs"
+  },
+  "generation": {
+    "providerId": "claude-cli",
+    "modelChoice": {
+      "kind": "explicit",
+      "modelId": "global.anthropic.claude-opus-4-8"
+    },
+    "concurrency": 1,
+    "maxNonterminal": 10,
+    "timeoutMs": 300000,
+    "controlPollMs": 250,
+    "terminationGraceMs": 2000,
+    "terminationObservationMs": 10000
+  },
+  "limits": {
+    "commandBytes": 8388608,
+    "artifactBytes": 1048576,
+    "providerInputBytes": 2097152,
+    "stdoutBytes": 4194304,
+    "stderrBytes": 262144,
+    "draftBytes": 2097152,
+    "handoffBytes": 8388608
+  },
+  "sqlite": {
+    "journalMode": "DELETE",
+    "synchronous": "FULL",
+    "foreignKeys": true,
+    "busyTimeoutMs": 100
+  }
+}

@@ -1,0 +1,40 @@
+.inception-conversation { display: grid; gap: 18px; }
+.inception-conversation > header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.inception-conversation > header h2 { margin: 3px 0 0; }
+.inception-conversation > header > span { padding: 4px 9px; border-radius: 999px; background: #e7ece8; color: #465149; font-size: 12px; font-weight: 700; }
+.inception-conversation__intro { margin: 0; color: #59635c; }
+.inception-conversation__composer,
+.inception-conversation__proposals,
+.inception-conversation__plan,
+.inception-conversation__history { padding: 18px; border: 1px solid #dbe1dc; border-radius: 9px; background: #fff; }
+.inception-conversation__composer { display: grid; gap: 12px; background: #f8faf8; }
+.inception-conversation__actions { display: flex; flex-wrap: wrap; gap: 9px; }
+.inception-conversation__notice,
+.inception-conversation__status,
+.inception-conversation__error,
+.inception-conversation__success { margin: 0; padding: 12px 14px; border-radius: 7px; }
+.inception-conversation__notice,
+.inception-conversation__status { background: #edf1ee; color: #465149; }
+.inception-conversation__error { background: #fae6e2; color: #79271f; }
+.inception-conversation__success { background: #e1f1e7; color: #17623c; font-weight: 700; }
+.inception-conversation__error p { margin-top: 0; }
+.inception-conversation__proposals,
+.inception-conversation__history { display: grid; gap: 12px; }
+.inception-conversation__proposals > h3,
+.inception-conversation__history > h3,
+.inception-conversation__plan > h3 { margin: 0; }
+.inception-conversation__proposals > article,
+.inception-conversation__history > article { padding: 15px; border: 1px solid #dbe1dc; border-radius: 8px; background: #f9faf9; }
+.inception-conversation__proposals article p,
+.inception-conversation__history article p { margin: 8px 0; }
+.inception-conversation__select { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: start; gap: 9px; }
+.inception-conversation__select input,
+.inception-conversation__answer input { width: auto; }
+.inception-conversation__plan pre { max-height: 520px; overflow: auto; padding: 16px; border: 1px solid #dbe1dc; border-radius: 7px; background: #f8faf8; white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; }
+.inception-conversation__plan-preview { max-height:560px; overflow:auto; padding:18px; margin:16px 0; background:#f8faf8; border:1px solid #dbe1dc; border-radius:8px; overflow-wrap:anywhere; }.inception-conversation__plan-preview h1 { font-size:22px; }.inception-conversation__plan-preview h2 { font-size:18px; }
+.inception-conversation__history h4 { margin: 0; }
+.inception-conversation__history blockquote { margin: 12px 0; padding: 10px 12px; border-left: 3px solid #397653; background: #edf4ef; }
+.inception-conversation__answer { display: grid; gap: 11px; margin-top: 14px; padding-top: 14px; border-top: 1px solid #dbe1dc; }
+.inception-conversation__answer fieldset { display: grid; gap: 7px; margin: 0; padding: 12px; border: 1px solid #d5ddd7; border-radius: 7px; }
+.inception-conversation__answer fieldset label { display: flex; align-items: center; gap: 7px; }
+@media (max-width: 640px) { .inception-conversation > header { flex-direction: column; }.inception-conversation__actions > button { width: 100%; } }

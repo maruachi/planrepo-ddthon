@@ -1,0 +1,11 @@
+.draft-first-form { max-width: 900px; }
+.draft-first-form form { display: grid; gap: 16px; }
+.draft-first-form .draft-primary textarea { min-height: 280px; }
+.advanced-fields { padding: 12px 14px; border: 1px solid #d9dfda; border-radius: 8px; background: #f9faf9; }
+.advanced-fields summary { cursor: pointer; font-weight: 750; }
+.advanced-fields > div { display: grid; gap: 14px; margin-top: 14px; }
+.onboarding-progress { display: grid; gap: 8px; padding: 14px; border-radius: 8px; background: #eef4ef; }
+.onboarding-progress ol { margin: 0; padding-left: 22px; }
+.document-guidance { padding: 12px 14px; border-left: 3px solid #397653; background: #edf4ef; }
+.document-advanced { margin: 14px 0; padding: 12px 14px; border: 1px solid #d9dfda; border-radius: 8px; }
+.document-advanced summary { cursor: pointer; font-weight: 750; }

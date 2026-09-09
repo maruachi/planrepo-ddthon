@@ -1,0 +1,1591 @@
+{
+  "sr": {
+    "scope": {
+      "kind": "sr",
+      "projectId": "demo-project",
+      "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69"
+    },
+    "key": "SR-SQPKHL",
+    "title": "[예시] 배송 전 주문 취소·환불",
+    "ownerId": "persona-p01-owner",
+    "originalDescriptionRef": {
+      "kind": "sr_description",
+      "projectId": "demo-project",
+      "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+      "entityId": "description-67c6bd00-a969-438a-85b1-50cc72f7456a",
+      "version": 1
+    },
+    "currentDescriptionRef": {
+      "kind": "sr_description",
+      "projectId": "demo-project",
+      "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+      "entityId": "description-67c6bd00-a969-438a-85b1-50cc72f7456a",
+      "version": 1
+    },
+    "progressStage": "planning",
+    "revision": 11,
+    "gates": [
+      {
+        "gate": "G1",
+        "validity": "valid",
+        "reviewEpoch": 9,
+        "currentBundleRef": {
+          "projectId": "demo-project",
+          "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+          "gate": "G1",
+          "bundleId": "bundle-b9d91b7a-f23b-4a5b-a9bd-04ee925cbc42",
+          "version": 1
+        },
+        "blockers": []
+      },
+      {
+        "gate": "G2",
+        "validity": "not_passed",
+        "reviewEpoch": 9,
+        "blockers": []
+      }
+    ]
+  },
+  "originalDescription": {
+    "versionRef": {
+      "kind": "sr_description",
+      "projectId": "demo-project",
+      "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+      "entityId": "description-67c6bd00-a969-438a-85b1-50cc72f7456a",
+      "version": 1
+    },
+    "title": "[예시] 배송 전 주문 취소·환불",
+    "purpose": "[예시] 배송 전 주문 취소·환불의 목적과 완료 기준을 구체화합니다.",
+    "description": "[이미지 예시 체험] 배송 전 주문 취소·환불\n\n고객센터를 기다리지 않고 고객이 주문 상세에서 직접 주문 전체를 취소할 수 있게 합니다.\n배송 전 전체 주문만 직접 취소합니다. 취소 확정 직전에 배송 상태를 다시 확인합니다.\n이미 배송이 시작됐다면 주문을 유지하고 자동 환불 없이 반품 방법을 안내합니다.\n일부 상품만 취소하는 경우는 이번 범위에서 제외하고 고객센터로 안내합니다.\n취소 요청 버튼을 반복해서 눌러도 주문 취소와 환불 요청은 한 번만 처리해야 합니다.\n주문 취소 완료와 환불 완료는 다릅니다. 환불 접수, 환불 상태 확인 중, 환불 완료를 구분해 보여 줍니다.\n환불 서비스 응답이 늦으면 '환불 상태 확인 중'으로 안내하고, 30분 안에 확인되지 않으면 담당자에게 알려 확인합니다.\n환불 금액은 실제 결제 금액 기준입니다. 이미지의 예시 주문은 상품 45,000원 - 할인 9,000원 + 배송비 3,000원 = 환불 접수 39,000원입니다.\n환불은 기존 결제 수단으로 요청하며 통상 3~5영업일이 걸릴 수 있다는 안내를 표시합니다.\n쿠폰 재발급, 부분 취소 금액 계산, 배송 후 실제 반품 처리, 실제 결제 실행은 이번 Plan의 범위에 포함하지 않습니다.\n주문 상세 화면, 취소 확인 화면, 취소 결과와 환불 상태 화면이 필요합니다.\n구성은 고객 화면, 주문 취소 API, 주문 상태 저장소, 배송 상태 조회, 환불 서비스이며 취소 확정과 배송 시작의 경합을 다뤄야 합니다.\n이번은 PlanRepo의 문서 리뷰·결재를 체험하는 예시입니다. 실제 고객 주문이나 결제를 실행하지 않습니다. 위 내용으로 Inception 문서와 상황별 시각화를 만들고 동료 검토자 한 명에게 검토받습니다.",
+    "authorId": "persona-p01-owner",
+    "createdAt": "2026-09-09T05:43:22.862Z"
+  },
+  "currentDescription": {
+    "versionRef": {
+      "kind": "sr_description",
+      "projectId": "demo-project",
+      "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+      "entityId": "description-67c6bd00-a969-438a-85b1-50cc72f7456a",
+      "version": 1
+    },
+    "title": "[예시] 배송 전 주문 취소·환불",
+    "purpose": "[예시] 배송 전 주문 취소·환불의 목적과 완료 기준을 구체화합니다.",
+    "description": "[이미지 예시 체험] 배송 전 주문 취소·환불\n\n고객센터를 기다리지 않고 고객이 주문 상세에서 직접 주문 전체를 취소할 수 있게 합니다.\n배송 전 전체 주문만 직접 취소합니다. 취소 확정 직전에 배송 상태를 다시 확인합니다.\n이미 배송이 시작됐다면 주문을 유지하고 자동 환불 없이 반품 방법을 안내합니다.\n일부 상품만 취소하는 경우는 이번 범위에서 제외하고 고객센터로 안내합니다.\n취소 요청 버튼을 반복해서 눌러도 주문 취소와 환불 요청은 한 번만 처리해야 합니다.\n주문 취소 완료와 환불 완료는 다릅니다. 환불 접수, 환불 상태 확인 중, 환불 완료를 구분해 보여 줍니다.\n환불 서비스 응답이 늦으면 '환불 상태 확인 중'으로 안내하고, 30분 안에 확인되지 않으면 담당자에게 알려 확인합니다.\n환불 금액은 실제 결제 금액 기준입니다. 이미지의 예시 주문은 상품 45,000원 - 할인 9,000원 + 배송비 3,000원 = 환불 접수 39,000원입니다.\n환불은 기존 결제 수단으로 요청하며 통상 3~5영업일이 걸릴 수 있다는 안내를 표시합니다.\n쿠폰 재발급, 부분 취소 금액 계산, 배송 후 실제 반품 처리, 실제 결제 실행은 이번 Plan의 범위에 포함하지 않습니다.\n주문 상세 화면, 취소 확인 화면, 취소 결과와 환불 상태 화면이 필요합니다.\n구성은 고객 화면, 주문 취소 API, 주문 상태 저장소, 배송 상태 조회, 환불 서비스이며 취소 확정과 배송 시작의 경합을 다뤄야 합니다.\n이번은 PlanRepo의 문서 리뷰·결재를 체험하는 예시입니다. 실제 고객 주문이나 결제를 실행하지 않습니다. 위 내용으로 Inception 문서와 상황별 시각화를 만들고 동료 검토자 한 명에게 검토받습니다.",
+    "authorId": "persona-p01-owner",
+    "createdAt": "2026-09-09T05:43:22.862Z"
+  },
+  "sources": [
+    {
+      "scope": {
+        "kind": "sr",
+        "projectId": "demo-project",
+        "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69"
+      },
+      "sourceId": "source-1ad4f17e-9823-4889-9dcf-ddd15fe8e455",
+      "currentVersionRef": {
+        "kind": "context_source",
+        "projectId": "demo-project",
+        "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+        "entityId": "source-1ad4f17e-9823-4889-9dcf-ddd15fe8e455",
+        "version": 1
+      },
+      "revision": 1,
+      "createdBy": "persona-p01-owner",
+      "createdAt": "2026-09-09T05:43:22.868Z",
+      "displayName": "[예시] 배송 전 주문 취소·환불 시작 초안",
+      "provenance": "사용자가 등록할 때 제공한 초안",
+      "versionCreatedBy": "persona-p01-owner",
+      "versionCreatedAt": "2026-09-09T05:43:22.868Z",
+      "kind": "markdown",
+      "content": "[이미지 예시 체험] 배송 전 주문 취소·환불\n\n고객센터를 기다리지 않고 고객이 주문 상세에서 직접 주문 전체를 취소할 수 있게 합니다.\n배송 전 전체 주문만 직접 취소합니다. 취소 확정 직전에 배송 상태를 다시 확인합니다.\n이미 배송이 시작됐다면 주문을 유지하고 자동 환불 없이 반품 방법을 안내합니다.\n일부 상품만 취소하는 경우는 이번 범위에서 제외하고 고객센터로 안내합니다.\n취소 요청 버튼을 반복해서 눌러도 주문 취소와 환불 요청은 한 번만 처리해야 합니다.\n주문 취소 완료와 환불 완료는 다릅니다. 환불 접수, 환불 상태 확인 중, 환불 완료를 구분해 보여 줍니다.\n환불 서비스 응답이 늦으면 '환불 상태 확인 중'으로 안내하고, 30분 안에 확인되지 않으면 담당자에게 알려 확인합니다.\n환불 금액은 실제 결제 금액 기준입니다. 이미지의 예시 주문은 상품 45,000원 - 할인 9,000원 + 배송비 3,000원 = 환불 접수 39,000원입니다.\n환불은 기존 결제 수단으로 요청하며 통상 3~5영업일이 걸릴 수 있다는 안내를 표시합니다.\n쿠폰 재발급, 부분 취소 금액 계산, 배송 후 실제 반품 처리, 실제 결제 실행은 이번 Plan의 범위에 포함하지 않습니다.\n주문 상세 화면, 취소 확인 화면, 취소 결과와 환불 상태 화면이 필요합니다.\n구성은 고객 화면, 주문 취소 API, 주문 상태 저장소, 배송 상태 조회, 환불 서비스이며 취소 확정과 배송 시작의 경합을 다뤄야 합니다.\n이번은 PlanRepo의 문서 리뷰·결재를 체험하는 예시입니다. 실제 고객 주문이나 결제를 실행하지 않습니다. 위 내용으로 Inception 문서와 상황별 시각화를 만들고 동료 검토자 한 명에게 검토받습니다.",
+      "confirmation": "unconfirmed",
+      "reviewImpact": {
+        "affectedGates": [],
+        "needsNewReview": false,
+        "carriedBlockingRequestIds": [],
+        "currentHandoffValid": true
+      }
+    }
+  ],
+  "artifacts": [
+    {
+      "scope": {
+        "kind": "sr",
+        "projectId": "demo-project",
+        "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69"
+      },
+      "artifactId": "artifact-45fd5ff8-4158-4bd5-a48c-9606510186f4",
+      "kind": "requirements",
+      "versionRef": {
+        "kind": "artifact",
+        "projectId": "demo-project",
+        "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+        "entityId": "artifact-45fd5ff8-4158-4bd5-a48c-9606510186f4",
+        "version": 3
+      },
+      "markdown": "# Inception Plan: [예시] 배송 전 주문 취소·환불\n\n## 요구사항\n\n이 문서는 PlanRepo의 문서 리뷰·결재를 체험하기 위한 예시 Plan입니다. 실제 고객 주문이나 결제를 실행하지 않습니다.\n\n확인된 요구사항(사용자 초안 및 답변 기준):\n\n- 고객센터를 기다리지 않고 고객이 주문 상세에서 직접 주문 전체를 취소할 수 있게 합니다.\n- 배송 전 전체 주문만 직접 취소하며, 취소 확정 직전에 배송 상태를 다시 확인합니다.\n- 이미 배송이 시작됐다면 주문을 유지하고 자동 환불 없이 반품 방법을 안내합니다.\n- 일부 상품만 취소하는 경우는 이번 범위에서 제외하고 고객센터로 안내합니다.\n- 취소 요청 버튼을 반복해서 눌러도 주문 취소와 환불 요청은 한 번만 처리해야 합니다.\n- 주문 취소 완료와 환불 완료는 다릅니다. 환불 접수, 환불 상태 확인 중, 환불 완료를 구분해 보여 줍니다.\n- 환불 서비스 응답이 늦으면 '환불 상태 확인 중'으로 안내하고, 30분 안에 확인되지 않으면 담당자에게 알려 확인합니다.\n- 환불 금액은 실제 결제 금액 기준입니다. 예시 주문은 상품 45,000원 - 할인 9,000원 + 배송비 3,000원 = 환불 접수 39,000원입니다.\n- 환불은 기존 결제 수단으로 요청하며 통상 3~5영업일이 걸릴 수 있다는 안내를 표시합니다.\n\n범위에서 제외(확인됨): 쿠폰 재발급, 부분 취소 금액 계산, 배송 후 실제 반품 처리, 실제 결제 실행은 이번 Plan의 범위에 포함하지 않습니다.\n\n필요한 화면(확인됨): 주문 상세 화면, 취소 확인 화면, 취소 결과와 환불 상태 화면.\n\n### 읽는 사람이 먼저 알아야 할 것\n\n이 예시의 고객은 주문한 머그컵을 받기 전에 주문 전체를 취소하려고 합니다. 고객에게 중요한 것은 세 가지입니다. 지금 취소할 수 있는지, 얼마가 돌아오는지, 실제 환불이 끝났는지입니다.\n\n사람은 취소가 허용되는 범위와 예외를 결정합니다. AI는 그 결정을 문서와 화면 예시로 정리합니다. 문단 번호를 연결하거나 이미 적힌 내용을 별도의 근거 칸에 다시 옮겨 적을 필요는 없습니다.\n\n### 잘 만들었다고 판단할 기준\n\n| 확인하는 상황 | 기대하는 결과 |\n|---|---|\n| 배송 전 주문 전체를 취소합니다. | 주문은 취소 완료가 되고 39,000원 환불 접수를 안내합니다. |\n| 취소를 확정하기 전에 배송이 시작됐습니다. | 주문을 유지하고 반품 방법을 안내합니다. 자동 환불하지 않습니다. |\n| 취소가 먼저 확정됐습니다. | 나중에 들어온 배송 시작 처리로 취소 완료가 뒤집히지 않습니다. |\n| 같은 취소 버튼을 여러 번 누릅니다. | 주문 취소와 환불 접수는 각각 한 번만 처리됩니다. |\n| 환불 응답을 아직 받지 못했습니다. | 환불 완료라고 표시하지 않고 확인 중이라고 안내합니다. |\n| 주문 중 일부 상품만 취소하려고 합니다. | 직접 취소하지 않고 고객센터 이용을 안내합니다. |\n\n## 사용자 시나리오\n\n**상황 1 — 배송 전 전체 취소 성공(확인됨):** 고객이 주문 상세에서 취소를 요청합니다. 취소 확인 화면에서 환불 접수 39,000원과 기존 결제 수단, 통상 3~5영업일 안내를 확인하고 취소를 확정합니다. 취소 확정 직전에 배송 상태를 다시 확인해 배송 전이면 취소를 완료하고 환불 접수 상태로 전환합니다.\n\n**상황 2 — 취소 확정과 배송 시작의 경합(확인됨, 답변 기준):** 고객이 취소를 확정하려는 순간 배송이 시작되어 두 처리가 겹치는 경우, 취소 확정 직전 배송 상태를 재확인해 배송 시작이 확인되면 배송을 우선합니다. 주문은 유지하고 취소·환불은 실행하지 않으며 반품 안내로 전환합니다. 배송 전 상태에서 취소 확정이 먼저 완료되면 취소 완료 상태를 유지하고 배송 시작 처리는 거절합니다. 두 상태 변경은 같은 주문에 대해 한 번만 확정되도록 합니다.\n\n**상황 3 — 일부 상품만 취소(확인됨, 범위 밖):** 일부 상품만 취소하려는 경우는 이번 범위에서 제외하고 고객센터로 안내합니다.\n\n**상황 4 — 환불 응답 지연(확인됨):** 환불 서비스 응답이 늦으면 '환불 상태 확인 중'으로 안내하고, 30분 안에 확인되지 않으면 담당자에게 알려 확인합니다. 환불 접수, 환불 상태 확인 중, 환불 완료를 구분해 보여 줍니다.\n\n\n### 고객에게 보여줄 화면 문구\n\n**배송 전 전체 취소 성공**\n\n- 상태: 주문 취소 완료 · 환불 접수\n- 제목: 주문을 취소했어요\n- 설명: 환불 39,000원을 접수했어요. 결제했던 수단으로 돌려드리며 통상 3~5영업일이 걸릴 수 있어요.\n- 버튼: 주문 상세로\n\n**취소·배송 시작 경합**\n\n- 상태: 배송 중 · 주문 유지\n- 제목: 이미 배송이 시작됐어요\n- 설명: 지금은 주문을 취소할 수 없어요. 상품을 받은 뒤 반품 방법을 확인해 주세요. 자동 환불은 진행하지 않았어요.\n- 버튼: 반품 방법 보기\n\n**일부 상품만 취소**\n\n- 상태: 주문 유지\n- 제목: 일부 상품만 취소하려면\n- 설명: 일부 상품 취소는 고객센터에서 도와드려요. 현재 주문은 그대로 유지돼요.\n- 버튼: 고객센터 안내\n\n**환불 응답 지연**\n\n- 상태: 취소 완료 · 환불 확인 중\n- 제목: 환불 상태를 확인하고 있어요\n- 설명: 주문 취소는 완료됐고 환불 결과를 확인하고 있어요. 환불을 다시 요청하지 않으셔도 돼요. 30분 안에 확인되지 않으면 담당자가 확인해요.\n- 버튼: 주문 상세로\n\n화면 문구는 이 Plan에서 검토할 제안입니다. 실제 고객 화면의 캡처가 아닙니다.\n\n## 진행 계획\n\n이 예시는 새 기능의 개발 전에 팀이 같은 문서를 읽고 동의하는 과정까지 진행합니다.\n\n1. **초안을 올립니다.** 기획 담당자가 가지고 있던 설명을 그대로 올립니다. 올린 문서가 바로 Plan이 됩니다.\n2. **필요한 부분만 다듬습니다.** 기획 담당자는 문서를 직접 수정할 수 있습니다. AI에게 요약, 빠진 질문, 문장 수정이나 화면 예시를 요청하는 것은 선택입니다.\n3. **중요한 선택을 확인합니다.** 이 예시에서는 취소와 배송 시작이 겹칠 때 먼저 확정된 주문 상태를 유지하기로 정했습니다.\n4. **동료 검토자 한 명에게 검토받는 것을 목표로 합니다.** 검토자는 고객에게 보여줄 내용과 예외 처리가 문서에 맞는지 읽고, 바꿔야 할 문단에 의견을 남깁니다.\n5. **수정한 문서를 다시 확인합니다.** 작성자는 의견을 반영합니다. 시스템은 새 버전과 변경 내용을 연결합니다.\n6. **문서를 승인합니다.** 검토자가 현재 문서를 승인하고 담당자가 승인 범위를 확정합니다. 이 승인은 문서의 내용에 대한 합의입니다.\n\nAI 질문에 전부 답하거나 별도의 근거 기록을 작성하는 일은 승인 조건이 아닙니다. 사람이 리뷰에서 요청한 필수 수정은 해결 여부를 확인합니다.\n\n이번에 확정하지 않는 일은 실제 개발 착수, 배포 일정, 실제 결제나 환불 실행입니다. 이 문서는 그 단계에서 활용할 계획입니다.\n\n## 주요 구조\n\n구성요소는 고객 화면, 주문 취소 API, 주문 상태 저장소, 배송 상태 조회, 환불 서비스입니다.\n\n각 부분은 다음 순서로 연결됩니다.\n\n- 고객 화면 → 주문 취소 API: 고객이 주문 상세에서 취소를 요청하면 취소 처리를 호출합니다.\n- 주문 취소 API → 배송 상태 조회: 취소 확정 직전에 배송 상태를 다시 확인합니다.\n- 주문 취소 API → 주문 상태 저장소: 취소 완료 상태를 기록하고 두 상태 변경이 한 번만 확정되도록 합니다.\n- 주문 취소 API → 환불 서비스: 배송 전 취소가 확정되면 환불 접수를 요청합니다.\n- 환불 서비스 → 고객 화면: 환불 접수, 환불 상태 확인 중, 환불 완료 상태를 구분해 표시합니다.\n\n### 각 부분을 쉬운 말로 보면\n\n| 부분 | 하는 일 |\n|---|---|\n| 고객 화면 | 취소 버튼과 취소·환불 상태를 보여 줍니다. |\n| 주문 취소 API | 화면에서 받은 취소 요청을 처리하는 서버 창구입니다. |\n| 주문 상태 저장소 | 주문이 배송 전인지, 배송 중인지, 취소됐는지 기록합니다. |\n| 배송 상태 조회 | 취소를 확정해도 되는지 배송의 최신 상태를 확인합니다. |\n| 환불 서비스 | 결제했던 수단으로 환불을 접수하고 처리 상태를 알려 줍니다. |\n\n개발 단계에서 정할 내용: 저장 방식과 서비스 사이의 자세한 데이터 형식은 이 문서의 고객 약속을 지키는 방향으로 정합니다.\n\n## 주요 결정\n\n**결정: 먼저 확정된 주문 상태를 유지합니다.** SR 담당자가 답한 내용에 따라, 취소 확정 직전 배송 상태를 재확인해 배송 시작이 확인되면 배송을 우선합니다. 주문은 유지하고 취소·환불은 실행하지 않으며 반품 안내로 전환합니다. 배송 전 상태에서 취소 확정이 먼저 완료되면 취소 완료 상태를 유지하고 배송 시작 처리는 거절합니다. 두 상태 변경은 같은 주문에 대해 한 번만 확정되도록 합니다. 이는 예시 체험용 결정이며 실제 서비스 정책의 확정이 아닙니다.\n\n**결정: 버튼을 여러 번 눌러도 한 번만 처리합니다.** 취소 요청 버튼을 반복해서 눌러도 주문 취소와 환불 요청은 한 번만 처리합니다.\n\n**결정(확인됨): 환불 상태 구분과 지연 처리.** 환불 접수, 환불 상태 확인 중, 환불 완료를 구분해 보여 주고, 응답 지연 시 30분 기준으로 담당자에게 알립니다.\n\n개발 전에 더 구체화할 내용: 반품 안내로 연결할 실제 주소, 운영 담당자에게 알리는 채널, 주문 상태를 한 번만 확정하는 저장 방식은 구현 준비에서 정합니다. 이번 문서 승인으로 이 세부 사항까지 정했다고 보지 않습니다.\n\n## 작업 단위\n\n- 작업 단위 1: 주문 상세·취소 확인·취소 결과/환불 상태 화면 구성(고객 화면).\n- 작업 단위 2: 주문 취소 API의 취소 확정 직전 배송 상태 재확인과 먼저 확정된 주문 상태를 유지하는 처리.\n- 작업 단위 3: 주문 상태 저장소의 취소 완료/배송 시작 단일 확정과 반복 요청을 한 번만 처리하는 기능.\n- 작업 단위 4: 환불 서비스 연동과 환불 접수·확인 중·완료 상태 표시 및 39,000원 예시 금액 표기.\n- 작업 단위 5: 환불 응답 지연 시 '환불 상태 확인 중' 안내와 30분 기준 담당자 알림.\n\n각 작업은 고객에게 약속한 동작을 기준으로 나눴습니다. 세부 코드·저장 기술·배포 작업은 다음 개발 과정에서 정합니다.\n\n<!-- planrepo-visualization\n{\n  \"schemaVersion\": 1,\n  \"overview\": {\n    \"headline\": \"배송 전 주문 전체 취소와 환불 상태 안내\",\n    \"summary\": \"고객이 주문 상세에서 배송 전 전체 취소를 직접 요청하고, 취소 확정 직전 배송 상태를 재확인해 환불 접수·상태 안내까지 처리하는 검토용 Plan입니다.\",\n    \"evidence\": {\n      \"sectionId\": \"요구사항\",\n      \"quote\": \"고객이 주문 상세에서 직접 주문 전체를 취소할 수 있게 합니다\"\n    }\n  },\n  \"changes\": {\n    \"before\": [\n      \"고객센터에 취소를 요청하고 담당자의 처리를 기다립니다.\"\n    ],\n    \"after\": [\n      \"배송 전 전체 주문은 고객이 직접 취소합니다.\",\n      \"주문 취소 상태와 환불 상태를 따로 보여 줍니다.\"\n    ],\n    \"evidence\": {\n      \"sectionId\": \"요구사항\",\n      \"quote\": \"고객센터를 기다리지 않고 고객이 주문 상세에서 직접 주문 전체를 취소할 수 있게 합니다.\"\n    }\n  },\n  \"nodes\": [\n    {\n      \"id\": \"node-1\",\n      \"kind\": \"action\",\n      \"title\": \"주문 상세에서 취소 요청\",\n      \"detail\": \"고객이 주문 상세에서 취소를 요청합니다.\",\n      \"evidence\": {\n        \"sectionId\": \"사용자 시나리오\",\n        \"quote\": \"고객이 주문 상세에서 취소를 요청합니다\"\n      }\n    },\n    {\n      \"id\": \"node-2\",\n      \"kind\": \"condition\",\n      \"title\": \"취소 확정 직전 배송 상태 재확인\",\n      \"detail\": \"취소 확정 직전에 배송 상태를 다시 확인합니다.\",\n      \"evidence\": {\n        \"sectionId\": \"사용자 시나리오\",\n        \"quote\": \"취소 확정 직전에 배송 상태를 다시 확인해\"\n      }\n    },\n    {\n      \"id\": \"node-3\",\n      \"kind\": \"result\",\n      \"title\": \"취소 완료 및 환불 접수\",\n      \"detail\": \"배송 전이면 취소를 완료하고 환불 접수 상태로 전환합니다.\",\n      \"evidence\": {\n        \"sectionId\": \"사용자 시나리오\",\n        \"quote\": \"취소를 완료하고 환불 접수 상태로 전환합니다\"\n      }\n    },\n    {\n      \"id\": \"node-4\",\n      \"kind\": \"result\",\n      \"title\": \"주문 유지·반품 안내 전환\",\n      \"detail\": \"배송 시작이 확인되면 주문을 유지하고 반품 안내로 전환합니다.\",\n      \"evidence\": {\n        \"sectionId\": \"사용자 시나리오\",\n        \"quote\": \"주문은 유지하고 취소·환불은 실행하지 않으며 반품 안내로 전환합니다\"\n      }\n    },\n    {\n      \"id\": \"node-5\",\n      \"kind\": \"result\",\n      \"title\": \"환불 상태 확인 중 안내\",\n      \"detail\": \"환불 응답이 늦으면 확인 중으로 안내하고 30분 기준 담당자에게 알립니다.\",\n      \"evidence\": {\n        \"sectionId\": \"사용자 시나리오\",\n        \"quote\": \"30분 안에 확인되지 않으면 담당자에게 알려 확인합니다\"\n      }\n    },\n    {\n      \"id\": \"node-6\",\n      \"kind\": \"condition\",\n      \"title\": \"주문 전체를 취소하나요?\",\n      \"detail\": \"일부 상품만 취소하는 요청은 고객센터로 안내합니다.\",\n      \"evidence\": {\n        \"sectionId\": \"요구사항\",\n        \"quote\": \"일부 상품만 취소하는 경우는 이번 범위에서 제외하고 고객센터로 안내합니다.\"\n      }\n    },\n    {\n      \"id\": \"node-7\",\n      \"kind\": \"result\",\n      \"title\": \"고객센터 안내\",\n      \"detail\": \"일부 상품 취소는 직접 처리하지 않고 고객센터로 안내합니다.\",\n      \"evidence\": {\n        \"sectionId\": \"사용자 시나리오\",\n        \"quote\": \"일부 상품만 취소하려는 경우는 이번 범위에서 제외하고 고객센터로 안내합니다.\"\n      }\n    }\n  ],\n  \"edges\": [\n    {\n      \"from\": \"node-1\",\n      \"to\": \"node-6\",\n      \"label\": \"취소 범위 확인\",\n      \"evidence\": {\n        \"sectionId\": \"요구사항\",\n        \"quote\": \"배송 전 전체 주문만 직접 취소하며\"\n      }\n    },\n    {\n      \"from\": \"node-2\",\n      \"to\": \"node-3\",\n      \"label\": \"배송 전이면 취소 확정\",\n      \"evidence\": {\n        \"sectionId\": \"주요 구조\",\n        \"quote\": \"배송 전 취소가 확정되면 환불 접수를 요청합니다\"\n      }\n    },\n    {\n      \"from\": \"node-2\",\n      \"to\": \"node-4\",\n      \"label\": \"배송 시작 확인 시 배송 우선\",\n      \"evidence\": {\n        \"sectionId\": \"주요 결정\",\n        \"quote\": \"배송 시작이 확인되면 배송을 우선합니다\"\n      }\n    },\n    {\n      \"from\": \"node-3\",\n      \"to\": \"node-5\",\n      \"label\": \"환불 응답 지연 시 상태 안내\",\n      \"evidence\": {\n        \"sectionId\": \"주요 구조\",\n        \"quote\": \"환불 접수, 환불 상태 확인 중, 환불 완료 상태를 구분해 표시합니다\"\n      }\n    },\n    {\n      \"from\": \"node-6\",\n      \"to\": \"node-2\",\n      \"label\": \"전체 주문\",\n      \"evidence\": {\n        \"sectionId\": \"요구사항\",\n        \"quote\": \"배송 전 전체 주문만 직접 취소하며, 취소 확정 직전에 배송 상태를 다시 확인합니다.\"\n      }\n    },\n    {\n      \"from\": \"node-6\",\n      \"to\": \"node-7\",\n      \"label\": \"일부 상품\",\n      \"evidence\": {\n        \"sectionId\": \"요구사항\",\n        \"quote\": \"일부 상품만 취소하는 경우는 이번 범위에서 제외하고 고객센터로 안내합니다.\"\n      }\n    }\n  ],\n  \"scenarios\": [\n    {\n      \"id\": \"scenario-1\",\n      \"label\": \"배송 전 전체 취소 성공\",\n      \"description\": \"고객이 배송 전 전체 주문을 취소하고 환불 접수까지 진행합니다.\",\n      \"nodeIds\": [\n        \"node-1\",\n        \"node-6\",\n        \"node-2\",\n        \"node-3\"\n      ],\n      \"outcome\": \"취소 완료 및 환불 접수 39,000원\",\n      \"evidence\": {\n        \"sectionId\": \"사용자 시나리오\",\n        \"quote\": \"환불 접수 39,000원과 기존 결제 수단\"\n      },\n      \"screen\": {\n        \"title\": \"주문을 취소했어요\",\n        \"body\": \"환불 39,000원을 접수했어요. 결제했던 수단으로 돌려드리며 통상 3~5영업일이 걸릴 수 있어요.\",\n        \"status\": \"주문 취소 완료 · 환불 접수\",\n        \"primaryAction\": \"주문 상세로\",\n        \"evidence\": {\n          \"sectionId\": \"사용자 시나리오\",\n          \"quote\": \"환불 39,000원을 접수했어요. 결제했던 수단으로 돌려드리며 통상 3~5영업일이 걸릴 수 있어요.\"\n        }\n      }\n    },\n    {\n      \"id\": \"scenario-2\",\n      \"label\": \"취소·배송 시작 경합\",\n      \"description\": \"취소 확정 순간 배송이 시작되면 배송을 우선하고 반품 안내로 전환합니다.\",\n      \"nodeIds\": [\n        \"node-1\",\n        \"node-6\",\n        \"node-2\",\n        \"node-4\"\n      ],\n      \"outcome\": \"주문 유지·반품 안내\",\n      \"evidence\": {\n        \"sectionId\": \"사용자 시나리오\",\n        \"quote\": \"배송 시작이 확인되면 배송을 우선합니다\"\n      },\n      \"screen\": {\n        \"title\": \"이미 배송이 시작됐어요\",\n        \"body\": \"지금은 주문을 취소할 수 없어요. 상품을 받은 뒤 반품 방법을 확인해 주세요. 자동 환불은 진행하지 않았어요.\",\n        \"status\": \"배송 중 · 주문 유지\",\n        \"primaryAction\": \"반품 방법 보기\",\n        \"evidence\": {\n          \"sectionId\": \"사용자 시나리오\",\n          \"quote\": \"지금은 주문을 취소할 수 없어요. 상품을 받은 뒤 반품 방법을 확인해 주세요. 자동 환불은 진행하지 않았어요.\"\n        }\n      }\n    },\n    {\n      \"id\": \"scenario-3\",\n      \"label\": \"일부 상품만 취소\",\n      \"description\": \"일부 상품만 취소하려는 경우는 범위에서 제외하고 고객센터로 안내합니다.\",\n      \"nodeIds\": [\n        \"node-1\",\n        \"node-6\",\n        \"node-7\"\n      ],\n      \"outcome\": \"고객센터 안내\",\n      \"evidence\": {\n        \"sectionId\": \"사용자 시나리오\",\n        \"quote\": \"이번 범위에서 제외하고 고객센터로 안내합니다\"\n      },\n      \"screen\": {\n        \"title\": \"일부 상품만 취소하려면\",\n        \"body\": \"일부 상품 취소는 고객센터에서 도와드려요. 현재 주문은 그대로 유지돼요.\",\n        \"status\": \"주문 유지\",\n        \"primaryAction\": \"고객센터 안내\",\n        \"evidence\": {\n          \"sectionId\": \"사용자 시나리오\",\n          \"quote\": \"일부 상품 취소는 고객센터에서 도와드려요. 현재 주문은 그대로 유지돼요.\"\n        }\n      }\n    },\n    {\n      \"id\": \"scenario-4\",\n      \"label\": \"환불 응답 지연\",\n      \"description\": \"환불 응답이 늦으면 확인 중으로 안내하고 30분 후 담당자에게 알립니다.\",\n      \"nodeIds\": [\n        \"node-3\",\n        \"node-5\"\n      ],\n      \"outcome\": \"환불 상태 확인 중 안내\",\n      \"evidence\": {\n        \"sectionId\": \"사용자 시나리오\",\n        \"quote\": \"'환불 상태 확인 중'으로 안내하고\"\n      },\n      \"screen\": {\n        \"title\": \"환불 상태를 확인하고 있어요\",\n        \"body\": \"주문 취소는 완료됐고 환불 결과를 확인하고 있어요. 환불을 다시 요청하지 않으셔도 돼요. 30분 안에 확인되지 않으면 담당자가 확인해요.\",\n        \"status\": \"취소 완료 · 환불 확인 중\",\n        \"primaryAction\": \"주문 상세로\",\n        \"evidence\": {\n          \"sectionId\": \"사용자 시나리오\",\n          \"quote\": \"주문 취소는 완료됐고 환불 결과를 확인하고 있어요. 환불을 다시 요청하지 않으셔도 돼요. 30분 안에 확인되지 않으면 담당자가 확인해요.\"\n        }\n      }\n    }\n  ],\n  \"rules\": [\n    {\n      \"id\": \"rule-1\",\n      \"title\": \"배송 전 전체 취소만 허용\",\n      \"detail\": \"배송 전 전체 주문만 직접 취소하며 일부 취소는 범위 밖입니다.\",\n      \"category\": \"requirement\",\n      \"evidence\": {\n        \"sectionId\": \"요구사항\",\n        \"quote\": \"배송 전 전체 주문만 직접 취소하며\"\n      }\n    },\n    {\n      \"id\": \"rule-2\",\n      \"title\": \"반복 요청은 한 번만 처리\",\n      \"detail\": \"취소 버튼을 반복해서 눌러도 취소와 환불 요청은 한 번만 처리합니다.\",\n      \"category\": \"success\",\n      \"evidence\": {\n        \"sectionId\": \"요구사항\",\n        \"quote\": \"주문 취소와 환불 요청은 한 번만 처리해야 합니다\"\n      }\n    },\n    {\n      \"id\": \"rule-3\",\n      \"title\": \"먼저 확정된 주문 상태 유지\",\n      \"detail\": \"배송 시작이 확인되면 취소를 막고 주문 유지·반품 안내로 전환하며 상태는 한 번만 확정합니다.\",\n      \"category\": \"exception\",\n      \"evidence\": {\n        \"sectionId\": \"주요 결정\",\n        \"quote\": \"두 상태 변경은 같은 주문에 대해 한 번만 확정되도록 합니다\"\n      }\n    },\n    {\n      \"id\": \"rule-4\",\n      \"title\": \"환불 금액 기준\",\n      \"detail\": \"환불 금액은 실제 결제 금액 기준이며 예시는 39,000원입니다.\",\n      \"category\": \"requirement\",\n      \"evidence\": {\n        \"sectionId\": \"요구사항\",\n        \"quote\": \"환불 접수 39,000원입니다\"\n      }\n    }\n  ]\n}\n-->\n",
+      "sectionIndex": [
+        {
+          "sectionId": "요구사항",
+          "title": "요구사항",
+          "startOffset": 38,
+          "endOffset": 1446
+        },
+        {
+          "sectionId": "사용자 시나리오",
+          "title": "사용자 시나리오",
+          "startOffset": 1446,
+          "endOffset": 2709
+        },
+        {
+          "sectionId": "진행 계획",
+          "title": "진행 계획",
+          "startOffset": 2709,
+          "endOffset": 3398
+        },
+        {
+          "sectionId": "주요 구조",
+          "title": "주요 구조",
+          "startOffset": 3398,
+          "endOffset": 4108
+        },
+        {
+          "sectionId": "주요 결정",
+          "title": "주요 결정",
+          "startOffset": 4108,
+          "endOffset": 4680
+        },
+        {
+          "sectionId": "작업 단위",
+          "title": "작업 단위",
+          "startOffset": 4680,
+          "endOffset": 12584
+        }
+      ],
+      "requirementLinks": [
+        {
+          "requirementId": "요구사항",
+          "sectionIds": [
+            "요구사항"
+          ],
+          "acceptanceCriteria": [
+            "고객센터를 기다리지 않고 고객이 주문 상세에서 직접 주문 전체를 취소할 수 있게 합니다.",
+            "배송 전 전체 주문만 직접 취소하며, 취소 확정 직전에 배송 상태를 다시 확인합니다.",
+            "이미 배송이 시작됐다면 주문을 유지하고 자동 환불 없이 반품 방법을 안내합니다.",
+            "일부 상품만 취소하는 경우는 이번 범위에서 제외하고 고객센터로 안내합니다.",
+            "취소 요청 버튼을 반복해서 눌러도 주문 취소와 환불 요청은 한 번만 처리해야 합니다.",
+            "주문 취소 완료와 환불 완료는 다릅니다. 환불 접수, 환불 상태 확인 중, 환불 완료를 구분해 보여 줍니다.",
+            "환불 서비스 응답이 늦으면 '환불 상태 확인 중'으로 안내하고, 30분 안에 확인되지 않으면 담당자에게 알려 확인합니다.",
+            "환불 금액은 실제 결제 금액 기준입니다. 예시 주문은 상품 45,000원 - 할인 9,000원 + 배송비 3,000원 = 환불 접수 39,000원입니다.",
+            "환불은 기존 결제 수단으로 요청하며 통상 3~5영업일이 걸릴 수 있다는 안내를 표시합니다."
+          ]
+        },
+        {
+          "requirementId": "사용자 시나리오",
+          "sectionIds": [
+            "사용자 시나리오"
+          ],
+          "acceptanceCriteria": [
+            "상태: 주문 취소 완료 · 환불 접수",
+            "제목: 주문을 취소했어요",
+            "설명: 환불 39,000원을 접수했어요. 결제했던 수단으로 돌려드리며 통상 3~5영업일이 걸릴 수 있어요.",
+            "버튼: 주문 상세로",
+            "상태: 배송 중 · 주문 유지",
+            "제목: 이미 배송이 시작됐어요",
+            "설명: 지금은 주문을 취소할 수 없어요. 상품을 받은 뒤 반품 방법을 확인해 주세요. 자동 환불은 진행하지 않았어요.",
+            "버튼: 반품 방법 보기",
+            "상태: 주문 유지",
+            "제목: 일부 상품만 취소하려면",
+            "설명: 일부 상품 취소는 고객센터에서 도와드려요. 현재 주문은 그대로 유지돼요.",
+            "버튼: 고객센터 안내",
+            "상태: 취소 완료 · 환불 확인 중",
+            "제목: 환불 상태를 확인하고 있어요",
+            "설명: 주문 취소는 완료됐고 환불 결과를 확인하고 있어요. 환불을 다시 요청하지 않으셔도 돼요. 30분 안에 확인되지 않으면 담당자가 확인해요.",
+            "버튼: 주문 상세로"
+          ]
+        },
+        {
+          "requirementId": "진행 계획",
+          "sectionIds": [
+            "진행 계획"
+          ],
+          "acceptanceCriteria": [
+            "이 예시는 새 기능의 개발 전에 팀이 같은 문서를 읽고 동의하는 과정까지 진행합니다."
+          ]
+        },
+        {
+          "requirementId": "주요 구조",
+          "sectionIds": [
+            "주요 구조"
+          ],
+          "acceptanceCriteria": [
+            "고객 화면 → 주문 취소 API: 고객이 주문 상세에서 취소를 요청하면 취소 처리를 호출합니다.",
+            "주문 취소 API → 배송 상태 조회: 취소 확정 직전에 배송 상태를 다시 확인합니다.",
+            "주문 취소 API → 주문 상태 저장소: 취소 완료 상태를 기록하고 두 상태 변경이 한 번만 확정되도록 합니다.",
+            "주문 취소 API → 환불 서비스: 배송 전 취소가 확정되면 환불 접수를 요청합니다.",
+            "환불 서비스 → 고객 화면: 환불 접수, 환불 상태 확인 중, 환불 완료 상태를 구분해 표시합니다."
+          ]
+        },
+        {
+          "requirementId": "주요 결정",
+          "sectionIds": [
+            "주요 결정"
+          ],
+          "acceptanceCriteria": [
+            "**결정: 먼저 확정된 주문 상태를 유지합니다.** SR 담당자가 답한 내용에 따라, 취소 확정 직전 배송 상태를 재확인해 배송 시작이 확인되면 배송을 우선합니다. 주문은 유지하고 취소·환불은 실행하지 않으며 반품 안내로 전환합니다. 배송 전 상태에서 취소 확정이 먼저 완료되면 취소 완료 상태를 유지하고 배송 시작 처리는 거절합니다. 두 상태 변경은 같은 주문에 대해 한 번만 확정되도록 합니다. 이는 예시 체험용 결정이며 실제 서비스 정책의 확정이 아닙니다."
+          ]
+        },
+        {
+          "requirementId": "작업 단위",
+          "sectionIds": [
+            "작업 단위"
+          ],
+          "acceptanceCriteria": [
+            "작업 단위 1: 주문 상세·취소 확인·취소 결과/환불 상태 화면 구성(고객 화면).",
+            "작업 단위 2: 주문 취소 API의 취소 확정 직전 배송 상태 재확인과 먼저 확정된 주문 상태를 유지하는 처리.",
+            "작업 단위 3: 주문 상태 저장소의 취소 완료/배송 시작 단일 확정과 반복 요청을 한 번만 처리하는 기능.",
+            "작업 단위 4: 환불 서비스 연동과 환불 접수·확인 중·완료 상태 표시 및 39,000원 예시 금액 표기.",
+            "작업 단위 5: 환불 응답 지연 시 '환불 상태 확인 중' 안내와 30분 기준 담당자 알림."
+          ]
+        }
+      ],
+      "authorOrigin": "human",
+      "authorId": "persona-p01-owner",
+      "createdAt": "2026-09-09T06:01:19.728Z",
+      "changeSummary": "문서를 수정했습니다.",
+      "previousVersionRef": {
+        "kind": "artifact",
+        "projectId": "demo-project",
+        "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+        "entityId": "artifact-45fd5ff8-4158-4bd5-a48c-9606510186f4",
+        "version": 2
+      },
+      "decisionRefs": [],
+      "sourceRefs": [],
+      "questionResultRefs": [
+        {
+          "kind": "question_result",
+          "projectId": "demo-project",
+          "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+          "entityId": "question-f475c6ba-0d49-48e2-8029-c75bc7bedc14",
+          "version": 2
+        }
+      ],
+      "revision": 3,
+      "reviewImpact": {
+        "affectedGates": [],
+        "needsNewReview": false,
+        "carriedBlockingRequestIds": [],
+        "currentHandoffValid": true
+      }
+    }
+  ],
+  "questions": [
+    {
+      "scope": {
+        "kind": "sr",
+        "projectId": "demo-project",
+        "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69"
+      },
+      "questionId": "question-f475c6ba-0d49-48e2-8029-c75bc7bedc14",
+      "status": "answered",
+      "text": "고객이 취소를 확정하려는 바로 그 순간에 배송이 시작되어 두 처리가 겹치면, 어느 쪽을 우선해 어떻게 처리해야 하나요? (예: 배송 시작을 우선해 취소를 막고 반품 안내로 전환, 또는 취소 확정을 우선)",
+      "reason": "초안은 '취소 확정 직전에 배송 상태를 다시 확인'하고 '취소 확정과 배송 시작의 경합을 다뤄야 한다'고만 밝혀, 실제로 두 사건이 동시에 일어났을 때의 우선순위 규칙이 확정되지 않았습니다. 답에 따라 이 SR의 핵심 사용자 시나리오(취소 성공 흐름 vs 반품 안내 전환 흐름)와 주문 취소 API·상태 저장소의 처리 결정, 그리고 관련 작업 단위 구분이 달라집니다.",
+      "assigneeId": "persona-p01-owner",
+      "answerMode": "free_text",
+      "options": [],
+      "requiredGate": "G1",
+      "classificationRef": {
+        "kind": "scope_classification",
+        "projectId": "demo-project",
+        "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+        "entityId": "classification-37cec566-ea0d-4fc5-be3a-d8c17ae4c228",
+        "version": 1
+      },
+      "currentClassification": {
+        "ref": {
+          "kind": "scope_classification",
+          "projectId": "demo-project",
+          "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+          "entityId": "classification-37cec566-ea0d-4fc5-be3a-d8c17ae4c228",
+          "version": 1
+        },
+        "targetRef": {
+          "kind": "question",
+          "projectId": "demo-project",
+          "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+          "entityId": "question-f475c6ba-0d49-48e2-8029-c75bc7bedc14"
+        },
+        "reason": "초안은 '취소 확정 직전에 배송 상태를 다시 확인'하고 '취소 확정과 배송 시작의 경합을 다뤄야 한다'고만 밝혀, 실제로 두 사건이 동시에 일어났을 때의 우선순위 규칙이 확정되지 않았습니다. 답에 따라 이 SR의 핵심 사용자 시나리오(취소 성공 흐름 vs 반품 안내 전환 흐름)와 주문 취소 API·상태 저장소의 처리 결정, 그리고 관련 작업 단위 구분이 달라집니다.",
+        "classifiedBy": "persona-p01-owner",
+        "classifiedAt": "2026-09-09T05:46:39.995Z",
+        "basisRefs": [],
+        "scope": "current",
+        "requiredGate": "G1"
+      },
+      "candidateAnswers": [
+        "배송 시작을 우선한다: 취소 확정을 막고 주문을 유지한 채 반품 안내로 전환한다",
+        "취소 확정을 우선한다: 이미 눌린 취소를 완료 처리하고 환불 접수로 진행한다",
+        "확정 직전 재확인 시점에 배송이 시작된 것으로 확인되면 취소를 취소하고 사용자에게 상태 변경을 다시 안내한다"
+      ],
+      "relatedArtifactRefs": [],
+      "sourceRefs": [
+        {
+          "kind": "sr_description",
+          "projectId": "demo-project",
+          "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+          "entityId": "description-67c6bd00-a969-438a-85b1-50cc72f7456a",
+          "version": 1
+        }
+      ],
+      "sourceDraft": {
+        "draftId": "draft-78eab030-3bc0-405f-9c11-1e30b80d41ed",
+        "temporaryId": "q1"
+      },
+      "createdAt": "2026-09-09T05:46:39.995Z",
+      "currentResult": {
+        "ref": {
+          "kind": "question_result",
+          "projectId": "demo-project",
+          "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+          "entityId": "question-f475c6ba-0d49-48e2-8029-c75bc7bedc14",
+          "version": 2
+        },
+        "capturedAt": "2026-09-09T05:46:49.447Z",
+        "evidenceRefs": [
+          {
+            "kind": "sr_description",
+            "projectId": "demo-project",
+            "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+            "entityId": "description-67c6bd00-a969-438a-85b1-50cc72f7456a",
+            "version": 1
+          }
+        ],
+        "selectedAnswer": {
+          "ref": {
+            "kind": "question_answer",
+            "projectId": "demo-project",
+            "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+            "entityId": "answer-82cf3269-faec-4d53-92b2-238609e0cd4b",
+            "version": 1
+          },
+          "answeredQuestionSnapshotRef": {
+            "kind": "question_result",
+            "projectId": "demo-project",
+            "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+            "entityId": "question-f475c6ba-0d49-48e2-8029-c75bc7bedc14",
+            "version": 1
+          },
+          "answer": {
+            "kind": "free_text",
+            "text": "이번 예시에서는 취소 확정 직전 배송 상태를 재확인해 배송 시작이 확인되면 배송을 우선합니다. 주문은 유지하고 취소·환불은 실행하지 않으며 반품 안내로 전환합니다. 배송 전 상태에서 취소 확정이 먼저 완료되면 취소 완료 상태를 유지하고 배송 시작 처리는 거절합니다. 두 상태 변경은 같은 주문에 대해 한 번만 확정되도록 합니다."
+          },
+          "evidence": {
+            "text": "사용자가 제공한 배송 전 취소·환불 이미지의 배송 시작 분기와 주문 유지·자동 환불 없음 원칙에 맞춘 체험용 결정입니다. 실제 서비스 정책의 확정이 아닙니다."
+          },
+          "answeredBy": "persona-p01-owner",
+          "answeredAt": "2026-09-09T05:46:49.447Z"
+        }
+      },
+      "revision": 2,
+      "allowedActions": [],
+      "reviewImpact": {
+        "affectedGates": [],
+        "needsNewReview": false,
+        "carriedBlockingRequestIds": [],
+        "currentHandoffValid": true
+      }
+    }
+  ],
+  "decisions": [],
+  "bundles": [
+    {
+      "bundleRef": {
+        "projectId": "demo-project",
+        "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+        "gate": "G1",
+        "bundleId": "bundle-2f29d47c-7214-45af-806f-0e5c1c183ef5",
+        "version": 1
+      },
+      "reviewEpoch": 4,
+      "artifactVersionRefs": [
+        {
+          "kind": "artifact",
+          "projectId": "demo-project",
+          "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+          "entityId": "artifact-45fd5ff8-4158-4bd5-a48c-9606510186f4",
+          "version": 1
+        }
+      ],
+      "decisionVersionRefs": [],
+      "unconfirmedDecisionSnapshots": [],
+      "questionResultRefs": [],
+      "classificationRefs": [],
+      "contextSourceVersionRefs": [
+        {
+          "kind": "context_source",
+          "projectId": "demo-project",
+          "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+          "entityId": "source-1ad4f17e-9823-4889-9dcf-ddd15fe8e455",
+          "version": 1
+        }
+      ],
+      "assignmentRef": {
+        "kind": "review_assignment",
+        "projectId": "demo-project",
+        "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+        "entityId": "assignment-e09a2e2a-48b0-4280-8f75-052f82a8f1af",
+        "version": 1
+      },
+      "reviewerIds": [
+        "persona-p03-reviewer"
+      ],
+      "policyRef": {
+        "kind": "review_policy",
+        "projectId": "demo-project",
+        "entityId": "policy-demo-review",
+        "version": 1
+      },
+      "checklistSnapshot": [
+        {
+          "itemId": "g1-requirements",
+          "label": "요구사항과 완료 기준을 확인했습니다."
+        },
+        {
+          "itemId": "g1-evidence",
+          "label": "질문·결정과 근거를 확인했습니다."
+        }
+      ],
+      "descriptionRef": {
+        "kind": "sr_description",
+        "projectId": "demo-project",
+        "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+        "entityId": "description-67c6bd00-a969-438a-85b1-50cc72f7456a",
+        "version": 1
+      },
+      "createdBy": "persona-p01-owner",
+      "createdAt": "2026-09-09T05:43:22.880Z"
+    },
+    {
+      "bundleRef": {
+        "projectId": "demo-project",
+        "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+        "gate": "G1",
+        "bundleId": "bundle-6fb0c4df-96f0-4a22-acbf-22e011e37cdd",
+        "version": 1
+      },
+      "reviewEpoch": 7,
+      "artifactVersionRefs": [
+        {
+          "kind": "artifact",
+          "projectId": "demo-project",
+          "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+          "entityId": "artifact-45fd5ff8-4158-4bd5-a48c-9606510186f4",
+          "version": 2
+        }
+      ],
+      "decisionVersionRefs": [],
+      "unconfirmedDecisionSnapshots": [],
+      "questionResultRefs": [
+        {
+          "kind": "question_result",
+          "projectId": "demo-project",
+          "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+          "entityId": "question-f475c6ba-0d49-48e2-8029-c75bc7bedc14",
+          "version": 2
+        }
+      ],
+      "classificationRefs": [
+        {
+          "kind": "scope_classification",
+          "projectId": "demo-project",
+          "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+          "entityId": "classification-37cec566-ea0d-4fc5-be3a-d8c17ae4c228",
+          "version": 1
+        }
+      ],
+      "contextSourceVersionRefs": [
+        {
+          "kind": "context_source",
+          "projectId": "demo-project",
+          "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+          "entityId": "source-1ad4f17e-9823-4889-9dcf-ddd15fe8e455",
+          "version": 1
+        }
+      ],
+      "assignmentRef": {
+        "kind": "review_assignment",
+        "projectId": "demo-project",
+        "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+        "entityId": "assignment-e09a2e2a-48b0-4280-8f75-052f82a8f1af",
+        "version": 1
+      },
+      "reviewerIds": [
+        "persona-p03-reviewer"
+      ],
+      "policyRef": {
+        "kind": "review_policy",
+        "projectId": "demo-project",
+        "entityId": "policy-demo-review",
+        "version": 1
+      },
+      "checklistSnapshot": [
+        {
+          "itemId": "g1-requirements",
+          "label": "요구사항과 완료 기준을 확인했습니다."
+        },
+        {
+          "itemId": "g1-evidence",
+          "label": "질문·결정과 근거를 확인했습니다."
+        }
+      ],
+      "descriptionRef": {
+        "kind": "sr_description",
+        "projectId": "demo-project",
+        "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+        "entityId": "description-67c6bd00-a969-438a-85b1-50cc72f7456a",
+        "version": 1
+      },
+      "createdBy": "persona-p01-owner",
+      "createdAt": "2026-09-09T06:00:21.427Z",
+      "previousBundleRef": {
+        "projectId": "demo-project",
+        "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+        "gate": "G1",
+        "bundleId": "bundle-2f29d47c-7214-45af-806f-0e5c1c183ef5",
+        "version": 1
+      }
+    },
+    {
+      "bundleRef": {
+        "projectId": "demo-project",
+        "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+        "gate": "G1",
+        "bundleId": "bundle-b9d91b7a-f23b-4a5b-a9bd-04ee925cbc42",
+        "version": 1
+      },
+      "reviewEpoch": 9,
+      "artifactVersionRefs": [
+        {
+          "kind": "artifact",
+          "projectId": "demo-project",
+          "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+          "entityId": "artifact-45fd5ff8-4158-4bd5-a48c-9606510186f4",
+          "version": 3
+        }
+      ],
+      "decisionVersionRefs": [],
+      "unconfirmedDecisionSnapshots": [],
+      "questionResultRefs": [
+        {
+          "kind": "question_result",
+          "projectId": "demo-project",
+          "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+          "entityId": "question-f475c6ba-0d49-48e2-8029-c75bc7bedc14",
+          "version": 2
+        }
+      ],
+      "classificationRefs": [
+        {
+          "kind": "scope_classification",
+          "projectId": "demo-project",
+          "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+          "entityId": "classification-37cec566-ea0d-4fc5-be3a-d8c17ae4c228",
+          "version": 1
+        }
+      ],
+      "contextSourceVersionRefs": [
+        {
+          "kind": "context_source",
+          "projectId": "demo-project",
+          "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+          "entityId": "source-1ad4f17e-9823-4889-9dcf-ddd15fe8e455",
+          "version": 1
+        }
+      ],
+      "assignmentRef": {
+        "kind": "review_assignment",
+        "projectId": "demo-project",
+        "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+        "entityId": "assignment-e09a2e2a-48b0-4280-8f75-052f82a8f1af",
+        "version": 1
+      },
+      "reviewerIds": [
+        "persona-p03-reviewer"
+      ],
+      "policyRef": {
+        "kind": "review_policy",
+        "projectId": "demo-project",
+        "entityId": "policy-demo-review",
+        "version": 1
+      },
+      "checklistSnapshot": [
+        {
+          "itemId": "g1-requirements",
+          "label": "요구사항과 완료 기준을 확인했습니다."
+        },
+        {
+          "itemId": "g1-evidence",
+          "label": "질문·결정과 근거를 확인했습니다."
+        }
+      ],
+      "descriptionRef": {
+        "kind": "sr_description",
+        "projectId": "demo-project",
+        "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+        "entityId": "description-67c6bd00-a969-438a-85b1-50cc72f7456a",
+        "version": 1
+      },
+      "createdBy": "persona-p01-owner",
+      "createdAt": "2026-09-09T06:01:40.681Z",
+      "previousBundleRef": {
+        "projectId": "demo-project",
+        "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+        "gate": "G1",
+        "bundleId": "bundle-6fb0c4df-96f0-4a22-acbf-22e011e37cdd",
+        "version": 1
+      }
+    }
+  ],
+  "reviewRequests": [
+    {
+      "requestId": "review-request-ae9e2752-4737-47a8-ba65-799f1196e19b",
+      "bundleRef": {
+        "projectId": "demo-project",
+        "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+        "gate": "G1",
+        "bundleId": "bundle-2f29d47c-7214-45af-806f-0e5c1c183ef5",
+        "version": 1
+      },
+      "reviewEpoch": 4,
+      "reviewerId": "persona-p03-reviewer",
+      "requestKind": "review",
+      "requestedBy": "persona-p01-owner",
+      "requestedAt": "2026-09-09T05:43:22.880Z",
+      "status": "superseded",
+      "revision": 2,
+      "supersededByRequestId": "review-request-aa570bc8-3803-462b-ba7e-59130cff559f"
+    },
+    {
+      "requestId": "review-request-aa570bc8-3803-462b-ba7e-59130cff559f",
+      "bundleRef": {
+        "projectId": "demo-project",
+        "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+        "gate": "G1",
+        "bundleId": "bundle-6fb0c4df-96f0-4a22-acbf-22e011e37cdd",
+        "version": 1
+      },
+      "reviewEpoch": 7,
+      "reviewerId": "persona-p03-reviewer",
+      "requestKind": "review",
+      "requestedBy": "persona-p01-owner",
+      "requestedAt": "2026-09-09T06:00:21.427Z",
+      "status": "superseded",
+      "revision": 2,
+      "supersededByRequestId": "review-request-ec87c712-7d65-4080-a9d3-cac4879d4acb"
+    },
+    {
+      "requestId": "review-request-ec87c712-7d65-4080-a9d3-cac4879d4acb",
+      "bundleRef": {
+        "projectId": "demo-project",
+        "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+        "gate": "G1",
+        "bundleId": "bundle-b9d91b7a-f23b-4a5b-a9bd-04ee925cbc42",
+        "version": 1
+      },
+      "reviewEpoch": 9,
+      "reviewerId": "persona-p03-reviewer",
+      "requestKind": "review",
+      "requestedBy": "persona-p01-owner",
+      "requestedAt": "2026-09-09T06:01:40.681Z",
+      "status": "handled",
+      "revision": 2,
+      "resultRef": {
+        "kind": "approval",
+        "projectId": "demo-project",
+        "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+        "entityId": "approval-3c4f1d1d-f844-477b-8315-9bee4ae9b2da"
+      },
+      "handledAt": "2026-09-09T06:01:53.414Z"
+    }
+  ],
+  "approvals": [
+    {
+      "approvalId": "approval-3c4f1d1d-f844-477b-8315-9bee4ae9b2da",
+      "bundleRef": {
+        "projectId": "demo-project",
+        "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+        "gate": "G1",
+        "bundleId": "bundle-b9d91b7a-f23b-4a5b-a9bd-04ee925cbc42",
+        "version": 1
+      },
+      "reviewEpoch": 9,
+      "policyRef": {
+        "kind": "review_policy",
+        "projectId": "demo-project",
+        "entityId": "policy-demo-review",
+        "version": 1
+      },
+      "approverId": "persona-p03-reviewer",
+      "checklistResults": [
+        {
+          "itemId": "g1-requirements",
+          "checked": true
+        },
+        {
+          "itemId": "g1-evidence",
+          "checked": true
+        }
+      ],
+      "approvalScope": "G1",
+      "result": "approved",
+      "approvedAt": "2026-09-09T06:01:53.414Z",
+      "comment": "예시 Plan 문서 v3의 전체 취소 범위와 배송 시작 예외를 확인했습니다. 주문 취소·환불 접수·환불 완료의 구분과 네 상황의 고객 안내 문구에 동의합니다. 이 승인은 문서 내용의 합의이며 실제 주문·환불 실행을 뜻하지 않습니다."
+    }
+  ],
+  "gateAssessments": [
+    {
+      "gate": "G1",
+      "assessedRevision": 11,
+      "reviewEpoch": 9,
+      "currentBundleRef": {
+        "projectId": "demo-project",
+        "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+        "gate": "G1",
+        "bundleId": "bundle-b9d91b7a-f23b-4a5b-a9bd-04ee925cbc42",
+        "version": 1
+      },
+      "conditions": [
+        {
+          "conditionId": "GP-01",
+          "passed": true,
+          "reason": "현재 검토 자료와 검토자 기준이 일치합니다.",
+          "assigneeIds": [
+            "persona-p01-owner"
+          ],
+          "targetRefs": [
+            {
+              "kind": "review_gate_state",
+              "projectId": "demo-project",
+              "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+              "entityId": "G1"
+            }
+          ]
+        },
+        {
+          "conditionId": "GP-02",
+          "passed": true,
+          "reason": "현재 요구사항 문서가 준비됐습니다. 문서 구조는 검토 조건으로 강제하지 않습니다.",
+          "assigneeIds": [
+            "persona-p01-owner"
+          ],
+          "targetRefs": []
+        },
+        {
+          "conditionId": "GP-03",
+          "passed": true,
+          "reason": "미해결 질문 1개는 참고용 기록이며 문서 검토와 분리합니다.",
+          "assigneeIds": [],
+          "targetRefs": [
+            {
+              "kind": "question",
+              "projectId": "demo-project",
+              "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+              "entityId": "question-f475c6ba-0d49-48e2-8029-c75bc7bedc14"
+            }
+          ]
+        },
+        {
+          "conditionId": "GP-04",
+          "passed": true,
+          "reason": "미확정 결정 0개는 참고용 기록이며 문서 검토와 분리합니다.",
+          "assigneeIds": [],
+          "targetRefs": []
+        },
+        {
+          "conditionId": "GP-05",
+          "passed": true,
+          "reason": "먼저 해결해야 할 수정 요청이 없습니다.",
+          "assigneeIds": [],
+          "targetRefs": []
+        },
+        {
+          "conditionId": "GP-06",
+          "passed": true,
+          "reason": "담당자 외 동료 검토자가 있습니다.",
+          "assigneeIds": [
+            "persona-p01-owner"
+          ],
+          "targetRefs": []
+        },
+        {
+          "conditionId": "GP-07",
+          "passed": true,
+          "reason": "검토자 전원이 승인했습니다.",
+          "assigneeIds": [],
+          "targetRefs": [
+            {
+              "kind": "review_bundle",
+              "projectId": "demo-project",
+              "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+              "entityId": "bundle-b9d91b7a-f23b-4a5b-a9bd-04ee925cbc42"
+            }
+          ]
+        },
+        {
+          "conditionId": "GP-08",
+          "passed": true,
+          "reason": "정책 역할과 체크리스트를 충족했습니다.",
+          "assigneeIds": [
+            "persona-p03-reviewer"
+          ],
+          "targetRefs": []
+        },
+        {
+          "conditionId": "GP-09",
+          "passed": true,
+          "reason": "요구사항 검토는 먼저 완료해야 할 다른 검토가 없습니다.",
+          "assigneeIds": [
+            "persona-p01-owner"
+          ],
+          "targetRefs": [
+            {
+              "kind": "review_gate_state",
+              "projectId": "demo-project",
+              "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+              "entityId": "G1"
+            }
+          ]
+        }
+      ],
+      "reviewState": "승인 완료",
+      "canTransition": true
+    },
+    {
+      "gate": "G2",
+      "assessedRevision": 11,
+      "reviewEpoch": 9,
+      "conditions": [
+        {
+          "conditionId": "GP-01",
+          "passed": false,
+          "reason": "검토할 자료를 준비한 뒤 검토를 요청해 주세요.",
+          "assigneeIds": [
+            "persona-p01-owner"
+          ],
+          "targetRefs": [
+            {
+              "kind": "review_gate_state",
+              "projectId": "demo-project",
+              "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+              "entityId": "G2"
+            }
+          ]
+        },
+        {
+          "conditionId": "GP-02",
+          "passed": false,
+          "reason": "검토 요청에 요구사항, 진행 계획, 설계, 구현 계획 문서를 포함해 주세요.",
+          "assigneeIds": [
+            "persona-p01-owner"
+          ],
+          "targetRefs": []
+        },
+        {
+          "conditionId": "GP-03",
+          "passed": false,
+          "reason": "현재 필수 질문의 해결이 필요합니다.",
+          "assigneeIds": [
+            "persona-p01-owner"
+          ],
+          "targetRefs": [
+            {
+              "kind": "question",
+              "projectId": "demo-project",
+              "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+              "entityId": "question-f475c6ba-0d49-48e2-8029-c75bc7bedc14"
+            }
+          ]
+        },
+        {
+          "conditionId": "GP-04",
+          "passed": true,
+          "reason": "필수 결정이 확정됐습니다.",
+          "assigneeIds": [],
+          "targetRefs": []
+        },
+        {
+          "conditionId": "GP-05",
+          "passed": true,
+          "reason": "먼저 해결해야 할 수정 요청이 없습니다.",
+          "assigneeIds": [],
+          "targetRefs": []
+        },
+        {
+          "conditionId": "GP-06",
+          "passed": false,
+          "reason": "검토자를 한 명 이상 배정하고 SR 담당자 외 동료 검토자를 포함해 주세요.",
+          "assigneeIds": [
+            "persona-p01-owner"
+          ],
+          "targetRefs": []
+        },
+        {
+          "conditionId": "GP-07",
+          "passed": false,
+          "reason": "검토자를 먼저 배정해 주세요.",
+          "assigneeIds": [],
+          "targetRefs": [
+            {
+              "kind": "review_bundle",
+              "projectId": "demo-project",
+              "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+              "entityId": "G2"
+            }
+          ]
+        },
+        {
+          "conditionId": "GP-08",
+          "passed": false,
+          "reason": "정책 기준을 충족할 검토자를 먼저 배정해 주세요.",
+          "assigneeIds": [],
+          "targetRefs": []
+        },
+        {
+          "conditionId": "GP-09",
+          "passed": false,
+          "reason": "최신 요구사항을 반영해 계획 검토를 다시 요청해 주세요.",
+          "assigneeIds": [
+            "persona-p01-owner"
+          ],
+          "targetRefs": [
+            {
+              "kind": "review_gate_state",
+              "projectId": "demo-project",
+              "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+              "entityId": "G1"
+            }
+          ]
+        }
+      ],
+      "reviewState": "작성 중",
+      "canTransition": false
+    }
+  ],
+  "reviewConfigurations": [
+    {
+      "gate": "G1",
+      "reviewEpoch": 9,
+      "revision": 12,
+      "needsNewBundle": false,
+      "validity": "valid",
+      "policy": {
+        "policyRef": {
+          "kind": "review_policy",
+          "projectId": "demo-project",
+          "entityId": "policy-demo-review",
+          "version": 1
+        },
+        "description": "DEMO-4 기본 동료 검토 정책",
+        "gates": {
+          "G1": {
+            "requiredRoles": [
+              "reviewer"
+            ],
+            "checklist": [
+              {
+                "itemId": "g1-requirements",
+                "label": "요구사항과 완료 기준을 확인했습니다."
+              },
+              {
+                "itemId": "g1-evidence",
+                "label": "질문·결정과 근거를 확인했습니다."
+              }
+            ]
+          },
+          "G2": {
+            "requiredRoles": [
+              "reviewer"
+            ],
+            "checklist": [
+              {
+                "itemId": "g2-plan",
+                "label": "진행 계획·설계·구현 계획을 확인했습니다."
+              },
+              {
+                "itemId": "g2-verification",
+                "label": "작업과 검증 연결을 확인했습니다."
+              }
+            ]
+          }
+        }
+      },
+      "assignment": {
+        "assignmentRef": {
+          "kind": "review_assignment",
+          "projectId": "demo-project",
+          "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+          "entityId": "assignment-e09a2e2a-48b0-4280-8f75-052f82a8f1af",
+          "version": 1
+        },
+        "gate": "G1",
+        "reviewerIds": [
+          "persona-p03-reviewer"
+        ],
+        "ready": true
+      },
+      "currentBundleRef": {
+        "projectId": "demo-project",
+        "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+        "gate": "G1",
+        "bundleId": "bundle-b9d91b7a-f23b-4a5b-a9bd-04ee925cbc42",
+        "version": 1
+      },
+      "lastPassTransitionId": "gate-transition-33b68148-4b7f-4418-b4c4-87fe42dd7bff"
+    },
+    {
+      "gate": "G2",
+      "reviewEpoch": 9,
+      "revision": 9,
+      "needsNewBundle": true,
+      "validity": "not_passed",
+      "policy": {
+        "policyRef": {
+          "kind": "review_policy",
+          "projectId": "demo-project",
+          "entityId": "policy-demo-review",
+          "version": 1
+        },
+        "description": "DEMO-4 기본 동료 검토 정책",
+        "gates": {
+          "G1": {
+            "requiredRoles": [
+              "reviewer"
+            ],
+            "checklist": [
+              {
+                "itemId": "g1-requirements",
+                "label": "요구사항과 완료 기준을 확인했습니다."
+              },
+              {
+                "itemId": "g1-evidence",
+                "label": "질문·결정과 근거를 확인했습니다."
+              }
+            ]
+          },
+          "G2": {
+            "requiredRoles": [
+              "reviewer"
+            ],
+            "checklist": [
+              {
+                "itemId": "g2-plan",
+                "label": "진행 계획·설계·구현 계획을 확인했습니다."
+              },
+              {
+                "itemId": "g2-verification",
+                "label": "작업과 검증 연결을 확인했습니다."
+              }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "reviewPreparations": [
+    {
+      "kind": "Ready",
+      "gate": "G1",
+      "gateRevision": 12,
+      "input": {
+        "gate": "G1",
+        "artifactVersionRefs": [
+          {
+            "kind": "artifact",
+            "projectId": "demo-project",
+            "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+            "entityId": "artifact-45fd5ff8-4158-4bd5-a48c-9606510186f4",
+            "version": 3
+          }
+        ],
+        "decisionVersionRefs": [],
+        "unconfirmedDecisionSnapshots": [],
+        "questionResultRefs": [
+          {
+            "kind": "question_result",
+            "projectId": "demo-project",
+            "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+            "entityId": "question-f475c6ba-0d49-48e2-8029-c75bc7bedc14",
+            "version": 2
+          }
+        ],
+        "classificationRefs": [
+          {
+            "kind": "scope_classification",
+            "projectId": "demo-project",
+            "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+            "entityId": "classification-37cec566-ea0d-4fc5-be3a-d8c17ae4c228",
+            "version": 1
+          }
+        ],
+        "contextSourceVersionRefs": [
+          {
+            "kind": "context_source",
+            "projectId": "demo-project",
+            "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+            "entityId": "source-1ad4f17e-9823-4889-9dcf-ddd15fe8e455",
+            "version": 1
+          }
+        ],
+        "assignmentRef": {
+          "kind": "review_assignment",
+          "projectId": "demo-project",
+          "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+          "entityId": "assignment-e09a2e2a-48b0-4280-8f75-052f82a8f1af",
+          "version": 1
+        },
+        "reviewerIds": [
+          "persona-p03-reviewer"
+        ],
+        "policyRef": {
+          "kind": "review_policy",
+          "projectId": "demo-project",
+          "entityId": "policy-demo-review",
+          "version": 1
+        }
+      },
+      "checklistSnapshot": [
+        {
+          "itemId": "g1-requirements",
+          "label": "요구사항과 완료 기준을 확인했습니다."
+        },
+        {
+          "itemId": "g1-evidence",
+          "label": "질문·결정과 근거를 확인했습니다."
+        }
+      ]
+    },
+    {
+      "kind": "NeedsInputs",
+      "gate": "G2",
+      "gateRevision": 9,
+      "missing": [
+        "G2 검토자 배정이 필요합니다."
+      ],
+      "assigneeIds": [
+        "persona-p01-owner"
+      ]
+    }
+  ],
+  "comments": [
+    {
+      "commentId": "comment-e40ae210-b129-46b9-a0c4-e90b0523acbc",
+      "artifactVersionRef": {
+        "kind": "artifact",
+        "projectId": "demo-project",
+        "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+        "entityId": "artifact-45fd5ff8-4158-4bd5-a48c-9606510186f4",
+        "version": 2
+      },
+      "sectionId": "주요 결정",
+      "body": "고객 입장에서 주문 취소와 환불 완료는 다르게 보일 수 있습니다. 환불이 접수된 상태와 실제 돈이 돌아온 상태를 문서와 화면에서 나눠 보여주면 좋겠습니다.",
+      "bundleRef": {
+        "projectId": "demo-project",
+        "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+        "gate": "G1",
+        "bundleId": "bundle-6fb0c4df-96f0-4a22-acbf-22e011e37cdd",
+        "version": 1
+      },
+      "authorId": "persona-p03-reviewer",
+      "createdAt": "2026-09-09T06:00:44.705Z"
+    }
+  ],
+  "changeRequests": [
+    {
+      "changeRequestId": "change-2e52d509-6bc8-484b-89db-a3b837b03837",
+      "originalTargetVersionRef": {
+        "kind": "artifact",
+        "projectId": "demo-project",
+        "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+        "entityId": "artifact-45fd5ff8-4158-4bd5-a48c-9606510186f4",
+        "version": 2
+      },
+      "originalSectionId": "주요 결정",
+      "body": "제목의 배송 우선은 취소가 먼저 끝난 경우에도 배송을 진행한다는 뜻으로 읽힙니다. 먼저 확정된 주문 상태를 유지한다고 바꿔 주세요. 고객 화면에는 주문 취소 완료와 환불 접수를 구분하고, 배송 시작·일부 취소·환불 지연 때의 안내 문구도 적어 주세요.",
+      "blocking": true,
+      "affectedGate": "G1",
+      "assigneeId": "persona-p01-owner",
+      "requesterId": "persona-p03-reviewer",
+      "status": "resolved",
+      "currentTargetRef": {
+        "kind": "artifact",
+        "projectId": "demo-project",
+        "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+        "entityId": "artifact-45fd5ff8-4158-4bd5-a48c-9606510186f4",
+        "version": 3
+      },
+      "revision": 4,
+      "requestedAt": "2026-09-09T06:00:51.722Z",
+      "bundleRef": {
+        "projectId": "demo-project",
+        "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+        "gate": "G1",
+        "bundleId": "bundle-6fb0c4df-96f0-4a22-acbf-22e011e37cdd",
+        "version": 1
+      },
+      "currentApplicationEventRef": {
+        "kind": "change_request_event",
+        "projectId": "demo-project",
+        "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+        "entityId": "change-event-f237dde7-d333-447e-a48b-a796e4ffb087"
+      },
+      "currentResolutionEventRef": {
+        "kind": "change_request_event",
+        "projectId": "demo-project",
+        "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+        "entityId": "change-event-ad40cc8a-2f24-4383-b874-cd68efad3781"
+      },
+      "appliedArtifactVersionRef": {
+        "kind": "artifact",
+        "projectId": "demo-project",
+        "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+        "entityId": "artifact-45fd5ff8-4158-4bd5-a48c-9606510186f4",
+        "version": 3
+      },
+      "events": [
+        {
+          "eventRef": {
+            "kind": "change_request_event",
+            "projectId": "demo-project",
+            "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+            "entityId": "change-event-c27cc128-f239-4ac6-9f3c-13c46ce0f806"
+          },
+          "changeRequestId": "change-2e52d509-6bc8-484b-89db-a3b837b03837",
+          "kind": "carried",
+          "actorId": "persona-p01-owner",
+          "occurredAt": "2026-09-09T06:01:19.728Z",
+          "beforeStatus": "open",
+          "afterStatus": "open",
+          "targetArtifactVersionRef": {
+            "kind": "artifact",
+            "projectId": "demo-project",
+            "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+            "entityId": "artifact-45fd5ff8-4158-4bd5-a48c-9606510186f4",
+            "version": 3
+          },
+          "beforeTargetRef": {
+            "kind": "artifact",
+            "projectId": "demo-project",
+            "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+            "entityId": "artifact-45fd5ff8-4158-4bd5-a48c-9606510186f4",
+            "version": 2
+          },
+          "afterTargetRef": {
+            "kind": "artifact",
+            "projectId": "demo-project",
+            "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+            "entityId": "artifact-45fd5ff8-4158-4bd5-a48c-9606510186f4",
+            "version": 3
+          }
+        },
+        {
+          "eventRef": {
+            "kind": "change_request_event",
+            "projectId": "demo-project",
+            "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+            "entityId": "change-event-f237dde7-d333-447e-a48b-a796e4ffb087"
+          },
+          "changeRequestId": "change-2e52d509-6bc8-484b-89db-a3b837b03837",
+          "kind": "applied",
+          "actorId": "persona-p01-owner",
+          "occurredAt": "2026-09-09T06:01:27.946Z",
+          "beforeStatus": "open",
+          "afterStatus": "awaiting_confirmation",
+          "targetArtifactVersionRef": {
+            "kind": "artifact",
+            "projectId": "demo-project",
+            "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+            "entityId": "artifact-45fd5ff8-4158-4bd5-a48c-9606510186f4",
+            "version": 3
+          },
+          "applicationSummary": "먼저 확정된 주문 상태를 유지한다는 문장으로 바꿨습니다. 네 상황별 고객 화면 문구를 추가하고 주문 취소 완료와 환불 접수를 구분했습니다. 고객 약속을 확인할 표와 각 구성요소의 쉬운 설명도 넣었습니다.",
+          "evidence": {
+            "text": "현재 문서 v3의 \"주요 결정\" 문단 본문:\n## 주요 결정\n\n**결정: 먼저 확정된 주문 상태를 유지합니다.** SR 담당자가 답한 내용에 따라, 취소 확정 직전 배송 상태를 재확인해 배송 시작이 확인되면 배송을 우선합니다. 주문은 유지하고 취소·환불은 실행하지 않으며 반품 안내로 전환합니다. 배송 전 상태에서 취소 확정이 먼저 완료되면 취소 완료 상태를 유지하고 배송 시작 처리는 거절합니다. 두 상태 변경은 같은 주문에 대해 한 번만 확정되도록 합니다. 이는 예시 체험용 결정이며 실제 서비스 정책의 확정이 아닙니다.\n\n**결정: 버튼을 여러 번 눌러도 한 번만 처리합니다.** 취소 요청 버튼을 반복해서 눌러도 주문 취소와 환불 요청은 한 번만 처리합니다.\n\n**결정(확인됨): 환불 상태 구분과 지연 처리.** 환불 접수, 환불 상태 확인 중, 환불 완료를 구분해 보여 주고, 응답 지연 시 30분 기준으로 담당자에게 알립니다.\n\n개발 전에 더 구체화할 내용: 반품 안내로 연결할 실제 주소, 운영 담당자에게 알리는 채널, 주문 상태를 한 번만 확정하는 저장 방식은 구현 준비에서 정합니다. 이번 문서 승인으로 이 세부 사항까지 정했다고 보지 않습니다."
+          }
+        },
+        {
+          "eventRef": {
+            "kind": "change_request_event",
+            "projectId": "demo-project",
+            "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+            "entityId": "change-event-ad40cc8a-2f24-4383-b874-cd68efad3781"
+          },
+          "changeRequestId": "change-2e52d509-6bc8-484b-89db-a3b837b03837",
+          "kind": "resolved",
+          "actorId": "persona-p03-reviewer",
+          "occurredAt": "2026-09-09T06:01:36.746Z",
+          "beforeStatus": "awaiting_confirmation",
+          "afterStatus": "resolved",
+          "targetArtifactVersionRef": {
+            "kind": "artifact",
+            "projectId": "demo-project",
+            "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+            "entityId": "artifact-45fd5ff8-4158-4bd5-a48c-9606510186f4",
+            "version": 3
+          },
+          "applicationEventRef": {
+            "kind": "change_request_event",
+            "projectId": "demo-project",
+            "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+            "entityId": "change-event-f237dde7-d333-447e-a48b-a796e4ffb087"
+          },
+          "verification": "현재 문서 v3의 수정 내용을 확인했습니다. 취소와 배송 중 먼저 확정된 상태를 유지한다는 원칙과 네 상황의 고객 안내 문구를 확인했습니다."
+        }
+      ]
+    }
+  ],
+  "generationRuns": [
+    {
+      "scope": {
+        "kind": "sr",
+        "projectId": "demo-project",
+        "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69"
+      },
+      "runId": "run-f4bdd81b-76d7-40bd-afa6-bc41383b4eb6",
+      "taskKind": "QUESTION_PROPOSALS",
+      "inputSnapshotId": "snapshot-60aeb178-3401-44c4-955a-a85287a6adc7",
+      "revision": 3,
+      "requestedBy": "persona-p01-owner",
+      "requestedAt": "2026-09-09T05:45:59.386Z",
+      "requestedSelection": {
+        "providerId": "claude-cli",
+        "modelChoice": {
+          "kind": "explicit",
+          "modelId": "global.anthropic.claude-opus-4-8"
+        }
+      },
+      "actualModelId": "global.anthropic.claude-opus-4-8",
+      "cliVersion": "2.1.265",
+      "freshness": "stale",
+      "termination": "confirmed",
+      "application": {
+        "kind": "applied",
+        "applicationId": "application-fc1f0a07-f88a-47ed-8b6f-4f6b2a1d6414",
+        "result": {
+          "kind": "questions",
+          "mappings": [
+            {
+              "temporaryId": "q1",
+              "ref": {
+                "kind": "question",
+                "projectId": "demo-project",
+                "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+                "entityId": "question-f475c6ba-0d49-48e2-8029-c75bc7bedc14"
+              }
+            }
+          ]
+        }
+      },
+      "status": "succeeded",
+      "draft": {
+        "draftId": "draft-78eab030-3bc0-405f-9c11-1e30b80d41ed",
+        "schemaVersion": 1,
+        "taskKind": "QUESTION_PROPOSALS",
+        "body": {
+          "schemaVersion": 1,
+          "kind": "question_proposals",
+          "proposals": [
+            {
+              "temporaryId": "q1",
+              "text": "고객이 취소를 확정하려는 바로 그 순간에 배송이 시작되어 두 처리가 겹치면, 어느 쪽을 우선해 어떻게 처리해야 하나요? (예: 배송 시작을 우선해 취소를 막고 반품 안내로 전환, 또는 취소 확정을 우선)",
+              "reason": "초안은 '취소 확정 직전에 배송 상태를 다시 확인'하고 '취소 확정과 배송 시작의 경합을 다뤄야 한다'고만 밝혀, 실제로 두 사건이 동시에 일어났을 때의 우선순위 규칙이 확정되지 않았습니다. 답에 따라 이 SR의 핵심 사용자 시나리오(취소 성공 흐름 vs 반품 안내 전환 흐름)와 주문 취소 API·상태 저장소의 처리 결정, 그리고 관련 작업 단위 구분이 달라집니다.",
+              "suggestedAssigneeId": "persona-p01-owner",
+              "requiredGate": "G1",
+              "sourceRefs": [
+                {
+                  "kind": "sr_description",
+                  "projectId": "demo-project",
+                  "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+                  "entityId": "description-67c6bd00-a969-438a-85b1-50cc72f7456a",
+                  "version": 1
+                }
+              ],
+              "candidateAnswers": [
+                "배송 시작을 우선한다: 취소 확정을 막고 주문을 유지한 채 반품 안내로 전환한다",
+                "취소 확정을 우선한다: 이미 눌린 취소를 완료 처리하고 환불 접수로 진행한다",
+                "확정 직전 재확인 시점에 배송이 시작된 것으로 확인되면 취소를 취소하고 사용자에게 상태 변경을 다시 안내한다"
+              ]
+            }
+          ]
+        },
+        "basisInputSnapshotRef": "snapshot-60aeb178-3401-44c4-955a-a85287a6adc7",
+        "basisFingerprint": "sha256:87f4b2d3bb583289d3f38d801d2cb91098a5fb3e9272f19ad62f492ee1303cd0",
+        "provenance": {
+          "kind": "provider",
+          "sourceRunId": "run-f4bdd81b-76d7-40bd-afa6-bc41383b4eb6"
+        },
+        "freshness": "stale",
+        "staleReason": "현재 생성 입력 지문과 다릅니다.",
+        "application": {
+          "kind": "applied",
+          "applicationId": "application-fc1f0a07-f88a-47ed-8b6f-4f6b2a1d6414",
+          "result": {
+            "kind": "questions",
+            "mappings": [
+              {
+                "temporaryId": "q1",
+                "ref": {
+                  "kind": "question",
+                  "projectId": "demo-project",
+                  "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+                  "entityId": "question-f475c6ba-0d49-48e2-8029-c75bc7bedc14"
+                }
+              }
+            ]
+          }
+        }
+      },
+      "finishedAt": "2026-09-09T05:46:12.451Z"
+    },
+    {
+      "scope": {
+        "kind": "sr",
+        "projectId": "demo-project",
+        "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69"
+      },
+      "runId": "run-96d20d05-9d77-4274-93b4-c948b8cebfd5",
+      "taskKind": "ARTIFACT_REVISION",
+      "inputSnapshotId": "snapshot-d3520731-fb63-47a8-9450-d5f2b9ce7868",
+      "revision": 3,
+      "requestedBy": "persona-p01-owner",
+      "requestedAt": "2026-09-09T05:46:49.703Z",
+      "requestedSelection": {
+        "providerId": "claude-cli",
+        "modelChoice": {
+          "kind": "explicit",
+          "modelId": "global.anthropic.claude-opus-4-8"
+        }
+      },
+      "actualModelId": "global.anthropic.claude-opus-4-8",
+      "cliVersion": "2.1.265",
+      "freshness": "stale",
+      "termination": "confirmed",
+      "application": {
+        "kind": "applied",
+        "applicationId": "application-4bd8f4ba-9591-46cd-bfca-0c49cd7d3bb2",
+        "result": {
+          "kind": "artifact",
+          "artifactVersionRef": {
+            "kind": "artifact",
+            "projectId": "demo-project",
+            "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+            "entityId": "artifact-45fd5ff8-4158-4bd5-a48c-9606510186f4",
+            "version": 2
+          }
+        }
+      },
+      "status": "succeeded",
+      "draft": {
+        "draftId": "draft-a7fd3d79-f0a7-4478-89e5-966845ef1d12",
+        "schemaVersion": 1,
+        "taskKind": "ARTIFACT_REVISION",
+        "body": {
+          "schemaVersion": 1,
+          "kind": "artifact",
+          "documentKind": "requirements",
+          "markdown": "# Inception Plan: [예시] 배송 전 주문 취소·환불\n\n## 요구사항\n\n이 문서는 PlanRepo의 문서 리뷰·결재를 체험하기 위한 예시 Plan입니다. 실제 고객 주문이나 결제를 실행하지 않습니다.\n\n확인된 요구사항(사용자 초안 및 답변 기준):\n\n- 고객센터를 기다리지 않고 고객이 주문 상세에서 직접 주문 전체를 취소할 수 있게 합니다.\n- 배송 전 전체 주문만 직접 취소하며, 취소 확정 직전에 배송 상태를 다시 확인합니다.\n- 이미 배송이 시작됐다면 주문을 유지하고 자동 환불 없이 반품 방법을 안내합니다.\n- 일부 상품만 취소하는 경우는 이번 범위에서 제외하고 고객센터로 안내합니다.\n- 취소 요청 버튼을 반복해서 눌러도 주문 취소와 환불 요청은 한 번만 처리해야 합니다.\n- 주문 취소 완료와 환불 완료는 다릅니다. 환불 접수, 환불 상태 확인 중, 환불 완료를 구분해 보여 줍니다.\n- 환불 서비스 응답이 늦으면 '환불 상태 확인 중'으로 안내하고, 30분 안에 확인되지 않으면 담당자에게 알려 확인합니다.\n- 환불 금액은 실제 결제 금액 기준입니다. 예시 주문은 상품 45,000원 - 할인 9,000원 + 배송비 3,000원 = 환불 접수 39,000원입니다.\n- 환불은 기존 결제 수단으로 요청하며 통상 3~5영업일이 걸릴 수 있다는 안내를 표시합니다.\n\n범위에서 제외(확인됨): 쿠폰 재발급, 부분 취소 금액 계산, 배송 후 실제 반품 처리, 실제 결제 실행은 이번 Plan의 범위에 포함하지 않습니다.\n\n필요한 화면(확인됨): 주문 상세 화면, 취소 확인 화면, 취소 결과와 환불 상태 화면.\n\n## 사용자 시나리오\n\n**상황 1 — 배송 전 전체 취소 성공(확인됨):** 고객이 주문 상세에서 취소를 요청합니다. 취소 확인 화면에서 환불 접수 39,000원과 기존 결제 수단, 통상 3~5영업일 안내를 확인하고 취소를 확정합니다. 취소 확정 직전에 배송 상태를 다시 확인해 배송 전이면 취소를 완료하고 환불 접수 상태로 전환합니다.\n\n**상황 2 — 취소 확정과 배송 시작의 경합(확인됨, 답변 기준):** 고객이 취소를 확정하려는 순간 배송이 시작되어 두 처리가 겹치는 경우, 취소 확정 직전 배송 상태를 재확인해 배송 시작이 확인되면 배송을 우선합니다. 주문은 유지하고 취소·환불은 실행하지 않으며 반품 안내로 전환합니다. 배송 전 상태에서 취소 확정이 먼저 완료되면 취소 완료 상태를 유지하고 배송 시작 처리는 거절합니다. 두 상태 변경은 같은 주문에 대해 한 번만 확정되도록 합니다.\n\n**상황 3 — 일부 상품만 취소(확인됨, 범위 밖):** 일부 상품만 취소하려는 경우는 이번 범위에서 제외하고 고객센터로 안내합니다.\n\n**상황 4 — 환불 응답 지연(확인됨):** 환불 서비스 응답이 늦으면 '환불 상태 확인 중'으로 안내하고, 30분 안에 확인되지 않으면 담당자에게 알려 확인합니다. 환불 접수, 환불 상태 확인 중, 환불 완료를 구분해 보여 줍니다.\n\n## 진행 계획\n\n이번 Plan은 Inception 문서와 상황별 시각화를 만들고 동료 검토자 한 명에게 검토받는 것을 목표로 합니다.\n\n- 초안과 확정된 경합 처리 답변을 반영해 요구사항, 사용자 시나리오, 주요 구조, 주요 결정, 작업 단위를 정리합니다.\n- 배송 전 전체 취소, 배송 시작 경합, 일부 취소, 환불 응답 지연의 네 상황을 시각화합니다.\n- 이 문서는 검토용 Plan이며 실제 실행 결과가 아닙니다. 사람의 검토·승인 전에는 확정된 업무 기록이 아닙니다.\n\n## 주요 구조\n\n구성요소는 고객 화면, 주문 취소 API, 주문 상태 저장소, 배송 상태 조회, 환불 서비스입니다.\n\n근거가 있는 관계만 정리합니다.\n\n- 고객 화면 → 주문 취소 API: 고객이 주문 상세에서 취소를 요청하면 취소 처리를 호출합니다.\n- 주문 취소 API → 배송 상태 조회: 취소 확정 직전에 배송 상태를 다시 확인합니다.\n- 주문 취소 API → 주문 상태 저장소: 취소 완료 상태를 기록하고 두 상태 변경이 한 번만 확정되도록 합니다.\n- 주문 취소 API → 환불 서비스: 배송 전 취소가 확정되면 환불 접수를 요청합니다.\n- 환불 서비스 → 고객 화면: 환불 접수, 환불 상태 확인 중, 환불 완료 상태를 구분해 표시합니다.\n\n미확인: 위에 명시하지 않은 구성요소 간 세부 프로토콜·데이터 계약은 이번 Inception 범위에서 확정하지 않았습니다.\n\n## 주요 결정\n\n**결정(확인됨): 취소 확정과 배송 시작 경합 시 배송 우선.** SR 담당자가 답한 내용에 따라, 취소 확정 직전 배송 상태를 재확인해 배송 시작이 확인되면 배송을 우선합니다. 주문은 유지하고 취소·환불은 실행하지 않으며 반품 안내로 전환합니다. 배송 전 상태에서 취소 확정이 먼저 완료되면 취소 완료 상태를 유지하고 배송 시작 처리는 거절합니다. 두 상태 변경은 같은 주문에 대해 한 번만 확정되도록 합니다. 이는 예시 체험용 결정이며 실제 서비스 정책의 확정이 아닙니다.\n\n**결정(확인됨): 멱등 처리.** 취소 요청 버튼을 반복해서 눌러도 주문 취소와 환불 요청은 한 번만 처리합니다.\n\n**결정(확인됨): 환불 상태 구분과 지연 처리.** 환불 접수, 환불 상태 확인 중, 환불 완료를 구분해 보여 주고, 응답 지연 시 30분 기준으로 담당자에게 알립니다.\n\n미확인: 반품 안내의 구체 문구, 담당자 알림 채널, 저장소 잠금 방식 등 상세는 이후 단계에서 확정합니다.\n\n## 작업 단위\n\n- 작업 단위 1: 주문 상세·취소 확인·취소 결과/환불 상태 화면 구성(고객 화면).\n- 작업 단위 2: 주문 취소 API의 취소 확정 직전 배송 상태 재확인과 경합 처리(배송 우선) 로직.\n- 작업 단위 3: 주문 상태 저장소의 취소 완료/배송 시작 단일 확정과 멱등 처리.\n- 작업 단위 4: 환불 서비스 연동과 환불 접수·확인 중·완료 상태 표시 및 39,000원 예시 금액 표기.\n- 작업 단위 5: 환불 응답 지연 시 '환불 상태 확인 중' 안내와 30분 기준 담당자 알림.\n\n미확인: 각 작업 단위의 상세 설계·구현은 이번 Inception 범위에 포함하지 않습니다.\n\n<!-- planrepo-visualization\n{\n  \"schemaVersion\": 1,\n  \"overview\": {\n    \"headline\": \"배송 전 주문 전체 취소와 환불 상태 안내\",\n    \"summary\": \"고객이 주문 상세에서 배송 전 전체 취소를 직접 요청하고, 취소 확정 직전 배송 상태를 재확인해 환불 접수·상태 안내까지 처리하는 검토용 Plan입니다.\",\n    \"evidence\": { \"sectionId\": \"요구사항\", \"quote\": \"고객이 주문 상세에서 직접 주문 전체를 취소할 수 있게 합니다\" }\n  },\n  \"changes\": {\n    \"before\": [],\n    \"after\": [\"고객이 고객센터 없이 주문 상세에서 직접 배송 전 전체 취소를 요청할 수 있음\"],\n    \"evidence\": { \"sectionId\": \"진행 계획\", \"quote\": \"동료 검토자 한 명에게 검토받는 것을 목표로 합니다\" }\n  },\n  \"nodes\": [\n    {\n      \"id\": \"node-1\",\n      \"kind\": \"action\",\n      \"title\": \"주문 상세에서 취소 요청\",\n      \"detail\": \"고객이 주문 상세에서 취소를 요청합니다.\",\n      \"evidence\": { \"sectionId\": \"사용자 시나리오\", \"quote\": \"고객이 주문 상세에서 취소를 요청합니다\" }\n    },\n    {\n      \"id\": \"node-2\",\n      \"kind\": \"condition\",\n      \"title\": \"취소 확정 직전 배송 상태 재확인\",\n      \"detail\": \"취소 확정 직전에 배송 상태를 다시 확인합니다.\",\n      \"evidence\": { \"sectionId\": \"사용자 시나리오\", \"quote\": \"취소 확정 직전에 배송 상태를 다시 확인해\" }\n    },\n    {\n      \"id\": \"node-3\",\n      \"kind\": \"result\",\n      \"title\": \"취소 완료 및 환불 접수\",\n      \"detail\": \"배송 전이면 취소를 완료하고 환불 접수 상태로 전환합니다.\",\n      \"evidence\": { \"sectionId\": \"사용자 시나리오\", \"quote\": \"취소를 완료하고 환불 접수 상태로 전환합니다\" }\n    },\n    {\n      \"id\": \"node-4\",\n      \"kind\": \"result\",\n      \"title\": \"주문 유지·반품 안내 전환\",\n      \"detail\": \"배송 시작이 확인되면 주문을 유지하고 반품 안내로 전환합니다.\",\n      \"evidence\": { \"sectionId\": \"사용자 시나리오\", \"quote\": \"주문은 유지하고 취소·환불은 실행하지 않으며 반품 안내로 전환합니다\" }\n    },\n    {\n      \"id\": \"node-5\",\n      \"kind\": \"result\",\n      \"title\": \"환불 상태 확인 중 안내\",\n      \"detail\": \"환불 응답이 늦으면 확인 중으로 안내하고 30분 기준 담당자에게 알립니다.\",\n      \"evidence\": { \"sectionId\": \"사용자 시나리오\", \"quote\": \"30분 안에 확인되지 않으면 담당자에게 알려 확인합니다\" }\n    }\n  ],\n  \"edges\": [\n    {\n      \"from\": \"node-1\",\n      \"to\": \"node-2\",\n      \"label\": \"취소 요청 후 배송 상태 재확인\",\n      \"evidence\": { \"sectionId\": \"주요 구조\", \"quote\": \"취소 확정 직전에 배송 상태를 다시 확인합니다\" }\n    },\n    {\n      \"from\": \"node-2\",\n      \"to\": \"node-3\",\n      \"label\": \"배송 전이면 취소 확정\",\n      \"evidence\": { \"sectionId\": \"주요 구조\", \"quote\": \"배송 전 취소가 확정되면 환불 접수를 요청합니다\" }\n    },\n    {\n      \"from\": \"node-2\",\n      \"to\": \"node-4\",\n      \"label\": \"배송 시작 확인 시 배송 우선\",\n      \"evidence\": { \"sectionId\": \"주요 결정\", \"quote\": \"배송 시작이 확인되면 배송을 우선합니다\" }\n    },\n    {\n      \"from\": \"node-3\",\n      \"to\": \"node-5\",\n      \"label\": \"환불 응답 지연 시 상태 안내\",\n      \"evidence\": { \"sectionId\": \"주요 구조\", \"quote\": \"환불 접수, 환불 상태 확인 중, 환불 완료 상태를 구분해 표시합니다\" }\n    }\n  ],\n  \"scenarios\": [\n    {\n      \"id\": \"scenario-1\",\n      \"label\": \"배송 전 전체 취소 성공\",\n      \"description\": \"고객이 배송 전 전체 주문을 취소하고 환불 접수까지 진행합니다.\",\n      \"nodeIds\": [\"node-1\", \"node-2\", \"node-3\"],\n      \"outcome\": \"취소 완료 및 환불 접수 39,000원\",\n      \"evidence\": { \"sectionId\": \"사용자 시나리오\", \"quote\": \"환불 접수 39,000원과 기존 결제 수단\" }\n    },\n    {\n      \"id\": \"scenario-2\",\n      \"label\": \"취소·배송 시작 경합\",\n      \"description\": \"취소 확정 순간 배송이 시작되면 배송을 우선하고 반품 안내로 전환합니다.\",\n      \"nodeIds\": [\"node-2\", \"node-4\"],\n      \"outcome\": \"주문 유지·반품 안내\",\n      \"evidence\": { \"sectionId\": \"사용자 시나리오\", \"quote\": \"배송 시작이 확인되면 배송을 우선합니다\" }\n    },\n    {\n      \"id\": \"scenario-3\",\n      \"label\": \"일부 상품만 취소\",\n      \"description\": \"일부 상품만 취소하려는 경우는 범위에서 제외하고 고객센터로 안내합니다.\",\n      \"nodeIds\": [\"node-1\"],\n      \"outcome\": \"고객센터 안내\",\n      \"evidence\": { \"sectionId\": \"사용자 시나리오\", \"quote\": \"이번 범위에서 제외하고 고객센터로 안내합니다\" }\n    },\n    {\n      \"id\": \"scenario-4\",\n      \"label\": \"환불 응답 지연\",\n      \"description\": \"환불 응답이 늦으면 확인 중으로 안내하고 30분 후 담당자에게 알립니다.\",\n      \"nodeIds\": [\"node-3\", \"node-5\"],\n      \"outcome\": \"환불 상태 확인 중 안내\",\n      \"evidence\": { \"sectionId\": \"사용자 시나리오\", \"quote\": \"'환불 상태 확인 중'으로 안내하고\" }\n    }\n  ],\n  \"rules\": [\n    {\n      \"id\": \"rule-1\",\n      \"title\": \"배송 전 전체 취소만 허용\",\n      \"detail\": \"배송 전 전체 주문만 직접 취소하며 일부 취소는 범위 밖입니다.\",\n      \"category\": \"requirement\",\n      \"evidence\": { \"sectionId\": \"요구사항\", \"quote\": \"배송 전 전체 주문만 직접 취소하며\" }\n    },\n    {\n      \"id\": \"rule-2\",\n      \"title\": \"반복 요청 멱등 처리\",\n      \"detail\": \"취소 버튼을 반복해서 눌러도 취소와 환불 요청은 한 번만 처리합니다.\",\n      \"category\": \"success\",\n      \"evidence\": { \"sectionId\": \"요구사항\", \"quote\": \"주문 취소와 환불 요청은 한 번만 처리해야 합니다\" }\n    },\n    {\n      \"id\": \"rule-3\",\n      \"title\": \"경합 시 배송 우선\",\n      \"detail\": \"배송 시작이 확인되면 취소를 막고 주문 유지·반품 안내로 전환하며 상태는 한 번만 확정합니다.\",\n      \"category\": \"exception\",\n      \"evidence\": { \"sectionId\": \"주요 결정\", \"quote\": \"두 상태 변경은 같은 주문에 대해 한 번만 확정되도록 합니다\" }\n    },\n    {\n      \"id\": \"rule-4\",\n      \"title\": \"환불 금액 기준\",\n      \"detail\": \"환불 금액은 실제 결제 금액 기준이며 예시는 39,000원입니다.\",\n      \"category\": \"requirement\",\n      \"evidence\": { \"sectionId\": \"요구사항\", \"quote\": \"환불 접수 39,000원입니다\" }\n    }\n  ]\n}\n-->",
+          "requirementRefs": [
+            "요구사항",
+            "사용자 시나리오",
+            "진행 계획",
+            "주요 구조",
+            "주요 결정",
+            "작업 단위"
+          ],
+          "changeSummary": "초안 요구사항을 Inception Plan 구조(요구사항·사용자 시나리오·진행 계획·주요 구조·주요 결정·작업 단위)로 재작성하고, 확정된 경합 처리 답변(배송 우선)을 반영했습니다. 네 상황별 시각화, 고객 화면 흐름, 39,000원 예시 금액, 지킬 약속과 예외를 근거 인용과 함께 추가했습니다."
+        },
+        "basisInputSnapshotRef": "snapshot-d3520731-fb63-47a8-9450-d5f2b9ce7868",
+        "basisFingerprint": "sha256:8c3c517d3221c285cb5bd31fb204257e241ffa856e21a1e5bad106828e236900",
+        "provenance": {
+          "kind": "provider",
+          "sourceRunId": "run-96d20d05-9d77-4274-93b4-c948b8cebfd5"
+        },
+        "freshness": "stale",
+        "staleReason": "현재 생성 입력 지문과 다릅니다.",
+        "application": {
+          "kind": "applied",
+          "applicationId": "application-4bd8f4ba-9591-46cd-bfca-0c49cd7d3bb2",
+          "result": {
+            "kind": "artifact",
+            "artifactVersionRef": {
+              "kind": "artifact",
+              "projectId": "demo-project",
+              "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+              "entityId": "artifact-45fd5ff8-4158-4bd5-a48c-9606510186f4",
+              "version": 2
+            }
+          }
+        }
+      },
+      "finishedAt": "2026-09-09T05:48:00.483Z"
+    }
+  ],
+  "generationDrafts": [
+    {
+      "draftId": "draft-78eab030-3bc0-405f-9c11-1e30b80d41ed",
+      "taskKind": "QUESTION_PROPOSALS",
+      "basisInputSnapshotRef": "snapshot-60aeb178-3401-44c4-955a-a85287a6adc7",
+      "basisFingerprint": "sha256:87f4b2d3bb583289d3f38d801d2cb91098a5fb3e9272f19ad62f492ee1303cd0",
+      "provenance": {
+        "kind": "provider",
+        "sourceRunId": "run-f4bdd81b-76d7-40bd-afa6-bc41383b4eb6"
+      },
+      "freshness": "stale",
+      "application": {
+        "kind": "applied",
+        "applicationId": "application-fc1f0a07-f88a-47ed-8b6f-4f6b2a1d6414",
+        "result": {
+          "kind": "questions",
+          "mappings": [
+            {
+              "temporaryId": "q1",
+              "ref": {
+                "kind": "question",
+                "projectId": "demo-project",
+                "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+                "entityId": "question-f475c6ba-0d49-48e2-8029-c75bc7bedc14"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "draftId": "draft-a7fd3d79-f0a7-4478-89e5-966845ef1d12",
+      "taskKind": "ARTIFACT_REVISION",
+      "basisInputSnapshotRef": "snapshot-d3520731-fb63-47a8-9450-d5f2b9ce7868",
+      "basisFingerprint": "sha256:8c3c517d3221c285cb5bd31fb204257e241ffa856e21a1e5bad106828e236900",
+      "provenance": {
+        "kind": "provider",
+        "sourceRunId": "run-96d20d05-9d77-4274-93b4-c948b8cebfd5"
+      },
+      "freshness": "stale",
+      "application": {
+        "kind": "applied",
+        "applicationId": "application-4bd8f4ba-9591-46cd-bfca-0c49cd7d3bb2",
+        "result": {
+          "kind": "artifact",
+          "artifactVersionRef": {
+            "kind": "artifact",
+            "projectId": "demo-project",
+            "srId": "sr-1a3cf4a3-377e-45ee-8f4d-c158fad36e69",
+            "entityId": "artifact-45fd5ff8-4158-4bd5-a48c-9606510186f4",
+            "version": 2
+          }
+        }
+      }
+    }
+  ],
+  "implementations": [],
+  "revision": 11
+}

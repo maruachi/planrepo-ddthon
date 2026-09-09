@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "profileVersion": "claude-cli-2.1.265-planrepo-v2",
+  "profileFingerprint": "sha256:124f547454d165d434928ea5db9f0d7298c5c5ff98e665ae805dd051a704fcb2",
+  "approvedCliCandidate": "2.1.265",
+  "executable": "claude",
+  "defaultExplicitModel": "global.anthropic.claude-opus-4-8",
+  "inheritedEnvironmentNames": [
+    "HOME",
+    "PATH",
+    "CLAUDE_CODE_USE_BEDROCK",
+    "CLAUDE_CODE_USE_VERTEX",
+    "CLAUDE_CODE_USE_FOUNDRY",
+    "CLAUDE_CODE_OAUTH_TOKEN",
+    "ANTHROPIC_API_KEY",
+    "ANTHROPIC_AUTH_TOKEN",
+    "ANTHROPIC_BASE_URL",
+    "ANTHROPIC_BEDROCK_BASE_URL",
+    "ANTHROPIC_VERTEX_PROJECT_ID",
+    "AWS_PROFILE",
+    "AWS_REGION",
+    "AWS_DEFAULT_REGION",
+    "AWS_ACCESS_KEY_ID",
+    "AWS_SECRET_ACCESS_KEY",
+    "AWS_SESSION_TOKEN",
+    "AWS_WEB_IDENTITY_TOKEN_FILE",
+    "AWS_ROLE_ARN",
+    "AWS_ROLE_SESSION_NAME",
+    "AWS_CONTAINER_CREDENTIALS_RELATIVE_URI",
+    "AWS_CONTAINER_CREDENTIALS_FULL_URI",
+    "AWS_EC2_METADATA_DISABLED",
+    "AWS_BEARER_TOKEN_BEDROCK",
+    "CLOUD_ML_REGION",
+    "HTTP_PROXY",
+    "HTTPS_PROXY",
+    "NO_PROXY"
+  ],
+  "fixedEnvironment": {
+    "LANG": "C.UTF-8",
+    "LC_ALL": "C.UTF-8"
+  },
+  "excludedEnvironmentNames": [
+    "NODE_OPTIONS",
+    "NODE_PATH",
+    "PLANREPO_DATA_DIR",
+    "PLANREPO_DB_PATH"
+  ],
+  "limitations": [
+    "This candidate does not prove the absence of every managed or global customization.",
+    "Actual provider eligibility and a live business generation remain separate verification steps."
+  ]
+}

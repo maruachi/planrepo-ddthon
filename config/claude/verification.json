@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "profileVersion": "claude-cli-2.1.265-planrepo-v2",
+  "profileFingerprint": "sha256:124f547454d165d434928ea5db9f0d7298c5c5ff98e665ae805dd051a704fcb2",
+  "approvedCliVersion": "2.1.265",
+  "scopePolicyRef": "sha256:cb7ef772a7662c9bd4468b5997d765f819b2eb4f532f37072bb39d528cb68f43",
+  "cliProbe": "Passed",
+  "optionProbe": "Passed",
+  "policyPreflight": "Passed",
+  "fixtureContract": "Passed",
+  "actualGeneration": "Passed",
+  "actualIsolation": "Passed",
+  "sameBootRecovery": "KnownUnsupported"
+}
