@@ -61,3 +61,13 @@ Security Baseline, Resiliency Baseline, Property-Based Testing은 프로젝트�
 - 이번 변경은 기존 영상 편집과 문서 안내 갱신입니다. 제품 소스는 변경하지 않았으며 테스트·타입 검사·빌드는 다시 실행하지 않았습니다.
 
 편집 구간은 `aidlc-docs/examples/table-order/evidence/short60/edit-decisions.json`에 기록했습니다. 검증 결과는 `aidlc-docs/examples/table-order/evidence/short60/verification.json`이며 전체 디코딩 로그는 `aidlc-docs/examples/table-order/evidence/short60/decode.log`입니다. 영상 SHA-256은 `a7ece00ade878d8d9daedd9ac4eea207491d09d7f059899f1d2825ec81ef5f43`입니다.
+
+## 결과 중심 1분 재편집 검증
+
+후속 요청에 따라 `aidlc-docs/examples/table-order/table-order-demo-60s-results.mp4`를 만들었습니다. 과정은 11초이며 결과는 49초입니다. 문서 9초, 업무 흐름 9초, 여섯 화면 21초, 주요 규칙 4초, 승인 결과 6초입니다. 결과 장면은 배속하지 않았습니다. 여섯 화면은 원본의 1080×702 영역을 1440×936으로 확대했고 내용이 잘리지 않는지 확인했습니다. 하단 자막과 음성은 없습니다.
+
+- `ffprobe -v error -show_entries format=duration,size:stream=codec_name,codec_type,width,height,avg_frame_rate,nb_frames -of json aidlc-docs/examples/table-order/table-order-demo-60s-results.mp4`는 exit 0입니다. H.264, 1440×936, 24fps, 1,440프레임, 정확히 60초, 2,010,958바이트입니다.
+- `ffmpeg -hide_banner -v error -i aidlc-docs/examples/table-order/table-order-demo-60s-results.mp4 -f null -`는 exit 0입니다. 전체 디코딩 오류가 없습니다.
+- 최종 17개 장면을 추출해 문서·업무 흐름·여섯 화면·규칙·승인 결과와 자막 제거 상태를 육안으로 확인했습니다. 제품 코드를 수정하지 않아 앱 테스트·타입 검사·빌드는 다시 실행하지 않았습니다.
+
+편집 근거와 검증은 `aidlc-docs/examples/table-order/evidence/results60/edit-decisions.json`과 `aidlc-docs/examples/table-order/evidence/results60/verification.json`에 있습니다. 영상 SHA-256은 `8ff43f1b4bf56cac173740f63f3cc239e5c7a92ad5ae3b678559aba6d2caec7d`입니다.

@@ -1,0 +1,218 @@
+{
+  "source": "aidlc-docs/examples/table-order/table-order-full.mp4",
+  "output": "aidlc-docs/examples/table-order/table-order-demo-60s-results.mp4",
+  "duration": 60,
+  "fps": 24,
+  "captions": false,
+  "audio": false,
+  "resultDuration": 49,
+  "processDuration": 11,
+  "clips": [
+    {
+      "clip": 1,
+      "sourceStart": 3.8,
+      "sourceEnd": 6.8,
+      "outputStart": 0,
+      "outputDuration": 2,
+      "speed": 1.5,
+      "action": "초안 등록",
+      "group": "process"
+    },
+    {
+      "clip": 2,
+      "sourceStart": 89.5,
+      "sourceEnd": 95.5,
+      "outputStart": 2,
+      "outputDuration": 3,
+      "speed": 2,
+      "action": "질문 답변",
+      "group": "process"
+    },
+    {
+      "clip": 3,
+      "sourceStart": 145.8,
+      "sourceEnd": 148.8,
+      "outputStart": 5,
+      "outputDuration": 2,
+      "speed": 1.5,
+      "action": "AI 문서 생성 실행",
+      "group": "process"
+    },
+    {
+      "clip": 4,
+      "sourceStart": 253.2,
+      "sourceEnd": 255.7,
+      "outputStart": 7,
+      "outputDuration": 2,
+      "speed": 1.25,
+      "action": "AI 문서 생성 결과",
+      "group": "process"
+    },
+    {
+      "clip": 5,
+      "sourceStart": 637.8,
+      "sourceEnd": 640.8,
+      "outputStart": 9,
+      "outputDuration": 2,
+      "speed": 1.5,
+      "action": "보완안 반영",
+      "group": "process"
+    },
+    {
+      "clip": 6,
+      "sourceStart": 764.7,
+      "sourceEnd": 769.7,
+      "outputStart": 11,
+      "outputDuration": 5,
+      "speed": 1,
+      "action": "완성 문서 v3",
+      "group": "result"
+    },
+    {
+      "clip": 7,
+      "sourceStart": 732.8,
+      "sourceEnd": 736.8,
+      "outputStart": 16,
+      "outputDuration": 4,
+      "speed": 1,
+      "action": "요구사항 및 사용자 시나리오",
+      "group": "result"
+    },
+    {
+      "clip": 8,
+      "sourceStart": 657.2,
+      "sourceEnd": 661.2,
+      "outputStart": 20,
+      "outputDuration": 4,
+      "speed": 1,
+      "action": "업무 흐름 상세",
+      "group": "result"
+    },
+    {
+      "clip": 9,
+      "sourceStart": 666.7,
+      "sourceEnd": 671.7,
+      "outputStart": 24,
+      "outputDuration": 5,
+      "speed": 1,
+      "action": "전체 업무 흐름",
+      "group": "result"
+    },
+    {
+      "clip": 10,
+      "sourceStart": 693,
+      "sourceEnd": 697,
+      "outputStart": 29,
+      "outputDuration": 4,
+      "speed": 1,
+      "action": "메뉴 화면",
+      "group": "result",
+      "crop": {
+        "width": 1080,
+        "height": 702,
+        "x": 24,
+        "y": 110
+      }
+    },
+    {
+      "clip": 11,
+      "sourceStart": 698.3,
+      "sourceEnd": 702.3,
+      "outputStart": 33,
+      "outputDuration": 4,
+      "speed": 1,
+      "action": "주문 성공 화면",
+      "group": "result",
+      "crop": {
+        "width": 1080,
+        "height": 702,
+        "x": 24,
+        "y": 110
+      }
+    },
+    {
+      "clip": 12,
+      "sourceStart": 706.3,
+      "sourceEnd": 709.3,
+      "outputStart": 37,
+      "outputDuration": 3,
+      "speed": 1,
+      "action": "주문 실패 화면",
+      "group": "result",
+      "crop": {
+        "width": 1080,
+        "height": 702,
+        "x": 24,
+        "y": 110
+      }
+    },
+    {
+      "clip": 13,
+      "sourceStart": 710.8,
+      "sourceEnd": 714.8,
+      "outputStart": 40,
+      "outputDuration": 4,
+      "speed": 1,
+      "action": "관리자 화면",
+      "group": "result",
+      "crop": {
+        "width": 1080,
+        "height": 702,
+        "x": 24,
+        "y": 110
+      }
+    },
+    {
+      "clip": 14,
+      "sourceStart": 715.8,
+      "sourceEnd": 718.8,
+      "outputStart": 44,
+      "outputDuration": 3,
+      "speed": 1,
+      "action": "이용 완료 화면",
+      "group": "result",
+      "crop": {
+        "width": 1080,
+        "height": 702,
+        "x": 24,
+        "y": 110
+      }
+    },
+    {
+      "clip": 15,
+      "sourceStart": 720.5,
+      "sourceEnd": 723.5,
+      "outputStart": 47,
+      "outputDuration": 3,
+      "speed": 1,
+      "action": "새 세션 화면",
+      "group": "result",
+      "crop": {
+        "width": 1080,
+        "height": 702,
+        "x": 24,
+        "y": 110
+      }
+    },
+    {
+      "clip": 16,
+      "sourceStart": 747.5,
+      "sourceEnd": 751.5,
+      "outputStart": 50,
+      "outputDuration": 4,
+      "speed": 1,
+      "action": "주요 규칙",
+      "group": "result"
+    },
+    {
+      "clip": 17,
+      "sourceStart": 820.4,
+      "sourceEnd": 826.4,
+      "outputStart": 54,
+      "outputDuration": 6,
+      "speed": 1,
+      "action": "최종 결재 결과",
+      "group": "result"
+    }
+  ]
+}
